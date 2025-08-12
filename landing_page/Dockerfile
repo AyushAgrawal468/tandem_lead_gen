@@ -1,0 +1,9 @@
+FROM openjdk:21
+
+WORKDIR /app
+
+COPY target/app.jar app.jar
+
+EXPOSE 8180
+
+ENTRYPOINT ["java", "-jar", "app.jar"]
