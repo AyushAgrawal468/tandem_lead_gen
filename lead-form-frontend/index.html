@@ -9,5 +9,25 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+
+    ...existing code...
+<body>
+  <!-- page content -->
+  <!-- Location consent popup -->
+  <div id="location-consent" class="lc-hidden" aria-live="polite">
+    <div class="lc-panel">
+      <h3>Allow location?</h3>
+      <p>We use location to show content relevant to your area. Allow using your device location?</p>
+      <div class="lc-actions">
+        <button id="lc-allow" class="lc-btn lc-allow">Allow</button>
+        <button id="lc-deny" class="lc-btn lc-deny">No thanks</button>
+      </div>
+    </div>
+  </div>
+
+  <link rel="stylesheet" href="assets/location-consent.css">
+  <script src="assets/location-consent.js" defer></script>
+</body>
+...existing code...
   </body>
 </html>

@@ -1,40 +1,108 @@
-
-
-
-
-import React, { useRef } from "react";
-
-const phoneImages = [
-  "/previews/10.png",
-  "/previews/10.5.png"
-];
+import React, { useState, useEffect } from "react";
+import SwipeCard from "./SwipeCard";
+import { instructionSlides, eventSlides, responseOverlays } from "../data/phoneSlides";
 
 const PhonePreview = () => {
-  const scrollRef = useRef(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentOverlay, setCurrentOverlay] = useState(null);
+
+  const totalSlides = instructionSlides.length + eventSlides.length;
+
+  const getSlideType = (index) => {
+    if (index < instructionSlides.length) return "instruction";
+    else if (index < totalSlides) return "event";
+    else return "outro";
+  };
+
+  const handleNext = () => setCurrentIndex((prev) => Math.min(prev + 1, totalSlides));
+  const handlePrev = () => setCurrentIndex((prev) => Math.max(prev - 1, 0));
+
+  const handleSwipe = (direction) => {
+    const slideType = getSlideType(currentIndex);
+
+    // Instructions: only left/right
+    if (slideType === "instruction" && !["left", "right"].includes(direction)) return;
+
+    // Event slides: show overlay image then go to next
+    if (slideType === "event" && responseOverlays[direction]) {
+      setCurrentOverlay(responseOverlays[direction]);
+      setTimeout(() => {
+        setCurrentOverlay(null);
+        handleNext();
+      }, 1000); // 1 second overlay
+    } else {
+      handleNext();
+    }
+  };
+
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      const slideType = getSlideType(currentIndex);
+      if (slideType === "instruction") {
+        if (e.key === "ArrowRight") handleNext();
+        if (e.key === "ArrowLeft") handlePrev();
+      }
+      if (slideType === "event") {
+        if (e.key === "ArrowRight") handleSwipe("right");
+        if (e.key === "ArrowLeft") handleSwipe("left");
+        if (e.key === "ArrowUp") handleSwipe("up");
+        if (e.key === "ArrowDown") handleSwipe("down");
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [currentIndex]);
+
+  const currentSlideType = getSlideType(currentIndex);
+  let slideSrc = "";
+
+  if (currentSlideType === "instruction") slideSrc = instructionSlides[currentIndex];
+  else if (currentSlideType === "event")
+    slideSrc = eventSlides[currentIndex - instructionSlides.length];
+
+  const allowedDirs =
+    currentSlideType === "instruction"
+      ? ["left", "right"]
+      : currentSlideType === "event"
+      ? ["left", "right", "up", "down"]
+      : [];
 
   return (
     <section className="w-full flex flex-col items-center justify-center py-12 px-4 bg-[#181927]">
-      <div
-        className="relative w-[260px] h-[520px] rounded-3xl bg-[#23243a] shadow-2xl border-4 border-[#23243a] flex items-center justify-center overflow-hidden"
-        style={{ position: 'relative' }}
-      >
+      <div className="relative w-[260px] h-[520px] flex items-center justify-center">
+
+        {/* Ambient glow behind phone */}
         <div
-          ref={scrollRef}
-          className="w-full h-full overflow-x-auto whitespace-nowrap scrollbar-hide snap-x snap-mandatory"
-          style={{ WebkitOverflowScrolling: 'touch' }}
-        >
-          {phoneImages.map((src, idx) => (
-            <img
-              key={idx}
-              src={src}
-              alt={`App preview ${idx + 1}`}
-              className="inline-block w-[260px] h-[520px] object-cover rounded-2xl align-top select-none snap-center"
-              draggable={false}
-              style={{ marginRight: idx !== phoneImages.length - 1 ? 8 : 0 }}
+          className="absolute rounded-3xl pointer-events-none"
+          style={{
+            width: "400px",
+            height: "700px",
+            margin: "-90px 0 0 -70px",
+            background: "radial-gradient(circle at center, rgba(129,140,248,0.25), transparent 70%)",
+            filter: "blur(80px)",
+            zIndex: -1,
+            animation: "pulseGlow 3s ease-in-out infinite alternate"
+          }}
+        />
+
+        {/* Phone container */}
+        <div className="relative w-full h-full rounded-3xl bg-[#23243a] shadow-2xl border-4 border-[#23243a] flex items-center justify-center overflow-hidden">
+          {currentSlideType === "outro" ? (
+            <div className="flex items-center justify-center h-full w-full text-center p-6">
+              <h2 className="text-xl font-bold text-gray-200">
+                Eagerly waiting for you on our app.<br />Hope to see you soon.
+              </h2>
+            </div>
+          ) : (
+            <SwipeCard
+              imgSrc={slideSrc}
+              onSwipe={handleSwipe}
+              allowedDirections={allowedDirs}
+              overlayImage={currentOverlay}
             />
-          ))}
+          )}
+          <div className="absolute inset-0 rounded-3xl border-4 border-[#23243a] pointer-events-none" />
         </div>
-        <div className="absolute inset-0 rounded-3xl border-4 border-[#23243a] pointer-events-none" />
       </div>
     </section>
   );
