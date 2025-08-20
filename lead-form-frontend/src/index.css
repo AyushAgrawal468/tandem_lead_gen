@@ -7,84 +7,94 @@
   display: none; /* Chrome, Safari, Opera */
 }
 
-/* Location Consent */
+/* ================= LOCATION CONSENT ================= */
 #location-consent { 
   position: fixed; 
   inset: 0; 
   display: grid; 
   place-items: end center; 
   pointer-events: none; 
+  z-index: 1000;
 }
 #location-consent .lc-panel { 
   pointer-events: auto; 
-  margin: 24px; 
+  margin: 16px; 
   background: #23243a; 
-  border-radius: 8px; 
-  box-shadow: 0 6px 24px rgb(125, 100, 100); 
+  border-radius: 10px; 
+  box-shadow: 0 6px 24px rgba(0,0,0,0.5); 
   padding: 16px; 
   max-width: 420px; 
-  width: calc(100% - 48px); 
+  width: calc(100% - 32px); 
 }
 .lc-hidden { display: none !important; }
-.lc-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px; }
-.lc-btn { padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; }
+.lc-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px; }
+.lc-btn { padding: 8px 14px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
+
+/* Allow button */
 .lc-allow {
   background: linear-gradient(270deg, #818cf8, #c084fc, #f472b6, #c084fc, #818cf8);
   background-size: 200% auto;
   color: #fff;
-  border: none;
+  font-weight: bold;
   padding: 10px 20px;
   border-radius: 6px;
   cursor: pointer;
-  font-weight: bold;
   animation: gradientFlow 3s linear infinite;
   transition: transform 0.2s ease;
 }
 .lc-allow:hover {
   transform: scale(1.05); 
   background: green; 
-  border-color: green;
 }
+
+/* Gradient animation */
 @keyframes gradientFlow {
   0% { background-position: 0% center; }
   100% { background-position: 200% center; }
 }
+
+/* Deny button */
 .lc-deny {
-  background: #0b74de;
+  background: linear-gradient(270deg, #818cf8, #c084fc, #f472b6, #c084fc, #818cf8); /* same blue-purple-pink gradient */
+  background-size: 200% auto;
   color: #fff;
-  border: 1px solid #ddd;
+  font-weight: bold;
   padding: 10px 20px;
   border-radius: 6px;
   cursor: pointer;
-  font-weight: bold;
+  border: none;
+  animation: gradientFlow 3s linear infinite; /* same gradient animation as allow */
   transition: background 0.3s ease, transform 0.2s ease;
 }
 .lc-deny:hover {
-  background: #e63946;
+  background: #e63946; /* Red on hover */
   border-color: #e63946;
   transform: scale(1.05);
 }
-#location-consent p,h3 { color: lightgray; }
 
-/* Countdown Timer */
+#location-consent p,
+#location-consent h3 { color: lightgray; }
+
+/* ================= COUNTDOWN TIMER ================= */
 .countdown-timer {
   position: fixed;
   bottom: 20px;
   right: 20px;
   display: flex;
   gap: 12px;
-  z-index: 1000;
+  z-index: 999;
+  flex-wrap: wrap;
 }
 .cube {
-  background: linear-gradient(270deg, #818cf8, #c084fc, #f472b6, #c084fc);
-  color: white;
-  width: 70px;
-  height: 70px;
+  background: linear-gradient(270deg, #5c6ac4, #9b72c4, #c94a91, #9b72c4); /* darker gradient */
+  color: lightgray; /* text color */
+  width: 55px;
+  height: 55px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  border-radius: 8px;
+  border-radius: 10px;
   font-family: monospace;
   font-weight: bold;
   box-shadow: 0 4px 8px rgba(0,0,0,0.3);
@@ -92,10 +102,10 @@
   transition: transform 0.3s ease;
 }
 .cube:hover { transform: scale(1.1); }
-.cube span { font-size: 1.5rem; }
-.cube small { font-size: 0.7rem; margin-top: 4px; display: block; }
+.cube span { font-size: 1.2rem; }
+.cube small { font-size: 0.6rem; margin-top: 4px; display: block; }
 
-/* Ambient glow behind phone */
+/* ================= PHONE GLOW ================= */
 .phone-glow {
   position: absolute;
   width: 400px;
@@ -113,6 +123,52 @@
   100% { opacity: 0.3; transform: scale(1); }
 }
 
+/* ================= RESPONSIVE ================= */
+@media (max-width: 768px) {
+  .countdown-timer {
+    bottom: 12px;
+    right: 12px;
+    gap: 8px;
+  }
+  .cube {
+    width: 45px;
+    height: 45px;
+  }
+  .cube span { font-size: 1rem; }
+  .cube small { font-size: 0.55rem; }
+  .phone-glow {
+    width: 250px;
+    height: 450px;
+    margin: -50px 0 0 -30px;
+    filter: blur(60px);
+  }
+}
+
+@media (max-width: 480px) {
+  .countdown-timer {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    left: 0;
+    right: 0;
+    bottom: 8px;
+    gap: 6px;
+  }
+  .cube {
+    width: 40px;
+    height: 40px;
+  }
+  .cube span { font-size: 0.9rem; }
+  .cube small { font-size: 0.5rem; }
+  .phone-glow {
+    width: 200px;
+    height: 350px;
+    margin: -30px 0 0 -20px;
+    filter: blur(50px);
+  }
+}
+
+/* Tailwind setup */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

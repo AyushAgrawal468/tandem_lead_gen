@@ -93,7 +93,7 @@ const Features = () => {
           </div>
         ))}
       </div>
-      <div className="text-center text-gray-400 mt-8 text-sm">Join the waitlist to discover events near you <span className='inline-block'>👀</span></div>
+      
     </section>
   );
 };

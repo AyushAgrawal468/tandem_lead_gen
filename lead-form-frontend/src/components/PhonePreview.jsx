@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import SwipeCard from "./SwipeCard";
-import { instructionSlides, eventSlides, responseOverlays } from "../data/phoneSlides";
+import {
+  instructionSlides,
+  eventSlides,
+  responseOverlays,
+} from "../data/phoneSlides";
 
 const PhonePreview = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -14,22 +18,23 @@ const PhonePreview = () => {
     else return "outro";
   };
 
-  const handleNext = () => setCurrentIndex((prev) => Math.min(prev + 1, totalSlides));
-  const handlePrev = () => setCurrentIndex((prev) => Math.max(prev - 1, 0));
+  const handleNext = () =>
+    setCurrentIndex((prev) => Math.min(prev + 1, totalSlides));
+  const handlePrev = () =>
+    setCurrentIndex((prev) => Math.max(prev - 1, 0));
 
   const handleSwipe = (direction) => {
     const slideType = getSlideType(currentIndex);
 
-    // Instructions: only left/right
-    if (slideType === "instruction" && !["left", "right"].includes(direction)) return;
+    if (slideType === "instruction" && !["left", "right"].includes(direction))
+      return;
 
-    // Event slides: show overlay image then go to next
     if (slideType === "event" && responseOverlays[direction]) {
       setCurrentOverlay(responseOverlays[direction]);
       setTimeout(() => {
         setCurrentOverlay(null);
         handleNext();
-      }, 1000); // 1 second overlay
+      }, 1000);
     } else {
       handleNext();
     }
@@ -56,7 +61,8 @@ const PhonePreview = () => {
   const currentSlideType = getSlideType(currentIndex);
   let slideSrc = "";
 
-  if (currentSlideType === "instruction") slideSrc = instructionSlides[currentIndex];
+  if (currentSlideType === "instruction")
+    slideSrc = instructionSlides[currentIndex];
   else if (currentSlideType === "event")
     slideSrc = eventSlides[currentIndex - instructionSlides.length];
 
@@ -68,29 +74,30 @@ const PhonePreview = () => {
       : [];
 
   return (
-    <section className="w-full flex flex-col items-center justify-center py-12 px-4 bg-[#181927]">
-      <div className="relative w-[260px] h-[520px] flex items-center justify-center">
-
-        {/* Ambient glow behind phone */}
+    <section className="w-full flex flex-col items-center justify-center py-12 px-4 bg-[#181927] mt-16">
+      <div className="relative w-[85vw] max-w-[280px] aspect-[9/18] flex items-center justify-center">
+        {/* Glow */}
         <div
           className="absolute rounded-3xl pointer-events-none"
           style={{
-            width: "400px",
-            height: "700px",
-            margin: "-90px 0 0 -70px",
-            background: "radial-gradient(circle at center, rgba(129,140,248,0.25), transparent 70%)",
+            width: "150%",
+            height: "150%",
+            background:
+              "radial-gradient(circle at center, rgba(129,140,248,0.25), transparent 70%)",
             filter: "blur(80px)",
             zIndex: -1,
-            animation: "pulseGlow 3s ease-in-out infinite alternate"
+            animation: "pulseGlow 3s ease-in-out infinite alternate",
           }}
         />
 
-        {/* Phone container */}
+        {/* Phone */}
         <div className="relative w-full h-full rounded-3xl bg-[#23243a] shadow-2xl border-4 border-[#23243a] flex items-center justify-center overflow-hidden">
           {currentSlideType === "outro" ? (
             <div className="flex items-center justify-center h-full w-full text-center p-6">
-              <h2 className="text-xl font-bold text-gray-200">
-                Eagerly waiting for you on our app.<br />Hope to see you soon.
+              <h2 className="text-lg md:text-xl font-bold text-gray-200 leading-relaxed">
+                Eagerly waiting for you on our app.
+                <br />
+                Hope to see you soon.
               </h2>
             </div>
           ) : (

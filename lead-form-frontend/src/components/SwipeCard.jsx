@@ -19,20 +19,22 @@ const SwipeCard = ({ imgSrc, onSwipe, allowedDirections = [], overlayImage }) =>
       whileDrag={{ scale: 1.05 }}
       style={{ backgroundColor: "#181927" }}
     >
-      {/* Main Slide */}
+      {/* Main Slide Image */}
       <img
         src={imgSrc}
         alt="Slide"
-        className="w-full h-full object-contain select-none pointer-events-none"
+        className="w-full h-full object-cover md:object-contain select-none pointer-events-none"
       />
 
-      {/* Full-screen overlay */}
+      {/* Full-screen Overlay */}
       {overlayImage && (
-        <img
-          src={overlayImage}
-          alt="Action Overlay"
-          className="absolute inset-0 w-full h-full object-contain pointer-events-none"
-        />
+        <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+          <img
+            src={overlayImage}
+            alt="Action Overlay"
+            className="w-full h-full object-contain md:object-cover pointer-events-none"
+          />
+        </div>
       )}
     </motion.div>
   );

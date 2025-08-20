@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-// Ensure CSS is imported for styling
 
 function CountdownTimer({ targetDays = 10 }) {
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0 });
@@ -27,20 +26,28 @@ function CountdownTimer({ targetDays = 10 }) {
     return () => clearInterval(timer);
   }, [targetDays]);
 
+  const cubes = [
+    { label: "Days", value: timeLeft.days },
+    { label: "Hours", value: timeLeft.hours },
+    { label: "Minutes", value: timeLeft.minutes },
+  ];
+
   return (
-    <div className="countdown-timer">
-      <div className="cube">
-        <span>{String(timeLeft.days).padStart(2, "0")}</span>
-        <small>Days</small>
-      </div>
-      <div className="cube">
-        <span>{String(timeLeft.hours).padStart(2, "0")}</span>
-        <small>Hours</small>
-      </div>
-      <div className="cube">
-        <span>{String(timeLeft.minutes).padStart(2, "0")}</span>
-        <small>Minutes</small>
-      </div>
+    <div className="countdown-timer flex flex-wrap justify-center gap-1">
+      {cubes.map((cube, idx) => (
+        <div
+          key={idx}
+          className="cube flex flex-col items-center justify-center rounded-lg shadow-md w-12 h-12 sm:w-14 sm:h-14"
+          style={{
+            background: "linear-gradient(270deg, #3b82f6, #8b5cf6, #ec4899)", // blue -> purple -> pink
+          }}
+        >
+          <span className="text-gray-100 text-lg sm:text-xl font-bold">
+            {String(cube.value).padStart(2, "0")}
+          </span>
+          <small className="text-gray-200 mt-1 text-[0.55rem] sm:text-xs">{cube.label}</small>
+        </div>
+      ))}
     </div>
   );
 }
