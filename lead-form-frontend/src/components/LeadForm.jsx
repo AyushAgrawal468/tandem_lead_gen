@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom"; // ✅ Added Link
 
 const LeadForm = () => {
   const [formData, setFormData] = useState({
@@ -35,12 +36,17 @@ const LeadForm = () => {
 
   return (
     <section id="form" className="min-h-screen flex flex-col justify-center items-center bg-[#181927] py-16 px-4">
-      <div className="text-center mb-2 text-gray-300 text-sm">Join the waitlist to discover events near you <span className='inline-block'>🎯</span></div>
+      <div className="text-center mb-2 text-gray-300 text-sm">
+        Join the waitlist to discover events near you <span className='inline-block'>🎯</span>
+      </div>
       <h2 className="text-4xl md:text-5xl font-extrabold mb-2 text-white">
         Join the <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">waitlist</span>
       </h2>
       <p className="text-lg text-gray-300 mb-10">Be the first to get access when we launch in your city</p>
-      <form onSubmit={handleSubmit} className="bg-[#23243a] rounded-2xl shadow-xl max-w-xl w-full p-8 space-y-6 text-left transition-all duration-200 border border-transparent hover:border-purple-400/60 hover:shadow-[0_0_0_3px_rgba(168,85,247,0.2)]">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-[#23243a] rounded-2xl shadow-xl max-w-xl w-full p-8 space-y-6 text-left transition-all duration-200 border border-transparent hover:border-purple-400/60 hover:shadow-[0_0_0_3px_rgba(168,85,247,0.2)]"
+      >
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1">
             <label className="block text-gray-300 font-semibold mb-1">First Name</label>
@@ -114,9 +120,17 @@ const LeadForm = () => {
             required
           />
           <span className="text-gray-200 text-sm">
-            I agree to the <a href="#" className="underline text-indigo-300">Terms of Service</a> and <a href="#" className="underline text-indigo-300">Privacy Policy</a>
+            I agree to the{" "}
+            <Link to="/terms" className="underline text-indigo-300">
+              Terms of Service
+            </Link>{" "}
+            and{" "}
+            <Link to="/privacy" className="underline text-indigo-300">
+              Privacy Policy
+            </Link>
           </span>
         </div>
+
         <button
           type="submit"
           className="w-full py-3 rounded-full font-bold text-lg bg-gradient-to-r from-orange-400 via-pink-500 to-purple-500 text-white shadow-lg hover:opacity-90 transition"

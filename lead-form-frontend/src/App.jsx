@@ -10,6 +10,8 @@ import ExperienceSection from "./components/ExperienceSection";
 import LaunchingSoon from "./components/LaunchingSoon";
 import CountdownTimer from "./components/CountdownTimer";
 import BlogsPage from "./components/BlogsPage";
+import TermsPage from "./components/TermsPage";
+import PrivacyPage from "./components/PrivacyPage";
 
 function App() {
   const [showConsent, setShowConsent] = useState(false);
@@ -119,19 +121,15 @@ function App() {
       );
     };
 
-    // Check consent & stored location
     const consent = getCookie(CONSENT_KEY);
     const stored = readLocation();
 
     if (consent === "granted" && stored) {
       loadLocationContent(stored);
     } else if (!consent) {
-      // Delay showing the consent popup by 1.5 seconds
       const timer = setTimeout(() => setShowConsent(true), 1500);
       return () => clearTimeout(timer);
     }
-
-    // eslint-disable-next-line
   }, []);
 
   const handleConsent = (allowed) => {
@@ -139,7 +137,6 @@ function App() {
     setShowConsent(false);
     if (allowed) {
       document.cookie = `${CONSENT_KEY}=granted; path=/; SameSite=Lax`;
-      // Trigger geolocation request
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           (pos) => {
@@ -211,11 +208,15 @@ function App() {
               </main>
             }
           />
+
+          {/* 👉 New Pages */}
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
         </Routes>
 
         <Footer />
 
-        {/* React-controlled Location Consent */}
+        {/* Location Consent Banner */}
         {showConsent && (
           <div
             id="location-consent"

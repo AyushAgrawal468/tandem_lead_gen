@@ -20,11 +20,21 @@ const Header = () => {
     }
   };
 
+  // ✅ New function: always scroll to top (dummy phone section)
+  const goHome = () => {
+    setIsOpen(false);
+    if (location.pathname !== "/") {
+      navigate("/", { replace: false });
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   return (
     <header className="w-full bg-[#14151e] py-3 shadow-lg border-b border-[#23243a] fixed top-0 left-0 z-50">
       <div className="max-w-7xl w-full mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo + Brand */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 cursor-pointer" onClick={goHome}>
           <img
             src="/logo.jpg"
             alt="Logo"
@@ -37,6 +47,13 @@ const Header = () => {
 
         {/* Desktop nav */}
         <nav className="hidden md:flex space-x-6 lg:space-x-8">
+          {/* ✅ Home Link */}
+          <button
+            onClick={goHome}
+            className="text-white hover:underline font-medium text-sm sm:text-base"
+          >
+            Home
+          </button>
           <button
             onClick={() => handleNavigation("features")}
             className="text-white hover:underline font-medium text-sm sm:text-base"
@@ -62,7 +79,6 @@ const Header = () => {
           className="md:hidden text-white focus:outline-none"
           onClick={() => setIsOpen(!isOpen)}
         >
-          {/* Simple hamburger icon */}
           <svg
             className="w-7 h-7"
             fill="none"
@@ -82,6 +98,13 @@ const Header = () => {
       {/* Mobile menu */}
       {isOpen && (
         <div className="md:hidden bg-[#14151e] border-t border-[#23243a] px-6 py-4 space-y-4">
+          {/* ✅ Mobile Home */}
+          <button
+            onClick={goHome}
+            className="block w-full text-left text-white hover:underline font-medium text-base"
+          >
+            Home
+          </button>
           <button
             onClick={() => handleNavigation("features")}
             className="block w-full text-left text-white hover:underline font-medium text-base"
