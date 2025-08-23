@@ -25,7 +25,7 @@ const LeadForm = () => {
       alert("You must agree to the Terms of Service and Privacy Policy.");
       return;
     }
-    await fetch("https://tandem.it.com:8080/api/leads", {
+    await fetch("http://localhost:8080/api/leads", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formData),
