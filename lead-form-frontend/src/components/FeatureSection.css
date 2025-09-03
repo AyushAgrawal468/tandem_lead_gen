@@ -1,0 +1,64 @@
+.feature-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+  padding: 80px 10%;
+}
+
+.feature-section.reverse {
+  flex-direction: row-reverse;
+}
+
+.feature-text {
+  flex: 1;
+}
+
+.feature-text h2 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color:white
+}
+
+.feature-text p {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: lightgrey;
+}
+
+.feature-phone {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .feature-section {
+    flex-direction: column;
+    text-align: center;
+    padding: 60px 5%;
+  }
+
+  .feature-section.reverse {
+    flex-direction: column;
+  }
+
+  .feature-phone {
+    margin-top: 20px;
+  }
+}
+
+.timer-wrapper {
+  position: relative; /* contained inside the feature-text */
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+/* Optional: make cubes slightly bigger for emphasis */
+.countdown-timer .cube {
+  width: 3rem;
+  height: 3rem;
+}
+

@@ -1,4 +1,5 @@
 package com.tandem.landing_page.dto;
+
 public class LocationRequest {
 
     private Double lat;
@@ -6,6 +7,8 @@ public class LocationRequest {
     private Double accuracy;
     private String source;
     private Double ts;  // timestamp as Double
+    private Long userId;   // ✅ add this
+    private String sessionId; // ✅ add this
 
     // Getters and Setters
     public Double getLat() { return lat; }
@@ -22,4 +25,10 @@ public class LocationRequest {
 
     public Double getTs() { return ts; }
     public void setTs(Double ts) { this.ts = ts; }
+
+    public Long getUserId() { return userId; }
+    public void setUserId(Long userId) { this.userId = userId; }
+
+    public String getSessionId() { return sessionId; }
+    public void setSessionId(String sessionId) { this.sessionId = sessionId; }
 }

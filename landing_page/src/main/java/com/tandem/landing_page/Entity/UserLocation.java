@@ -8,9 +8,8 @@ public class UserLocation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-
     private String city;
+    private String sessionId;
 
     // Getters and Setters
 
@@ -28,6 +27,14 @@ public class UserLocation {
 
     public void setCity(String city) {
         this.city = city;
+    }
+
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
     }
 }
 

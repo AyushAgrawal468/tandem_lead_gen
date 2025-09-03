@@ -1,20 +1,32 @@
 package com.tandem.landing_page.Entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 @Entity
+@Table(name="lead")
 public class Lead {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    private String firstname;
-    private String lastname;
-    private String phone;
+    private String name;
+    private String mobile;
     private String email;
+    private String location;
+    private String sessionId;
+    private String cityReal;
+
+    public Lead() {
+    }
+
+    public Lead(Long id, String name, String mobile, String email, String location,String sessionId,String city) {
+        this.id = id;
+        this.name = name;
+        this.mobile = mobile;
+        this.email = email;
+        this.location = location;
+        this.sessionId=sessionId;
+        this.cityReal =city;
+    }
 
     public Long getId() {
         return id;
@@ -24,28 +36,20 @@ public class Lead {
         this.id = id;
     }
 
-    public String getFirstname() {
-        return firstname;
+    public String getName() {
+        return name;
     }
 
-    public void setFirstname(String firstname) {
-        this.firstname = firstname;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getLastname() {
-        return lastname;
+    public String getMobile() {
+        return mobile;
     }
 
-    public void setLastname(String lastname) {
-        this.lastname = lastname;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
+    public void setMobile(String mobile) {
+        this.mobile = mobile;
     }
 
     public String getEmail() {
@@ -54,5 +58,29 @@ public class Lead {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
+    }
+
+    public String getCityReal() {
+        return cityReal;
+    }
+
+    public void setCityReal(String cityReal) {
+        this.cityReal = cityReal;
     }
 }

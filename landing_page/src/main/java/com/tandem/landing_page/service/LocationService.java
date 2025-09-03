@@ -1,4 +1,5 @@
 package com.tandem.landing_page.service;
+
 import com.tandem.landing_page.dto.LocationRequest;
 import com.tandem.landing_page.Entity.UserLocation;
 import com.tandem.landing_page.Repository.UserLocationRepository;
@@ -11,15 +12,14 @@ import org.json.JSONObject;
 public class LocationService {
 
     private final UserLocationRepository repository;
-    private final String OPENCAGE_API_KEY = "8412a66ff5de4cfdb7b903319d63511d"; // replace with your key
+    private final String OPENCAGE_API_KEY = "8412a66ff5de4cfdb7b903319d63511d"; // put your key
 
     public LocationService(UserLocationRepository repository) {
         this.repository = repository;
     }
 
     public UserLocation saveLocationWithCity(LocationRequest request) {
-        UserLocation loc = new UserLocation();
-
+        String city = null;
 
         try {
             RestTemplate restTemplate = new RestTemplate();
@@ -30,7 +30,6 @@ public class LocationService {
             String resp = restTemplate.getForObject(url, String.class);
             JSONObject obj = new JSONObject(resp);
 
-            String city = null;
             JSONArray results = obj.getJSONArray("results");
             if (results.length() > 0) {
                 JSONObject components = results.getJSONObject(0).getJSONObject("components");
@@ -39,15 +38,15 @@ public class LocationService {
                 else if (components.has("town")) city = components.getString("town");
                 else if (components.has("village")) city = components.getString("village");
             }
-
-            loc.setCity(city);
-
         } catch (Exception e) {
-            loc.setCity(null);
             e.printStackTrace();
         }
+
+        // Save only city + sessionId
+        UserLocation loc = new UserLocation();
+        loc.setCity(city);
+        loc.setSessionId(request.getSessionId());
 
         return repository.save(loc);
     }
 }
-

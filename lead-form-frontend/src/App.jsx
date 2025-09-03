@@ -2,9 +2,6 @@ import React, { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import Header from "./components/Header";
-import PhonePreview from "./components/PhonePreview";
-import Features from "./components/Features";
-import LeadForm from "./components/LeadForm";
 import Footer from "./components/Footer";
 import ExperienceSection from "./components/ExperienceSection";
 import LaunchingSoon from "./components/LaunchingSoon";
@@ -12,6 +9,10 @@ import CountdownTimer from "./components/CountdownTimer";
 import BlogsPage from "./components/BlogsPage";
 import TermsPage from "./components/TermsPage";
 import PrivacyPage from "./components/PrivacyPage";
+import LeadForm from "./components/LeadForm";
+
+// 👉 New Components
+import FeatureSection from "./components/FeatureSection";
 
 function App() {
   const [showConsent, setShowConsent] = useState(false);
@@ -190,9 +191,48 @@ function App() {
             path="/"
             element={
               <main className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-                <PhonePreview />
+                {/* 🔼 New Hero + Features Section */}
+                <FeatureSection
+                  title="Welcome to Tandem"
+                  description="Your productivity companion — fast, reliable, and intuitive."
+                  images={["/images/phone1-1.jpg", "/images/phone1-2.jpg", "/images/phone1-3.jpg","/images/phone1-4.jpg"]}
+                />
+
+                <FeatureSection
+                  title="Stay Connected"
+                  description="Chat, call, and collaborate seamlessly with your team."
+                  images={["/images/phone2-1.jpg", "/images/phone2-2.jpg", "/images/phone2-3.jpg","/images/phone2-4.jpg"]}
+                  reverse
+                />
+
+                <FeatureSection
+                  title="Work Smarter"
+                  description="AI-powered tools to help you stay ahead of deadlines."
+                  images={["/images/phone3-1.jpg", "/images/phone3-2.jpg", "/images/phone3-3.jpg","/images/phone3-4.jpg"]}
+                />
+
+                <FeatureSection
+                  title="Simple & Intuitive"
+                  description="Clean design that makes complex tasks feel effortless."
+                  images={["/images/sample1.png", "/images/sample2.png", "/images/sample3.png"]}
+                  reverse
+                />
+
+                <FeatureSection
+                  title="Secure & Reliable"
+                  description="Built with security first — your data is always safe with us."
+                  images={["/images/phone5-1.jpg","/images/phone5-2.jpg","/images/phone5-3.jpg","/images/phone5-4.jpg" ]}
+                />
+
+                <FeatureSection
+                  title="Simple & Intuitive"
+                  description="Clean design that makes complex tasks feel effortless."
+                  images={["/images/sample1.png", "/images/sample2.png", "/images/sample3.png",""]}
+                  reverse
+                />
+
+                {/* 🔽 Keep your lower sections intact */}
                 <ExperienceSection />
-                <Features />
                 <CountdownTimer targetDays={10} />
                 <LeadForm />
                 <LaunchingSoon />

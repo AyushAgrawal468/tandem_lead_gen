@@ -33,19 +33,21 @@ function CountdownTimer({ targetDays = 10 }) {
   ];
 
   return (
-    <div className="countdown-timer flex flex-wrap justify-center gap-1">
+    <div className="countdown-timer flex flex-wrap justify-center gap-2 mt-4">
       {cubes.map((cube, idx) => (
         <div
           key={idx}
-          className="cube flex flex-col items-center justify-center rounded-lg shadow-md w-12 h-12 sm:w-14 sm:h-14"
+          className="cube flex flex-col items-center justify-center rounded-lg shadow-md w-14 h-14 sm:w-16 sm:h-16"
           style={{
-            background: "linear-gradient(270deg, #3b82f6, #8b5cf6, #ec4899)", // blue -> purple -> pink
+            background: "linear-gradient(270deg, #3b82f6, #8b5cf6, #ec4899)",
           }}
         >
-          <span className="text-gray-100 text-lg sm:text-xl font-bold">
+          <span className="text-white text-lg sm:text-xl font-bold">
             {String(cube.value).padStart(2, "0")}
           </span>
-          <small className="text-gray-200 mt-1 text-[0.55rem] sm:text-xs">{cube.label}</small>
+          <small className="text-gray-200 mt-1 text-[0.65rem] sm:text-xs">
+            {cube.label}
+          </small>
         </div>
       ))}
     </div>

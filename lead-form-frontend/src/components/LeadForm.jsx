@@ -25,7 +25,7 @@ const LeadForm = () => {
       alert("You must agree to the Terms of Service and Privacy Policy.");
       return;
     }
-    await fetch("/api/leads", {
+    await fetch("api/leads", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formData),
