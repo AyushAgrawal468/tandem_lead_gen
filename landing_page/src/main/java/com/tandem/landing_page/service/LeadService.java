@@ -20,7 +20,7 @@ public class LeadService {
         // check if sessionId exists in user_loc
         if (lead.getSessionId() != null) {
             userLocationRepository.findBySessionId(lead.getSessionId())
-                    .ifPresent(userLoc -> lead.setCityReal(userLoc.getCity())); // set city if found
+                    .ifPresent(userLoc -> lead.setLocationFetched(userLoc.getCity())); // set city if found
         }
         return leadRepository.save(lead);
     }

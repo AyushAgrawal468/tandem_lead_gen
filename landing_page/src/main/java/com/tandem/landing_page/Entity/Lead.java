@@ -13,19 +13,19 @@ public class Lead {
     private String email;
     private String location;
     private String sessionId;
-    private String cityReal;
+    private String locationFetched;
 
     public Lead() {
     }
 
-    public Lead(Long id, String name, String mobile, String email, String location,String sessionId,String city) {
+    public Lead(Long id, String name, String mobile, String email, String location, String sessionId, String locationFetched) {
         this.id = id;
         this.name = name;
         this.mobile = mobile;
         this.email = email;
         this.location = location;
         this.sessionId=sessionId;
-        this.cityReal =city;
+        this.locationFetched = locationFetched;
     }
 
     public Long getId() {
@@ -76,11 +76,11 @@ public class Lead {
         this.sessionId = sessionId;
     }
 
-    public String getCityReal() {
-        return cityReal;
+    public String getLocationFetched() {
+        return locationFetched;
     }
 
-    public void setCityReal(String cityReal) {
-        this.cityReal = cityReal;
+    public void setLocationFetched(String locationFetched) {
+        this.locationFetched = locationFetched;
     }
 }

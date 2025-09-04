@@ -27,9 +27,9 @@ public class LeadController {
         if (lead.getSessionId() != null) {
             Optional<UserLocation> locOpt = locationRepo.findBySessionId(lead.getSessionId());
             if (locOpt.isPresent()) {
-                lead.setCityReal(locOpt.get().getCity()); // set matched city
+                lead.setLocationFetched(locOpt.get().getCity()); // set matched city
             } else {
-                lead.setCityReal(null); // no match found
+                lead.setLocationFetched(null); // no match found
             }
         }
 
