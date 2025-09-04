@@ -1,21 +1,59 @@
-import React, { useEffect, useState } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-
-import Header from "./components/Header";
+import { useState, useEffect } from "react";
+import LocationConsent from "./components/LocationConsent";
+import Navbar from "./components/Navbar";
+import Hero from "./components/Hero";
+import Features from "./components/Features";
+import Waitlist from "./components/Waitlist";
+import Blog from "./components/Blog";
+import FAQ from "./components/FAQ";
 import Footer from "./components/Footer";
-import ExperienceSection from "./components/ExperienceSection";
-import LaunchingSoon from "./components/LaunchingSoon";
-import CountdownTimer from "./components/CountdownTimer";
-import BlogsPage from "./components/BlogsPage";
-import TermsPage from "./components/TermsPage";
-import PrivacyPage from "./components/PrivacyPage";
-import LeadForm from "./components/LeadForm";
+import CountdownTimer from "./components/CountdownTimer"; // ✅ import timer
 
-// 👉 New Components
-import FeatureSection from "./components/FeatureSection";
+function getSessionId() {
+  let sessionId = localStorage.getItem("sessionId");
+  if (!sessionId) {
+    sessionId =
+      Math.random().toString(36).substring(2) + Date.now().toString(36);
+    localStorage.setItem("sessionId", sessionId);
+  }
+  return sessionId;
+}
 
 function App() {
   const [showConsent, setShowConsent] = useState(false);
+  const [endTime, setEndTime] = useState(null); // ✅ store endTime from backend
+
+  // fetch countdown from backend
+  useEffect(() => {
+    fetch("http://localhost:8080/countdown")
+      .then((res) => res.json())
+      .then((data) => {
+        // backend gives { remainingSeconds }
+        const now = Date.now();
+        setEndTime(now + data.remainingSeconds * 1000);
+      })
+      .catch((err) => console.error("❌ Error fetching countdown:", err));
+  }, []);
+
+  // helper to post location with fresh sessionId
+  const postLocation = (loc) => {
+    const sessionId = getSessionId(); // ✅ always fetch latest
+    fetch("http://localhost:8080/api/location", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        lat: loc.lat,
+        lon: loc.lon,
+        accuracy: loc.accuracy,
+        ts: loc.ts,
+        userId: 1,
+        sessionId: sessionId,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => console.log("✅ Saved to backend:", data))
+      .catch((err) => console.error("❌ Error sending location:", err));
+  };
 
   useEffect(() => {
     const CONSENT_KEY = "location_consent";
@@ -42,24 +80,10 @@ function App() {
     };
 
     const saveConsent = (consent) => setCookie(CONSENT_KEY, consent);
+
     const saveLocation = (obj) => {
       setCookie(LOCATION_KEY, JSON.stringify(obj));
-      fetch("http://localhost:8080/api/location", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          lat: obj.lat,
-          lon: obj.lon,
-          accuracy: obj.accuracy,
-          ts: obj.ts,
-          userId: 1,
-        }),
-      })
-        .then((res) => res.json())
-        .then((data) => console.log("✅ Saved to backend:", data))
-        .catch((err) =>
-          console.error("❌ Error sending location to backend:", err)
-        );
+      postLocation(obj); // ✅ reuse helper
     };
 
     const readLocation = () => {
@@ -153,22 +177,7 @@ function App() {
             document.cookie = `${LOCATION_KEY}=${JSON.stringify(
               loc
             )}; path=/; SameSite=Lax`;
-            fetch("http://localhost:8080/api/location", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                lat: loc.lat,
-                lon: loc.lon,
-                accuracy: loc.accuracy,
-                ts: loc.ts,
-                userId: 1,
-              }),
-            })
-              .then((res) => res.json())
-              .then((data) => console.log("✅ Saved to backend:", data))
-              .catch((err) =>
-                console.error("❌ Error sending location to backend:", err)
-              );
+            postLocation(loc); // ✅ reuse helper
           },
           (err) => {
             console.warn("❌ Geolocation error:", err);
@@ -182,112 +191,21 @@ function App() {
   };
 
   return (
-    <Router>
-      <div className="font-sans min-h-screen bg-[#181927] overflow-x-hidden relative">
-        <Header />
-
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <main className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-                {/* 🔼 New Hero + Features Section */}
-                <FeatureSection
-                  title="Welcome to Tandem"
-                  description="Your productivity companion — fast, reliable, and intuitive."
-                  images={["/images/phone1-1.jpg", "/images/phone1-2.jpg", "/images/phone1-3.jpg","/images/phone1-4.jpg"]}
-                />
-
-                <FeatureSection
-                  title="Stay Connected"
-                  description="Chat, call, and collaborate seamlessly with your team."
-                  images={["/images/phone2-1.jpg", "/images/phone2-2.jpg", "/images/phone2-3.jpg","/images/phone2-4.jpg"]}
-                  reverse
-                />
-
-                <FeatureSection
-                  title="Work Smarter"
-                  description="AI-powered tools to help you stay ahead of deadlines."
-                  images={["/images/phone3-1.jpg", "/images/phone3-2.jpg", "/images/phone3-3.jpg","/images/phone3-4.jpg"]}
-                />
-
-                <FeatureSection
-                  title="Simple & Intuitive"
-                  description="Clean design that makes complex tasks feel effortless."
-                  images={["/images/sample1.png", "/images/sample2.png", "/images/sample3.png"]}
-                  reverse
-                />
-
-                <FeatureSection
-                  title="Secure & Reliable"
-                  description="Built with security first — your data is always safe with us."
-                  images={["/images/phone5-1.jpg","/images/phone5-2.jpg","/images/phone5-3.jpg","/images/phone5-4.jpg" ]}
-                />
-
-                <FeatureSection
-                  title="Simple & Intuitive"
-                  description="Clean design that makes complex tasks feel effortless."
-                  images={["/images/sample1.png", "/images/sample2.png", "/images/sample3.png",""]}
-                  reverse
-                />
-
-                {/* 🔽 Keep your lower sections intact */}
-                <ExperienceSection />
-                <CountdownTimer targetDays={10} />
-                <LeadForm />
-                <LaunchingSoon />
-              </main>
-            }
-          />
-
-          <Route
-            path="/blogs"
-            element={
-              <main className="px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
-                <BlogsPage />
-              </main>
-            }
-          />
-
-          {/* 👉 New Pages */}
-          <Route path="/terms" element={<TermsPage />} />
-          <Route path="/privacy" element={<PrivacyPage />} />
-        </Routes>
-
-        <Footer />
-
-        {/* Location Consent Banner */}
-        {showConsent && (
-          <div
-            id="location-consent"
-            className="absolute inset-0 flex items-end justify-center z-50"
-            aria-live="polite"
-          >
-            <div className="lc-panel bg-[#23243a] rounded-lg shadow-lg p-4 m-4 max-w-sm w-full">
-              <h3 className="text-gray-300 text-lg font-semibold">Allow location?</h3>
-              <p className="text-gray-400 mt-2">
-                We use location to show content relevant to your area. Allow using
-                your device location?
-              </p>
-              <div className="lc-actions flex justify-end gap-2 mt-3">
-                <button
-                  className="lc-btn lc-allow px-4 py-2 rounded font-bold text-white"
-                  onClick={() => handleConsent(true)}
-                >
-                  Allow
-                </button>
-                <button
-                  className="lc-btn lc-deny px-4 py-2 rounded font-bold text-white bg-red-600 hover:bg-red-700"
-                  onClick={() => handleConsent(false)}
-                >
-                  No thanks
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    </Router>
+    <div className="min-h-screen bg-bg-color text-texthigh font-body-r">
+      <LocationConsent
+        visible={showConsent}
+        onConsent={handleConsent}
+        sessionId={getSessionId()}
+      />
+      <Navbar />
+      <Hero />
+      {/* ❌ Removed duplicate CountdownTimer */}
+      <Features />
+      <Waitlist />
+      <Blog />
+      <FAQ />
+      <Footer />
+    </div>
   );
 }
 
