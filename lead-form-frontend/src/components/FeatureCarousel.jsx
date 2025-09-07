@@ -134,14 +134,14 @@ const FeatureCarousel = ({ items = sampleItems, belowLeft = null }) => {
         className="relative overflow-hidden"
         style={{
           // Responsive card size variables (used by children)
-      ['--card-w']: 'clamp(260px, 32vw, 420px)',
-      ['--card-h']: 'clamp(320px, 48vw, 480px)',
-      ['--gap']: '24px',
+          ['--card-w']: 'clamp(260px, 32vw, 420px)',
+          ['--card-h']: 'clamp(220px, 36vw, 340px)', // reduced max height
+          ['--gap']: '24px',
           // Use the section's full bleed width
           width: '100vw',
-      paddingTop: 8,
-      // Add bottom padding so scaled active card doesn't get clipped at the viewport edge
-      paddingBottom: 'clamp(12px, 1.5vw, 20px)',
+          paddingTop: 8,
+          // Add bottom padding so scaled active card doesn't get clipped at the viewport edge
+          paddingBottom: 'clamp(12px, 1.5vw, 20px)',
         }}
   >
         {/* Track */}

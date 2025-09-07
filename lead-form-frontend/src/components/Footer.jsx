@@ -1,11 +1,109 @@
-import React from 'react'
+import React, { useState } from 'react'
 
 const Footer = () => {
+  const [showTerms, setShowTerms] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
   return (
     <footer
       className="w-full border-t border-gray-800"
       style={{ backgroundColor: '#191919', height: '98px', flexShrink: 0 }}
     >
+      {/* Terms and Conditions Popup */}
+      {showTerms && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          background: 'rgba(0,0,0,0.7)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+          <div style={{
+            background: 'rgba(255,255,255,0.10)',
+            color: '#fff',
+            borderRadius: '16px',
+            padding: '32px',
+            maxWidth: '480px',
+            boxShadow: '0 2px 24px rgba(0,0,0,0.25)',
+            textAlign: 'left',
+            position: 'relative',
+            backdropFilter: 'blur(50px)',
+            WebkitBackdropFilter: 'blur(50px)'
+          }}>
+            <h3 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '16px' }}>Terms and Conditions</h3>
+            <p style={{ fontSize: '1.1rem', marginBottom: '24px' }}>
+              Sample Terms: By using Tandem, you agree to abide by our community guidelines, respect other users, and not misuse the platform. Tandem reserves the right to update these terms at any time. For full details, please contact support.
+            </p>
+            <button
+              onClick={() => setShowTerms(false)}
+              style={{
+                background: '#00FFC8',
+                color: '#23243a',
+                border: 'none',
+                borderRadius: '8px',
+                padding: '8px 16px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                fontFamily: '"Anek Latin", sans-serif',
+                fontSize: '1rem',
+                transition: 'background 0.3s, color 0.3s'
+              }}
+            >Close</button>
+          </div>
+        </div>
+      )}
+      {/* Privacy Policy Popup */}
+      {showPrivacy && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          background: 'rgba(0,0,0,0.7)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+          <div style={{
+            background: 'rgba(255,255,255,0.10)',
+            color: '#fff',
+            borderRadius: '16px',
+            padding: '32px',
+            maxWidth: '480px',
+            boxShadow: '0 2px 24px rgba(0,0,0,0.25)',
+            textAlign: 'left',
+            position: 'relative',
+            backdropFilter: 'blur(50px)',
+            WebkitBackdropFilter: 'blur(50px)'
+          }}>
+            <h3 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '16px' }}>Privacy Policy</h3>
+            <p style={{ fontSize: '1.1rem', marginBottom: '24px' }}>
+              Sample Privacy: Tandem values your privacy. We collect only essential information to improve your experience. Your data is never sold or shared with third parties. For more details, please review our full privacy policy or contact support.
+            </p>
+            <button
+              onClick={() => setShowPrivacy(false)}
+              style={{
+                background: '#00FFC8',
+                color: '#23243a',
+                border: 'none',
+                borderRadius: '8px',
+                padding: '8px 16px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                fontFamily: '"Anek Latin", sans-serif',
+                fontSize: '1rem',
+                transition: 'background 0.3s, color 0.3s'
+              }}
+            >Close</button>
+          </div>
+        </div>
+      )}
       <div className="h-full w-full p-0">
         <div className="h-full flex flex-row justify-between items-center w-full">
           <div className="mb-0 flex-shrink-0">
@@ -19,12 +117,8 @@ const Footer = () => {
 
           <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-8 flex-shrink-0" style={{paddingRight: 0, marginRight: 0}}>
             <div className="flex space-x-6">
-              <a href="#" className="text-white transition-colors">
-                Terms and Conditions
-              </a>
-              <a href="#" className="text-white transition-colors">
-                Privacy policy
-              </a>
+              <button onClick={() => setShowTerms(true)} className="text-white transition-colors" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 'inherit', padding: 0 }}>Terms and Conditions</button>
+              <button onClick={() => setShowPrivacy(true)} className="text-white transition-colors" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 'inherit', padding: 0 }}>Privacy policy</button>
               <a href="#" className="text-white transition-colors">
                 Social Links
               </a>

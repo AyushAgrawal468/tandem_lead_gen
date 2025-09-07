@@ -11,6 +11,16 @@ const Waitlist = () => {
   // Show the first available SVG; otherwise use the fallback photo
   const [displayedSrc, setDisplayedSrc] = useState(null);
   const [showConsole, setShowConsole] = useState(false);
+  const [showBenefits, setShowBenefits] = useState(false);
+
+  // Sample benefits data
+  const waitlistBenefits = [
+    "Early access to new features",
+    "Exclusive invites to beta events",
+    "Priority support",
+    "Special community badge",
+    "Chance to shape the product roadmap"
+  ];
 
   const handleInputChange = (e) => {
     setFormData({
@@ -52,7 +62,7 @@ const Waitlist = () => {
   }
 
   return (
-    <>
+  <section id="waitlist" className="py-20 px-6" style={{ scrollMarginTop: '-13vh' }}>
       {showConsole && (
         <div style={{
           position: 'fixed',
@@ -71,8 +81,7 @@ const Waitlist = () => {
           Thanks for registering!
         </div>
       )}
-      <section id="waitlist" className="py-20 px-6" style={{ scrollMarginTop: 'clamp(140px, 18vw, 260px)' }}>
-        <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+      <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           {/* Left side - Circular media container */}
           <div className="relative flex items-center justify-center">
             <div
@@ -147,8 +156,9 @@ const Waitlist = () => {
               >
                 Waitlist
               </h2>
-              <div 
-                className="text-textmid flex items-center"
+              <button
+                type="button"
+                className="text-textmid flex items-center w-full"
                 style={{
                   display: 'flex',
                   height: '48px',
@@ -157,8 +167,13 @@ const Waitlist = () => {
                   alignItems: 'center',
                   alignSelf: 'stretch',
                   borderRadius: '8px',
-                  border: '1px solid #8349FF'
+                  border: '1px solid #8349FF',
+                  background: 'none',
+                  cursor: 'pointer',
+                  fontSize: 'inherit'
                 }}
+                onClick={() => setShowBenefits((prev) => !prev)}
+                aria-expanded={showBenefits}
               >
                 <span>What you get by signing up for the waitlist</span>
                 <svg 
@@ -170,12 +185,31 @@ const Waitlist = () => {
                   style={{
                     width: '24px',
                     height: '24px',
-                    aspectRatio: '1/1'
+                    aspectRatio: '1/1',
+                    transform: showBenefits ? 'rotate(90deg)' : 'none',
+                    transition: 'transform 0.2s'
                   }}
                 >
                   <path d="M8.46976 5.03118C8.40008 4.9615 8.3448 4.87878 8.30709 4.78773C8.26938 4.69669 8.24997 4.5991 8.24997 4.50056C8.24997 4.40201 8.26938 4.30443 8.30709 4.21339C8.3448 4.12234 8.40008 4.03962 8.46976 3.96993C8.53944 3.90025 8.62217 3.84498 8.71321 3.80726C8.80426 3.76955 8.90184 3.75014 9.00039 3.75014C9.09893 3.75014 9.19651 3.76955 9.28756 3.80726C9.3786 3.84498 9.46133 3.90025 9.53101 3.96993L17.031 11.4699C17.1007 11.5396 17.1561 11.6223 17.1938 11.7134C17.2315 11.8044 17.251 11.902 17.251 12.0006C17.251 12.0991 17.2315 12.1967 17.1938 12.2878C17.1561 12.3788 17.1007 12.4615 17.031 12.5312L9.53101 20.0312C9.39028 20.1719 9.19941 20.251 9.00039 20.251C8.80136 20.251 8.61049 20.1719 8.46976 20.0312C8.32903 19.8905 8.24997 19.6996 8.24997 19.5006C8.24997 19.3015 8.32903 19.1107 8.46976 18.9699L15.4401 12.0006L8.46976 5.03118Z" fill="white"/>
                 </svg>
-              </div>
+              </button>
+              {showBenefits && (
+                <ul style={{
+                  marginTop: '12px',
+                  marginBottom: '8px',
+                  paddingLeft: '24px',
+                  color: '#00FFC8',
+                  fontWeight: 500,
+                  fontSize: '1.1rem',
+                  listStyle: 'disc',
+                  background: 'rgba(255,255,255,0.07)',
+                  borderRadius: '8px'
+                }}>
+                  {waitlistBenefits.map((benefit, idx) => (
+                    <li key={idx}>{benefit}</li>
+                  ))}
+                </ul>
+              )}
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -285,7 +319,7 @@ const Waitlist = () => {
 
               <button
                 type="submit"
-                className="w-full text-black font-semibold hover:bg-gray-200 transition-colors"
+                className="w-full font-semibold waitlist-join-btn"
                 style={{
                   display: 'flex',
                   padding: '8px 16px',
@@ -295,7 +329,7 @@ const Waitlist = () => {
                   flex: '1 0 0',
                   borderRadius: '24px',
                   borderBottom: '2px solid #C1F546',
-                  background: '#FFF'
+                  transition: 'background 0.3s, color 0.3s'
                 }}
               >
                 Join now
@@ -304,7 +338,7 @@ const Waitlist = () => {
           </div>
         </div>
       </section>
-    </>
+    
   )
 }
 

@@ -8,11 +8,11 @@ import org.springframework.web.bind.annotation.RestController;
 @CrossOrigin(origins = "*")
 public class CountdownTimerController {
     // Duration: 9 days (in seconds)
-    private static final long COUNTDOWN_DURATION = 9L * 24 * 60 * 60; // 9 days
+    private static final long COUNTDOWN_DURATION = 10L * 24 * 60 * 60; // 10 days
 
-    // Start and End times in millis
-    private static final long startTime = System.currentTimeMillis();
-    private static final long endTime = startTime + (COUNTDOWN_DURATION * 1000);
+    // Fixed start time: September 1, 2025, 00:00:00 UTC
+    private static final long FIXED_START_TIME = 1756684800000L; // Milliseconds since epoch (1 september 2025)
+    private static final long endTime = FIXED_START_TIME + (COUNTDOWN_DURATION * 1000);
 
     @GetMapping("/countdown")
     public CountdownResponse getRemainingTime() {
@@ -25,8 +25,8 @@ public class CountdownTimerController {
 
     // DTO (Response class)
     public static class CountdownResponse {
-        private long remainingSeconds;
-        private long endTime;
+        private final long remainingSeconds;
+        private final long endTime;
 
         public CountdownResponse(long remainingSeconds, long endTime) {
             this.remainingSeconds = remainingSeconds;

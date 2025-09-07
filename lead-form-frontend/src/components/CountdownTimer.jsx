@@ -3,8 +3,8 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 /**
  * CountdownTimer
  * Props:
- * - endTime: Date | number | string (required) – target time to count down to
- * - startTime?: Date | number | string – optional start for progress reference
+ * - endTime: number (required) – target time to count down to (ms)
+ * - remainingSeconds: number (required) – seconds left in countdown
  * - className?: string – extra classes
  *
  * Behavior:
@@ -14,70 +14,45 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
  *   it uses the remaining duration at mount as 100%.
  */
 const CountdownTimer = ({
-  endTime,
-  startTime,
   className = '',
   width = 200,
   height = 100,
   radius = 16,
   strokeWidth = 6,
-  // Smooth left-to-right dark ocean green (left) to near-black (right)
-  background = 'linear-gradient(90deg, rgba(1,77,64,0.95) 0%, rgba(6,51,44,0.9) 35%, rgba(10,24,22,0.9) 70%, rgba(0,0,0,0.96) 100%)',
+  background,
   displayWidth,
   displayHeight,
 }) => {
-  const endMs = useMemo(() => new Date(endTime).getTime(), [endTime])
-  const startMsProp = useMemo(
-    () => (startTime ? new Date(startTime).getTime() : undefined),
-    [startTime]
-  )
-  const [now, setNow] = useState(Date.now())
-  // If startTime is not provided, use the mount-time remaining as 100%
-  const initialRemainingRef = useRef(null)
-  const initialDaysRef = useRef(null)
-  const initialFiveRef = useRef(null)
+  // 10 days countdown demo for visible progress
+  const initialSeconds = 10 * 24 * 60 * 60; // 10 days in seconds
+  const [secondsLeft, setSecondsLeft] = useState(initialSeconds);
 
   useEffect(() => {
-    const dayMs = 24 * 60 * 60 * 1000
-    const fiveMinMs = 5 * 60 * 1000
-    if (!startMsProp) {
-      const rem = Math.max(0, endMs - Date.now())
-      initialRemainingRef.current = rem
-      initialDaysRef.current = Math.max(1, Math.ceil(rem / dayMs))
-      initialFiveRef.current = Math.max(1, Math.ceil(rem / fiveMinMs))
-    } else {
-      const total = Math.max(0, endMs - startMsProp)
-      initialRemainingRef.current = total
-      initialDaysRef.current = Math.max(1, Math.ceil(total / dayMs))
-      initialFiveRef.current = Math.max(1, Math.ceil(total / fiveMinMs))
-    }
-  }, [endMs, startMsProp])
+    if (secondsLeft <= 0) return;
+    const interval = setInterval(() => {
+      setSecondsLeft(prev => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [secondsLeft]);
 
-  useEffect(() => {
-    const tick = setInterval(() => setNow(Date.now()), 1000)
-    return () => clearInterval(tick)
-  }, [])
+  const dayMs = 24 * 60 * 60 * 1000;
+  const remainingMs = Math.max(0, secondsLeft * 1000);
 
-  const remainingMs = Math.max(0, endMs - now)
-  const dayMs = 24 * 60 * 60 * 1000
-
-  // ✅ Fix: safe calculation for days
-  let remainingDays = Math.ceil(remainingMs / dayMs)
+  // Days remaining
+  // Calculate days remaining, always show at least '01' if time remains, '00' only when finished
+  let remainingDays = Math.ceil(remainingMs / dayMs);
   if (isNaN(remainingDays) || remainingDays < 0) {
-    remainingDays = 9
+    remainingDays = 0;
   }
-  let daysText = String(remainingDays).padStart(2, '0')
+  let daysText = remainingMs > 0 ? String(Math.max(1, remainingDays)).padStart(2, '0') : '00';
 
-  const fiveMinMs = 5 * 60 * 1000
-  // Progress width (0-100%)
-  const totalFive = useMemo(() => {
-    if (initialFiveRef.current != null) return Math.max(1, initialFiveRef.current)
-    if (startMsProp) return Math.max(1, Math.ceil((endMs - startMsProp) / fiveMinMs))
-    return Math.max(1, Math.ceil((endMs - now) / fiveMinMs))
-  }, [endMs, fiveMinMs, now, startMsProp])
-
-  const remainingFive = Math.max(0, Math.ceil(remainingMs / fiveMinMs))
-  const progress = Math.min(100, Math.max(0, (remainingFive / totalFive) * 100))
+  // Progress based on 240 sections, each representing 1 hour for 10 days
+  const sectionMs = 60 * 60 * 1000; // 1 hour in ms
+  const totalSections = 10 * 24; // 10 days * 24 hours
+  // Calculate sections left
+  const sectionsLeft = Math.max(0, Math.ceil(remainingMs / sectionMs));
+  // Each decrement is visible: progress is in steps of 1/totalSections
+  const progress = Math.min(100, Math.max(0, (sectionsLeft / totalSections) * 100));
 
   // SVG progress path config
   const W = width
@@ -100,20 +75,24 @@ const CountdownTimer = ({
 
   return (
     <div
-      className={`relative flex items-center justify-center rounded-[16px] shadow-xl ${className}`}
+      className={`relative flex items-center justify-center countdown-bg ${className}`}
       style={{
         width: displayWidth ?? W,
         height: displayHeight ?? H,
         color: 'var(--Text-High, #F2F2F2)',
         fontFamily: 'Anek Latin, sans-serif',
-        background,
         overflow: 'hidden',
+        position: 'relative',
+        borderRadius: `${radius + strokeWidth/2}px`,
+  padding: `${strokeWidth * 2}px`, // increase padding so background doesn't show beyond SVG border
+        boxSizing: 'border-box',
       }}
     >
+  {/* Black screen overlay removed to show gradient background */}
       {/* Content */}
       <div
         className="flex flex-col items-center leading-none select-none"
-        style={{ gap: 2 }}
+        style={{ gap: 2, zIndex: 1, position: 'relative' }}
       >
         <div
           style={{
@@ -143,6 +122,7 @@ const CountdownTimer = ({
         viewBox={`0 0 ${W} ${H}`}
         className="absolute inset-0"
         aria-hidden="true"
+        style={{ zIndex: 1 }}
       >
         {/* Track (faint) */}
         <path

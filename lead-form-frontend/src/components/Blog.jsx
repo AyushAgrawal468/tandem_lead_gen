@@ -2,46 +2,54 @@ import React, { useState } from 'react'
 
 const Blog = () => {
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [expandedPosts, setExpandedPosts] = useState({})
   
   const blogPosts = [
     {
       id: 1,
       title: "The Loneliness Pandemic— How the World Became Lonely",
       excerpt: "Introduction In 2024, the World Health Organisation (WHO) recognised loneliness as a global public health concern, highlighting its significant impact on individuals across all...",
+      content: "Introduction In 2024, the World Health Organisation (WHO) recognised loneliness as a global public health concern, highlighting its significant impact on individuals across all ages and backgrounds. The rise of remote work, digital communication, and urbanization has contributed to a sense of isolation for many. Experts warn that chronic loneliness can lead to serious health issues, including depression, anxiety, and even cardiovascular disease. Addressing this pandemic requires a multifaceted approach, including community-building initiatives, mental health support, and policy changes.",
       readMore: "Read more"
     },
     {
       id: 2,
       title: "Building Authentic Connections in the Digital Age", 
       excerpt: "As technology continues to reshape how we interact, finding genuine connections becomes both easier and more challenging. Discover strategies for meaningful relationships in our hyperconnected world...",
+      content: "As technology continues to reshape how we interact, finding genuine connections becomes both easier and more challenging. Social media platforms offer opportunities to meet new people, but they can also foster superficial relationships. To build authentic connections, prioritize face-to-face interactions, practice active listening, and be vulnerable. Join interest-based groups, attend local events, and make time for meaningful conversations. Remember, quality matters more than quantity when it comes to relationships.",
       readMore: "Read more"
     },
     {
       id: 3,
       title: "The Science Behind Social Chemistry",
       excerpt: "What makes some friendships click instantly while others never quite gel? Recent research reveals the fascinating psychology and neuroscience behind human social bonds and compatibility...",
+      content: "What makes some friendships click instantly while others never quite gel? Recent research reveals the fascinating psychology and neuroscience behind human social bonds and compatibility. Factors such as shared values, mutual interests, and emotional intelligence play a crucial role. Oxytocin, the 'bonding hormone,' is released during positive social interactions, strengthening connections. Understanding these dynamics can help you cultivate deeper, more fulfilling relationships.",
       readMore: "Read more"
     },
     {
       id: 4,
       title: "From Strangers to Squad: Building Your Tribe",
       excerpt: "Moving to a new city or life phase? Learn practical strategies for finding your people and building a supportive social network from scratch, no matter your age or circumstances...",
+      content: "Moving to a new city or life phase? Learn practical strategies for finding your people and building a supportive social network from scratch, no matter your age or circumstances. Start by attending community events, volunteering, or joining clubs. Be proactive in reaching out and following up with new acquaintances. Building a tribe takes time and effort, but the rewards of belonging and support are invaluable.",
       readMore: "Read more"
     },
     {
       id: 5,
       title: "The Art of Spontaneous Adventures",
       excerpt: "Why planned hangouts sometimes fall flat while spontaneous meetups create the best memories. Explore how embracing uncertainty can lead to deeper friendships and unforgettable experiences...",
+      content: "Why planned hangouts sometimes fall flat while spontaneous meetups create the best memories. Explore how embracing uncertainty can lead to deeper friendships and unforgettable experiences. Spontaneity encourages creativity, breaks routine, and fosters genuine connections. Next time you feel bored or disconnected, invite a friend for an impromptu adventure—you might be surprised by the results.",
       readMore: "Read more"
     }
   ]
 
   const nextSlide = () => {
-    setCurrentIndex((prev) => (prev + 1) % Math.max(1, blogPosts.length - 1))
+    setCurrentIndex((prev) => (prev + 1) % Math.max(1, blogPosts.length - 1));
+    setExpandedPosts({});
   }
 
   const prevSlide = () => {
-    setCurrentIndex((prev) => (prev - 1 + Math.max(1, blogPosts.length - 1)) % Math.max(1, blogPosts.length - 1))
+    setCurrentIndex((prev) => (prev - 1 + Math.max(1, blogPosts.length - 1)) % Math.max(1, blogPosts.length - 1));
+    setExpandedPosts({});
   }
 
   const visiblePosts = blogPosts.slice(currentIndex, currentIndex + 2)
@@ -151,21 +159,26 @@ const Blog = () => {
                   </h3>
 
                   <p className="text-textmid mb-6 leading-relaxed">
-                    {post.excerpt}
+                    {expandedPosts[post.id] ? post.content : post.excerpt}
                   </p>
 
-                  <span 
+                  <button
                     className="font-bold hover:opacity-80 transition-opacity cursor-pointer"
                     style={{
                       color: '#00FFC8',
                       fontFamily: '"Anek Latin", sans-serif',
                       fontSize: '18px',
                       fontWeight: 700,
-                      lineHeight: '150%'
+                      lineHeight: '150%',
+                      background: 'none',
+                      border: 'none',
+                      padding: 0,
+                      outline: 'none'
                     }}
+                    onClick={() => setExpandedPosts(prev => ({ ...prev, [post.id]: !prev[post.id] }))}
                   >
-                    {post.readMore}
-                  </span>
+                    {expandedPosts[post.id] ? 'Show less' : post.readMore}
+                  </button>
                 </div>
               ))}
             </div>

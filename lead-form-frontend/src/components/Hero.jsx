@@ -2,6 +2,38 @@ import React, { useState, useEffect } from 'react'
 import CountdownTimer from './CountdownTimer'
 
 const Hero = () => {
+  // Touch swipe state
+  const touchStartX = React.useRef(null);
+  const touchEndX = React.useRef(null);
+
+  // Handle touch start
+  const handleTouchStart = (e) => {
+    if (e.touches && e.touches.length === 1) {
+      touchStartX.current = e.touches[0].clientX;
+      touchEndX.current = null;
+    }
+  };
+  // Handle touch move
+  const handleTouchMove = (e) => {
+    if (e.touches && e.touches.length === 1) {
+      touchEndX.current = e.touches[0].clientX;
+    }
+  };
+  // Handle touch end
+  const handleTouchEnd = () => {
+    if (touchStartX.current !== null && touchEndX.current !== null) {
+      const delta = touchEndX.current - touchStartX.current;
+      if (Math.abs(delta) > 40) { // threshold for swipe
+        if (delta < 0) {
+          nextSlide(); // swipe left
+        } else {
+          prevSlide(); // swipe right
+        }
+      }
+    }
+    touchStartX.current = null;
+    touchEndX.current = null;
+  };
   const [currentSlide, setCurrentSlide] = useState(0)
   // Track the last navigation direction: 'next' (slides move left) or 'prev' (slides move right)
   const [navDir, setNavDir] = useState('next')
@@ -141,23 +173,31 @@ const Hero = () => {
   const TIMER_BOTTOM_INSET = 'calc(var(--bottom-overlap) - 72px)'
 
   return (
-  <section className="relative overflow-hidden" style={{ zIndex: 10, minHeight: 'calc(100vh - 80px)' }}>
+  <section
+    className="relative overflow-hidden hero-section-responsive"
+    style={{
+      zIndex: 10,
+      minHeight: 'calc(100vh - 80px)',
+      height: 'auto',
+    }}
+  >
       {/* Theater overlay consideration - content positioned to work with navbar curve */}
-  <div className="relative w-full" onPointerDown={stopAuto} onTouchStart={stopAuto} onWheel={stopAuto} style={{ 
-        // Use dynamic viewport height to avoid mobile browser UI jumps
-        top: `-${heroShift}px`, 
-        height: `min(calc(100vh + ${heroShift}px + var(--hero-bottom-extend)), var(--hero-max-h))`,
-        // Responsive curve height: scales with viewport width but caps for desktop
-        ['--curve-h']: 'clamp(200px, 45vw, 300px)',
-        // Bottom overlap amount: smaller on mobile, larger on desktop
-  ['--bottom-overlap']: 'clamp(24px, 8vw, 96px)',
-        // Extra height added only at the bottom: keep compact on mobile
-        ['--hero-bottom-extend']: 'clamp(32px, 5vw, 80px)',
-        // Mobile hero max height: cap hero so it occupies only top portion on phones
-  ['--hero-max-h']: 'clamp(360px, 100vh, 100vh)',
-  // Bottom semicircle can be less curved than top for a more open view
-  ['--bottom-curve-h']: 'clamp(100px, 24vw, 200px)'
-      }}>
+  <div
+    className="relative w-full"
+    onPointerDown={stopAuto}
+    onTouchStart={stopAuto}
+    onWheel={stopAuto}
+    style={{
+      top: `-${heroShift}px`,
+      // Use a shorter height for mobile, keep desktop as is
+      height: 'min(calc(100vh + ' + heroShift + 'px + var(--hero-bottom-extend)), var(--hero-max-h))',
+  ['--curve-h']: 'clamp(100px, 45vw, 300px)', // further reduce min for mobile
+  ['--bottom-overlap']: 'clamp(6px, 8vw, 96px)', // further reduce min for mobile
+  ['--hero-bottom-extend']: 'clamp(8px, 5vw, 80px)', // further reduce min for mobile
+  ['--hero-max-h']: 'clamp(220px, 100vh, 100vh)', // further reduce min for mobile
+  ['--bottom-curve-h']: 'clamp(40px, 24vw, 200px)', // further reduce min for mobile
+    }}
+  >
         
         {/* Sliding Images Container */}
         <div 
@@ -175,6 +215,9 @@ const Hero = () => {
             ['--center-gap']: 'clamp(16px, 4.5vw, 32px)',
             ['--side-margin']: '12px'
           }}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
         >
           {/* Solid base background so side areas don't show any image through */}
           <div
