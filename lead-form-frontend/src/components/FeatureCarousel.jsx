@@ -1,36 +1,19 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
+import feature1 from '../assets/features/feature1.png'
+import feature2 from '../assets/features/feature2.png'
+import feature3 from '../assets/features/feature3.png'
+import feature4 from '../assets/features/feature4.png'
+import feature5 from '../assets/features/feature5.png'
+import feature6 from '../assets/features/feature6.png'
+
 const sampleItems = [
-  {
-    id: 1,
-    title: 'Wall of Moments',
-    image: 'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=1200&q=60',
-    caption: 'Showcase and relive your favorite shared stories.'
-  },
-  {
-    id: 2,
-    title: 'Plan Together',
-    image: 'https://images.unsplash.com/photo-1521737852567-6949f3f9f2b5?auto=format&fit=crop&w=1200&q=60', // People collaborating at a table
-    caption: 'Coordinate quickly, make it happen fast.'
-  },
-  {
-    id: 3,
-    title: 'Discover Nearby',
-    image: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=60',
-    caption: 'Find things to do around you with friends.'
-  },
-  {
-    id: 4,
-    title: 'Build Community',
-    image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=60',
-    caption: 'Connect with people who love doing more.'
-  },
-  {
-    id: 5,
-    title: 'Moments Gallery',
-    image: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=1200&q=60',
-    caption: 'Your shared memories, beautifully displayed.'
-  }
+  { id: 1, image: feature1 },
+  { id: 2, image: feature2 },
+  { id: 3, image: feature3 },
+  { id: 4, image: feature4 },
+  { id: 5, image: feature5 },
+  { id: 6, image: feature6 }
 ]
 
 const useMeasure = (ref) => {
@@ -133,15 +116,13 @@ const FeatureCarousel = ({ items = sampleItems, belowLeft = null }) => {
         ref={viewportRef}
         className="relative overflow-hidden"
         style={{
-          // Responsive card size variables (used by children)
-          ['--card-w']: 'clamp(260px, 32vw, 420px)',
-          ['--card-h']: 'clamp(220px, 36vw, 340px)', // reduced max height
-          ['--gap']: '24px',
-          // Use the section's full bleed width
+          // Responsive: fixed size for desktop, clamp for mobile/tablet
+          ['--card-w']: 'clamp(280px, 28.5vw, 583px)',
+          ['--card-h']: 'clamp(220px, 33vw, 678px)',
+          ['--gap']: '32px',
           width: '100vw',
           paddingTop: 8,
-          // Add bottom padding so scaled active card doesn't get clipped at the viewport edge
-          paddingBottom: 'clamp(12px, 1.5vw, 20px)',
+          paddingBottom: 'clamp(12px, 1.5vw, 32px)',
         }}
   >
         {/* Track */}
@@ -150,44 +131,33 @@ const FeatureCarousel = ({ items = sampleItems, belowLeft = null }) => {
       style={{ transform: `translateX(${translate}px)`, gap: 'var(--gap)', height: 'var(--card-h)' }}
         >
           {items.map((it, i) => {
-            const isActive = i === index
-            const isLeft = i < index
-            const isRight = i > index
-            const preview = !isActive
+            const isActive = i === index;
+            const preview = !isActive;
             return (
               <div
                 key={it.id}
                 ref={i === 0 ? cardRef : undefined}
-                className="relative shrink-0 rounded-2xl overflow-hidden bg-gray-800/40"
+                className="relative shrink-0 rounded-2xl overflow-hidden bg-gray-800/40 flex items-center justify-center"
                 style={{
                   width: 'var(--card-w)',
                   height: isActive ? 'var(--card-h)' : 'calc(var(--card-h) / 2)',
-                  alignSelf: preview ? (isLeft ? 'flex-start' : 'flex-end') : 'stretch',
+                  alignSelf: preview ? (i < index ? 'flex-start' : 'flex-end') : 'stretch',
                   border: isActive ? '2px solid rgba(255,255,255,0.6)' : '1px solid rgba(255,255,255,0.15)',
                   boxShadow: isActive ? '0 8px 24px rgba(0,0,0,0.35)' : 'none',
                   transform: isActive ? 'scale(1.02)' : 'scale(0.96)',
                   transition: 'transform 400ms, box-shadow 400ms, border-color 400ms, height 400ms',
+                  background: '#23243a',
                 }}
               >
-                <div
-                  className="absolute inset-0 bg-cover"
-                  style={{
-                    backgroundImage: `url(${it.image})`,
-                    backgroundPosition: isActive ? 'center' : (isLeft ? 'top center' : 'bottom center')
-                  }}
+                <img
+                  src={it.image}
+                  alt={`Feature ${it.id}`}
+                  className={isActive ? "w-full h-full object-contain" : "w-full h-full object-cover"}
+                  style={{ display: 'block', margin: 0, padding: 0, background: '#23243a' }}
+                  draggable={false}
                 />
-                <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-black/60" />
-                <div className="relative z-10 h-full p-4 flex flex-col justify-between">
-                  <div>
-                    <h3 className="text-xl font-bold text-white drop-shadow">{it.title}</h3>
-                    {isActive && (
-                      <p className="text-textmid text-sm mt-1 pr-2">{it.caption}</p>
-                    )}
-                  </div>
-                  <div className="text-xs text-textlow">#{String(it.id).padStart(2,'0')}</div>
-                </div>
               </div>
-            )
+            );
           })}
         </div>
 

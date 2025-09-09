@@ -14,7 +14,7 @@ const Features = () => {
                 className="text-left font-bold text-white"
                 style={{
                   fontFamily: '"Anek Latin", sans-serif',
-                  fontSize: '54px',
+                  fontSize: '60px', // slightly increased from 54px
                   fontWeight: 700,
                   lineHeight: '120%',
                   color: 'rgba(255, 255, 255, 1)'

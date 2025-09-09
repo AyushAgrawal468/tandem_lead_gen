@@ -331,3 +331,24 @@ button:focus-visible {
 #location-consent h3 {
   color: lightgray;
 }
+
+/* ================= HERO SECTION FIX ================= */
+.hero-section-responsive {
+  width: 100%;
+  height: 100svh; /* fixes mobile URL bar issue */
+  max-height: 100vh;
+  aspect-ratio: 16 / 9; /* lock panorama look */
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .hero-section-responsive {
+    aspect-ratio: 9 / 16; /* taller but proportional */
+    height: auto;
+    min-height: 100svh; /* still fills mobile screen */
+  }
+}
+

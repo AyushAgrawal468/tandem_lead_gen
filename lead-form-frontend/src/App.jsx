@@ -21,18 +21,36 @@ function getSessionId() {
 
 function App() {
   const [showConsent, setShowConsent] = useState(false);
-  const [endTime, setEndTime] = useState(null); // ✅ store endTime from backend
+  const [timerData, setTimerData] = useState(null);
 
-  // fetch countdown from backend
+  // fetch countdown from backend every minute
   useEffect(() => {
-    fetch("http://localhost:8080/countdown")
-      .then((res) => res.json())
-      .then((data) => {
-        // backend gives { remainingSeconds }
-        const now = Date.now();
-        setEndTime(now + data.remainingSeconds * 1000);
-      })
-      .catch((err) => console.error("❌ Error fetching countdown:", err));
+    let isMounted = true;
+    const fetchCountdown = () => {
+      fetch("http://localhost:8080/countdown")
+        .then((res) => res.json())
+        .then((data) => {
+          console.log('⏳ Backend countdown data:', data);
+          // Ensure startTime, endTime, remainingSeconds are present and correct
+          // If remainingSeconds is in seconds, convert to ms for timer
+          let timerObj = { ...data };
+          if (typeof timerObj.remainingSeconds === 'number' && timerObj.remainingSeconds < 1000000000000) {
+            // If value is in seconds, convert to ms
+            timerObj.remainingSeconds = timerObj.remainingSeconds * 1000;
+          }
+          if (!timerObj.startTime && timerObj.endTime && timerObj.remainingSeconds) {
+            timerObj.startTime = timerObj.endTime - timerObj.remainingSeconds;
+          }
+          if (isMounted) setTimerData(timerObj);
+        })
+        .catch((err) => console.error("❌ Error fetching countdown:", err));
+    };
+    fetchCountdown();
+    const interval = setInterval(fetchCountdown, 60 * 1000); // every minute
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
   }, []);
 
   // helper to post location with fresh sessionId
@@ -198,8 +216,13 @@ function App() {
         sessionId={getSessionId()}
       />
       <Navbar />
-      <Hero />
-      {/* ❌ Removed duplicate CountdownTimer */}
+      {/* Pass timerData props explicitly to Hero/CountdownTimer */}
+      <Hero
+        timerData={timerData}
+        startTime={timerData?.startTime}
+        endTime={timerData?.endTime}
+        remainingSeconds={timerData?.remainingSeconds}
+      />
       <Features />
       <Waitlist />
       <Blog />

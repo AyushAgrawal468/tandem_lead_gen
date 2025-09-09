@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import CountdownTimer from './CountdownTimer'
 
-const Hero = () => {
+const Hero = ({ timerData }) => {
   // Touch swipe state
   const touchStartX = React.useRef(null);
   const touchEndX = React.useRef(null);
@@ -136,31 +136,6 @@ const Hero = () => {
     setCurrentSlide(index)
   }
 
-  // Fetch launch time from server
-  const [launchTime, setLaunchTime] = useState(null)
-  const [loadingLaunch, setLoadingLaunch] = useState(true)
-  useEffect(() => {
-    let cancelled = false
-    setLoadingLaunch(true)
-    fetch('/api/launch-time')
-      .then(res => res.ok ? res.text() : Promise.reject('API error'))
-      .then(dt => {
-        if (!cancelled) {
-          setLaunchTime(dt)
-          setLoadingLaunch(false)
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setLaunchTime(Date.now()) // fallback to local time
-          setLoadingLaunch(false)
-        }
-      })
-    return () => { cancelled = true }
-  }, [])
-
-  // Timer end is always 9 days after launch
-  const timerEnd = React.useMemo(() => launchTime ? new Date(new Date(launchTime).getTime() + 9 * 24 * 60 * 60 * 1000) : null, [launchTime])
   // Timer sizing and offsets (easy to tweak)
   // Responsive sizing using clamp: smaller on phones, original on desktop
   const TIMER_W = 200
@@ -402,14 +377,15 @@ const Hero = () => {
             bottom: TIMER_BOTTOM_INSET,
           }}
         >
-          {loadingLaunch ? (
+          {!timerData ? (
             <div className="flex items-center justify-center w-full h-full">
               <span className="animate-pulse text-white text-lg">Loading timer…</span>
             </div>
           ) : (
             <CountdownTimer
-              endTime={timerEnd}
-              startTime={launchTime}
+              remainingSeconds={timerData.remainingSeconds}
+              endTime={timerData.endTime}
+              startTime={timerData.startTime}
               width={TIMER_W}
               height={TIMER_H}
               radius={TIMER_R}

@@ -5,6 +5,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
  * Props:
  * - endTime: number (required) – target time to count down to (ms)
  * - remainingSeconds: number (required) – seconds left in countdown
+ * - startTime: number (optional) – start time of countdown (ms)
  * - className?: string – extra classes
  *
  * Behavior:
@@ -22,21 +23,29 @@ const CountdownTimer = ({
   background,
   displayWidth,
   displayHeight,
+  remainingSeconds,
+  endTime,
+  startTime,
 }) => {
-  // 10 days countdown demo for visible progress
-  const initialSeconds = 10 * 24 * 60 * 60; // 10 days in seconds
-  const [secondsLeft, setSecondsLeft] = useState(initialSeconds);
+  // Use backend-provided remainingSeconds (now in ms!)
+  // Accept fixed_START_TIME from backend
+  const [remainingMs, setRemainingMs] = useState(
+    typeof remainingSeconds === 'number' ? remainingSeconds : 0
+  );
 
   useEffect(() => {
-    if (secondsLeft <= 0) return;
+    setRemainingMs(typeof remainingSeconds === 'number' ? remainingSeconds : 0);
+  }, [remainingSeconds]);
+
+  useEffect(() => {
+    if (remainingMs <= 0) return;
     const interval = setInterval(() => {
-      setSecondsLeft(prev => (prev > 0 ? prev - 1 : 0));
+      setRemainingMs(prev => (prev > 0 ? prev - 1000 : 0));
     }, 1000);
     return () => clearInterval(interval);
-  }, [secondsLeft]);
+  }, [remainingMs]);
 
   const dayMs = 24 * 60 * 60 * 1000;
-  const remainingMs = Math.max(0, secondsLeft * 1000);
 
   // Days remaining
   // Calculate days remaining, always show at least '01' if time remains, '00' only when finished
@@ -46,32 +55,45 @@ const CountdownTimer = ({
   }
   let daysText = remainingMs > 0 ? String(Math.max(1, remainingDays)).padStart(2, '0') : '00';
 
-  // Progress based on 240 sections, each representing 1 hour for 10 days
-  const sectionMs = 60 * 60 * 1000; // 1 hour in ms
-  const totalSections = 10 * 24; // 10 days * 24 hours
-  // Calculate sections left
-  const sectionsLeft = Math.max(0, Math.ceil(remainingMs / sectionMs));
-  // Each decrement is visible: progress is in steps of 1/totalSections
-  const progress = Math.min(100, Math.max(0, (sectionsLeft / totalSections) * 100));
+  // Progress bar decreases in 1-minute steps
+  const sectionMs = 1 * 60 * 1000; // 1 minute in ms
+  // Use fixed_START_TIME from backend if present
+  const effectiveStartTime = typeof fixed_START_TIME === 'number' ? fixed_START_TIME : (startTime ?? null);
+  const effectiveEndTime = typeof endTime === 'number' ? endTime : null;
+  // If all times are present, use them for progress calculation
+  let totalDurationMs = 0;
+  let progress = 0;
+  if (effectiveStartTime !== null && effectiveEndTime !== null) {
+    totalDurationMs = effectiveEndTime - effectiveStartTime;
+    // Calculate elapsed and left
+    const elapsedMs = Math.max(0, Date.now() - effectiveStartTime);
+    const leftMs = Math.max(0, effectiveEndTime - Date.now());
+    // Progress: percent left
+    progress = totalDurationMs > 0 ? Math.min(100, Math.max(0, (leftMs / totalDurationMs) * 100)) : 0;
+  } else {
+    // Fallback: use remainingMs and a default duration
+    totalDurationMs = 10 * 24 * 60 * 60 * 1000;
+    progress = Math.min(100, Math.max(0, (remainingMs / totalDurationMs) * 100));
+  }
 
   // SVG progress path config
-  const W = width
-  const H = height
-  const R = radius
-  const SW = strokeWidth
-  const pathRef = useRef(null)
-  const [pathLen, setPathLen] = useState(1)
+  const W = width;
+  const H = height;
+  const R = radius;
+  const SW = strokeWidth;
+  const pathRef = useRef(null);
+  const [pathLen, setPathLen] = useState(1);
 
   useEffect(() => {
     if (pathRef.current) {
       try {
-        setPathLen(pathRef.current.getTotalLength())
+        setPathLen(pathRef.current.getTotalLength());
       } catch (_) {}
     }
-  }, [])
+  }, []);
 
-  const visibleLen = pathLen * (progress / 100)
-  const isFull = progress >= 99.5
+  const visibleLen = pathLen * (progress / 100);
+  const isFull = progress >= 99.5;
 
   return (
     <div
@@ -84,11 +106,10 @@ const CountdownTimer = ({
         overflow: 'hidden',
         position: 'relative',
         borderRadius: `${radius + strokeWidth/2}px`,
-  padding: `${strokeWidth * 2}px`, // increase padding so background doesn't show beyond SVG border
+        padding: `${strokeWidth * 2}px`, // increase padding so background doesn't show beyond SVG border
         boxSizing: 'border-box',
       }}
     >
-  {/* Black screen overlay removed to show gradient background */}
       {/* Content */}
       <div
         className="flex flex-col items-center leading-none select-none"
