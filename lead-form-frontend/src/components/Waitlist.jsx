@@ -1,32 +1,161 @@
 import React, { useState } from 'react'
 
 const Waitlist = () => {
+
   const [formData, setFormData] = useState({
     name: '',
     mobile: '',
     email: '',
     location: ''
   });
+  const [errors, setErrors] = useState({});
+  const [backendError, setBackendError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   // Show the first available SVG; otherwise use the fallback photo
   const [displayedSrc, setDisplayedSrc] = useState(null);
   const [showConsole, setShowConsole] = useState(false);
   const [showBenefits, setShowBenefits] = useState(false);
 
-  // Sample benefits data
-  const waitlistBenefits = [
-    "Early access to new features",
-    "Exclusive invites to beta events",
-    "Priority support",
-    "Special community badge",
-    "Chance to shape the product roadmap"
+  // Rewards data for carousel
+  const rewards = [
+    {
+      title: 'Priority access',
+      description: 'Early beta invites before the public launch',
+    },
+    {
+      title: 'Invite credits',
+      description: 'Extra invites so your whole crew can join instantly.',
+    },
+    {
+      title: 'Exclusive badge',
+      description: 'Get a special badge in the community.',
+    },
+    {
+      title: 'Beta feedback',
+      description: 'Help shape the product with direct feedback.',
+    },
+    {
+      title: 'Priority support',
+      description: 'Get faster responses from our support team.',
+    },
+    {
+      title: 'Event invites',
+      description: 'Access to exclusive beta events and webinars.',
+    },
   ];
+
+  // Carousel state
+  const [carouselPage, setCarouselPage] = useState(0); // 0, 1, 2
+  const [carouselPaused, setCarouselPaused] = useState(false);
+  const autoIntervalRef = React.useRef(null);
+  const resumeTimeoutRef = React.useRef(null);
+  const touchStartXRef = React.useRef(0);
+  const touchStartYRef = React.useRef(0);
+  const touchActiveRef = React.useRef(false);
+
+  // Auto-scroll effect with pause/resume support
+  React.useEffect(() => {
+    if (carouselPaused) {
+      if (autoIntervalRef.current) clearInterval(autoIntervalRef.current);
+      return;
+    }
+    autoIntervalRef.current = setInterval(() => {
+      setCarouselPage((prev) => (prev + 1) % 3);
+    }, 6000);
+    return () => {
+      if (autoIntervalRef.current) clearInterval(autoIntervalRef.current);
+    };
+  }, [carouselPaused]);
+
+  // Cleanup timers on unmount
+  React.useEffect(() => {
+    return () => {
+      if (autoIntervalRef.current) clearInterval(autoIntervalRef.current);
+      if (resumeTimeoutRef.current) clearTimeout(resumeTimeoutRef.current);
+    };
+  }, []);
+
+  const scheduleResume = (delay = 5000) => {
+    if (resumeTimeoutRef.current) clearTimeout(resumeTimeoutRef.current);
+    resumeTimeoutRef.current = setTimeout(() => setCarouselPaused(false), delay);
+  };
+
+  const handleRewardsTouchStart = (e) => {
+    if (e.touches && e.touches.length > 0) {
+      touchStartXRef.current = e.touches[0].clientX;
+      touchStartYRef.current = e.touches[0].clientY;
+      touchActiveRef.current = true;
+      setCarouselPaused(true);
+      if (resumeTimeoutRef.current) clearTimeout(resumeTimeoutRef.current);
+    }
+  };
+
+  const handleRewardsTouchEnd = (e) => {
+    if (!touchActiveRef.current) {
+      scheduleResume();
+      return;
+    }
+    const touch = e.changedTouches && e.changedTouches[0];
+    if (touch) {
+      const dx = touch.clientX - touchStartXRef.current;
+      const dy = touch.clientY - touchStartYRef.current;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+        if (dx < 0) {
+          // swipe left -> next
+          setCarouselPage((prev) => (prev + 1) % 3);
+        } else {
+          // swipe right -> prev
+          setCarouselPage((prev) => (prev + 2) % 3);
+        }
+      }
+    }
+    touchActiveRef.current = false;
+    scheduleResume();
+  };
+
+  const handleRewardsTouchCancel = () => {
+    touchActiveRef.current = false;
+    scheduleResume();
+  };
+
+  const validate = () => {
+    const newErrors = {};
+    const alphaSpace = /^[A-Za-z ]+$/;
+    // Name: required + alphabets and spaces only
+    if (!formData.name.trim()) {
+      newErrors.name = 'Name is required';
+    } else if (!alphaSpace.test(formData.name.trim())) {
+      newErrors.name = 'Name must contain only alphabets and spaces';
+    }
+    // Mobile: required, 10 digits, numeric
+    if (!formData.mobile) {
+      newErrors.mobile = 'Mobile number is required';
+    } else if (!/^[0-9]{10}$/.test(formData.mobile)) {
+      newErrors.mobile = 'Mobile number must be exactly 10 digits';
+    }
+    // Email: required, valid format
+    if (!formData.email) {
+      newErrors.email = 'Email is required';
+    } else if (!/^([a-zA-Z0-9_\-.]+)@([a-zA-Z0-9_\-.]+)\.([a-zA-Z]{2,})$/.test(formData.email)) {
+      newErrors.email = 'Email should be valid (e.g. user@example.com)';
+    }
+    // Location: required + alphabets and spaces only
+    if (!formData.location.trim()) {
+      newErrors.location = 'Location is required';
+    } else if (!alphaSpace.test(formData.location.trim())) {
+      newErrors.location = 'Location must contain only alphabets and spaces';
+    }
+    return newErrors;
+  };
 
   const handleInputChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
-    })
+    });
+    setErrors({ ...errors, [e.target.name]: undefined });
+    setBackendError('');
   }
 
   const getSessionId = () => {
@@ -39,30 +168,73 @@ const Waitlist = () => {
     return sessionId;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const payload = { ...formData, sessionId: getSessionId() };
+  const submitLead = async (payload) => {
+    setSubmitting(true);
     try {
       const res = await fetch("http://localhost:8080/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error("Failed to submit");
+      if (!res.ok) {
+        // Read response safely, but never show to user
+        const ct = res.headers.get('content-type') || '';
+        let serverBody = '';
+        try {
+          if (ct.includes('application/json')) {
+            const j = await res.json();
+            serverBody = JSON.stringify(j);
+          } else {
+            serverBody = await res.text();
+          }
+        } catch (_) {}
+        console.error("/api/leads failed:", res.status, serverBody);
+        const friendly = res.status >= 500
+          ? 'Something went wrong on our side. Please try again in a moment.'
+          : 'We could not submit your signup. Please check your details and try again.';
+        setBackendError(friendly);
+        return;
+      }
       const data = await res.json();
       console.log("✅ Lead saved:", data);
       setShowConsole(true);
       setTimeout(() => setShowConsole(false), 3500);
-      // Optionally clear form
       setFormData({ name: '', mobile: '', email: '', location: '' });
+      setErrors({});
+      setBackendError('');
     } catch (err) {
+      setBackendError("Network error. Please try again in a moment.");
       console.error("❌ Error submitting lead:", err);
-      // Optionally show error message
+    } finally {
+      setSubmitting(false);
     }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setBackendError('');
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+    const payload = { ...formData, sessionId: getSessionId() };
+    await submitLead(payload);
   }
 
+  const handleRetry = async () => {
+    setBackendError('');
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+    const payload = { ...formData, sessionId: getSessionId() };
+    await submitLead(payload);
+  };
+
   return (
-  <section id="waitlist" className="py-20 px-6" style={{ scrollMarginTop: '-13vh' }}>
+    <>
       {showConsole && (
         <div style={{
           position: 'fixed',
@@ -81,256 +253,126 @@ const Waitlist = () => {
           Thanks for registering!
         </div>
       )}
-      <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          {/* Left side - Circular media container */}
-          <div className="relative flex items-center justify-center">
-            <div
-              className="mx-auto"
-              style={{
-                width: 'clamp(300px, 45vw, 560px)',
-                height: 'clamp(300px, 45vw, 560px)',
-                backgroundColor: 'var(--bg-color)'
-              }}
-            >
-              <img
-                src={displayedSrc || '/images/group-photo.jpg'}
-                alt="Waitlist visual"
-                className="w-full h-full object-cover block"
-                style={{
-                  WebkitMaskImage: 'radial-gradient(circle at 50% 50%, black 60%, rgba(0,0,0,0.7) 78%, transparent 92%)',
-                  maskImage: 'radial-gradient(circle at 50% 50%, black 60%, rgba(0,0,0,0.7) 78%, transparent 92%)',
-                  WebkitMaskRepeat: 'no-repeat',
-                  maskRepeat: 'no-repeat',
-                  WebkitMaskSize: '100% 100%',
-                  maskSize: '100% 100%',
-                  transform: 'scale(1.08)'
-                }}
-                onError={(e) => {
-                  console.log('Image failed to load:', e.currentTarget.src)
-                  // keep fallback attempts silent; if fallback fails, just hide
-                  if (!displayedSrc) e.currentTarget.style.display = 'none'
-                }}
-              />
-            </div>
 
-            {/* Preload candidates and pick the first that loads */}
-            <img
-              src="/images/waitlist-1.svg"
-              alt="preload 1"
-              style={{ display: 'none' }}
-              onLoad={(e) => {
-                if (!displayedSrc) setDisplayedSrc(e.currentTarget.src)
-              }}
-            />
-            <img
-              src="/images/waitlist-2.svg"
-              alt="preload 2"
-              style={{ display: 'none' }}
-              onLoad={(e) => {
-                if (!displayedSrc) setDisplayedSrc(e.currentTarget.src)
-              }}
-            />
-            <img
-              src="/images/waitlist-3.svg"
-              alt="preload 3"
-              style={{ display: 'none' }}
-              onLoad={(e) => {
-                if (!displayedSrc) setDisplayedSrc(e.currentTarget.src)
-              }}
-            />
+      {/* Mobile-only layout: stacked rewards + form */}
+  <section id="waitlist" className="block sm:hidden py-12 px-4" style={{ scrollMarginTop: '-13vh', background: '#23243a', borderRadius: '0px' }}>
+        <div className="w-full max-w-xl mx-auto">
+          <h2 className="text-white font-bold text-4xl text-center" style={{ fontFamily: 'Anek Latin, sans-serif', lineHeight: '120%' }}>Waitlist</h2>
+          <div className="mt-2 text-center text-white/90 text-lg">Signup to get exclusive rewards</div>
+
+          {/* Rewards (two cards stacked) with swipe support */}
+          <div
+            className="mt-6 space-y-4"
+            onTouchStart={handleRewardsTouchStart}
+            onTouchEnd={handleRewardsTouchEnd}
+            onTouchCancel={handleRewardsTouchCancel}
+          >
+            {rewards.slice(carouselPage * 2, carouselPage * 2 + 2).map((reward) => (
+              <div key={reward.title} className="flex items-start p-5" style={{
+                background: 'rgba(255,255,255,0.07)',
+                border: '1px solid rgba(255,255,255,0.18)',
+                borderRadius: '12px',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                height: '121px',
+                minHeight: '121px',
+                maxHeight: '121px',
+                boxSizing: 'border-box',
+                overflow: 'hidden'
+              }}>
+                <div style={{
+                  width: '64px',
+                  height: '64px',
+                  minWidth: '64px',
+                  minHeight: '64px',
+                  maxWidth: '64px',
+                  maxHeight: '64px',
+                  flex: '0 0 64px',
+                  flexShrink: 0,
+                  background: '#D9D9D9',
+                  borderRadius: '8px',
+                  marginRight: '24px'
+                }} />
+                <div>
+                  <div style={{ color: '#8349FF', fontWeight: 700, fontSize: '1.05rem', marginBottom: '4px' }}>{reward.title}</div>
+                  <div style={{ color: '#fff', fontSize: '0.98rem' }}>{reward.description}</div>
+                </div>
+              </div>
+            ))}
+            {/* Dots */}
+            <div className="flex items-center justify-center space-x-2 pt-1">
+              {[0,1,2].map(i => (
+                <span key={i} style={{ width: '8px', height: '8px', borderRadius: '50%', background: carouselPage === i ? '#fff' : 'rgba(255,255,255,0.3)' }} />
+              ))}
+            </div>
           </div>
 
-          {/* Right side - Waitlist form */}
-          <div>
-            <div className="mb-8">
-              <h2 
-                className="mb-4 text-white font-bold"
+          {/* Signup card */}
+          <div className="mt-6" style={{ border: '1.5px solid rgba(255,255,255,0.18)', borderRadius: '12px', background: 'rgba(255,255,255,0.04)', boxShadow: '0 2px 8px rgba(193,245,70,0.08)', padding: '24px' }}>
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <h3
                 style={{
-                  alignSelf: 'stretch',
-                  fontFamily: '"Anek Latin", sans-serif',
-                  fontSize: '64px',
+                  color: '#FFF',
+                  fontFamily: '"Anek Latin"',
+                  fontSize: '32px',
+                  fontStyle: 'normal',
                   fontWeight: 700,
-                  lineHeight: '120%',
-                  color: '#FFF'
+                  lineHeight: '150%',
+                  marginBottom: '8px'
                 }}
               >
-                Waitlist
-              </h2>
-              <button
-                type="button"
-                className="text-textmid flex items-center w-full"
-                style={{
-                  display: 'flex',
-                  height: '48px',
-                  padding: '8px 16px',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  alignSelf: 'stretch',
-                  borderRadius: '8px',
-                  border: '1px solid #8349FF',
-                  background: 'none',
-                  cursor: 'pointer',
-                  fontSize: 'inherit'
-                }}
-                onClick={() => setShowBenefits((prev) => !prev)}
-                aria-expanded={showBenefits}
-              >
-                <span>What you get by signing up for the waitlist</span>
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  width="24" 
-                  height="24" 
-                  viewBox="0 0 24 24" 
-                  fill="none"
-                  style={{
-                    width: '24px',
-                    height: '24px',
-                    aspectRatio: '1/1',
-                    transform: showBenefits ? 'rotate(90deg)' : 'none',
-                    transition: 'transform 0.2s'
-                  }}
-                >
-                  <path d="M8.46976 5.03118C8.40008 4.9615 8.3448 4.87878 8.30709 4.78773C8.26938 4.69669 8.24997 4.5991 8.24997 4.50056C8.24997 4.40201 8.26938 4.30443 8.30709 4.21339C8.3448 4.12234 8.40008 4.03962 8.46976 3.96993C8.53944 3.90025 8.62217 3.84498 8.71321 3.80726C8.80426 3.76955 8.90184 3.75014 9.00039 3.75014C9.09893 3.75014 9.19651 3.76955 9.28756 3.80726C9.3786 3.84498 9.46133 3.90025 9.53101 3.96993L17.031 11.4699C17.1007 11.5396 17.1561 11.6223 17.1938 11.7134C17.2315 11.8044 17.251 11.902 17.251 12.0006C17.251 12.0991 17.2315 12.1967 17.1938 12.2878C17.1561 12.3788 17.1007 12.4615 17.031 12.5312L9.53101 20.0312C9.39028 20.1719 9.19941 20.251 9.00039 20.251C8.80136 20.251 8.61049 20.1719 8.46976 20.0312C8.32903 19.8905 8.24997 19.6996 8.24997 19.5006C8.24997 19.3015 8.32903 19.1107 8.46976 18.9699L15.4401 12.0006L8.46976 5.03118Z" fill="white"/>
-                </svg>
-              </button>
-              {showBenefits && (
-                <ul style={{
-                  marginTop: '12px',
-                  marginBottom: '8px',
-                  paddingLeft: '24px',
-                  color: '#00FFC8',
-                  fontWeight: 500,
-                  fontSize: '1.1rem',
-                  listStyle: 'disc',
-                  background: 'rgba(255,255,255,0.07)',
-                  borderRadius: '8px'
-                }}>
-                  {waitlistBenefits.map((benefit, idx) => (
-                    <li key={idx}>{benefit}</li>
-                  ))}
-                </ul>
+                Signup
+              </h3>
+              {backendError && (
+                <div style={{ color: '#FF4D4F', marginBottom: '12px', fontWeight: 500, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                  <span>{backendError}</span>
+                  <button
+                    type="button"
+                    onClick={handleRetry}
+                    disabled={submitting}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      color: '#fff',
+                      textDecoration: 'underline',
+                      cursor: submitting ? 'not-allowed' : 'pointer',
+                      opacity: submitting ? 0.7 : 1
+                    }}
+                  >
+                    {submitting ? 'Retrying…' : 'Try again'}
+                  </button>
+                </div>
               )}
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div 
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'flex-start',
-                  gap: '8px',
-                  alignSelf: 'stretch'
-                }}
-              >
+              <div>
                 <label className="block text-texthigh mb-2">Name</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  placeholder="Enter..."
-                  className="w-full rounded-lg px-4 py-3 text-texthigh placeholder-textlow focus:outline-none focus:ring-2 focus:ring-primgreen/60"
-                  style={{
-                    borderRadius: '8px',
-                    background: 'rgba(255, 255, 255, 0.20)',
-                    backdropFilter: 'blur(50px)',
-                    WebkitBackdropFilter: 'blur(50px)'
-                  }}
-                />
+                <input type="text" name="name" value={formData.name} onChange={handleInputChange} placeholder="Enter" className="w-full rounded-lg px-4 py-3 text-texthigh placeholder-textlow focus:outline-none focus:ring-2 focus:ring-primgreen/60" style={{ background: 'rgba(255,255,255,0.20)', borderRadius: '8px', backdropFilter: 'blur(50px)', WebkitBackdropFilter: 'blur(50px)' }} />
+                {errors.name && (<span style={{ color: '#FF4D4F', fontSize: '0.95rem' }}>{errors.name}</span>)}
               </div>
-
-              <div 
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'flex-start',
-                  gap: '8px',
-                  alignSelf: 'stretch'
-                }}
-              >
+              <div>
                 <label className="block text-texthigh mb-2">Mobile number</label>
-                <input
-                  type="tel"
-                  name="mobile"
-                  value={formData.mobile}
-                  onChange={handleInputChange}
-                  placeholder="Enter..."
-                  className="w-full rounded-lg px-4 py-3 text-texthigh placeholder-textlow focus:outline-none focus:ring-2 focus:ring-primgreen/60"
-                  style={{
-                    borderRadius: '8px',
-                    background: 'rgba(255, 255, 255, 0.20)',
-                    backdropFilter: 'blur(50px)',
-                    WebkitBackdropFilter: 'blur(50px)'
-                  }}
-                />
+                <input type="tel" name="mobile" value={formData.mobile} onChange={handleInputChange} placeholder="Enter" className="w-full rounded-lg px-4 py-3 text-texthigh placeholder-textlow focus:outline-none focus:ring-2 focus:ring-primgreen/60" style={{ background: 'rgba(255,255,255,0.20)', borderRadius: '8px', backdropFilter: 'blur(50px)', WebkitBackdropFilter: 'blur(50px)' }} />
+                {errors.mobile && (<span style={{ color: '#FF4D4F', fontSize: '0.95rem' }}>{errors.mobile}</span>)}
               </div>
-
-              <div 
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'flex-start',
-                  gap: '8px',
-                  alignSelf: 'stretch'
-                }}
-              >
+              <div>
                 <label className="block text-texthigh mb-2">Email address</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  placeholder="Enter..."
-                  className="w-full rounded-lg px-4 py-3 text-texthigh placeholder-textlow focus:outline-none focus:ring-2 focus:ring-primgreen/60"
-                  style={{
-                    borderRadius: '8px',
-                    background: 'rgba(255, 255, 255, 0.20)',
-                    backdropFilter: 'blur(50px)',
-                    WebkitBackdropFilter: 'blur(50px)'
-                  }}
-                />
+                <input type="email" name="email" value={formData.email} onChange={handleInputChange} placeholder="Enter" className="w-full rounded-lg px-4 py-3 text-texthigh placeholder-textlow focus:outline-none focus:ring-2 focus:ring-primgreen/60" style={{ background: 'rgba(255,255,255,0.20)', borderRadius: '8px', backdropFilter: 'blur(50px)', WebkitBackdropFilter: 'blur(50px)' }} />
+                {errors.email && (<span style={{ color: '#FF4D4F', fontSize: '0.95rem' }}>{errors.email}</span>)}
               </div>
-
-              <div 
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'flex-start',
-                  gap: '8px',
-                  alignSelf: 'stretch'
-                }}
-              >
+              <div>
                 <label className="block text-texthigh mb-2">Location</label>
-                <input
-                  type="text"
-                  name="location"
-                  value={formData.location}
-                  onChange={handleInputChange}
-                  placeholder="Enter..."
-                  className="w-full rounded-lg px-4 py-3 text-texthigh placeholder-textlow focus:outline-none focus:ring-2 focus:ring-primgreen/60"
-                  style={{
-                    borderRadius: '8px',
-                    background: 'rgba(255, 255, 255, 0.20)',
-                    backdropFilter: 'blur(50px)',
-                    WebkitBackdropFilter: 'blur(50px)'
-                  }}
-                />
+                <input type="text" name="location" value={formData.location} onChange={handleInputChange} placeholder="Enter" className="w-full rounded-lg px-4 py-3 text-texthigh placeholder-textlow focus:outline-none focus:ring-2 focus:ring-primgreen/60" style={{ background: 'rgba(255,255,255,0.20)', borderRadius: '8px', backdropFilter: 'blur(50px)', WebkitBackdropFilter: 'blur(50px)' }} />
+                {errors.location && (<span style={{ color: '#FF4D4F', fontSize: '0.95rem' }}>{errors.location}</span>)}
               </div>
-
               <button
                 type="submit"
                 className="w-full font-semibold waitlist-join-btn"
-                style={{
-                  display: 'flex',
-                  padding: '8px 16px',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  gap: '10px',
-                  flex: '1 0 0',
-                  borderRadius: '24px',
-                  borderBottom: '2px solid #C1F546',
-                  transition: 'background 0.3s, color 0.3s'
-                }}
+                style={{ display: 'flex', padding: '10px 16px', justifyContent: 'center', alignItems: 'center', gap: '10px', borderRadius: '24px', borderBottom: '2px solid #C1F546' }}
+                disabled={submitting}
+                onTouchStart={(e) => e.currentTarget.classList.add('is-pressed')}
+                onTouchEnd={(e) => e.currentTarget.classList.remove('is-pressed')}
+                onTouchCancel={(e) => e.currentTarget.classList.remove('is-pressed')}
+                onMouseDown={(e) => e.currentTarget.classList.add('is-pressed')}
+                onMouseUp={(e) => e.currentTarget.classList.remove('is-pressed')}
+                onMouseLeave={(e) => e.currentTarget.classList.remove('is-pressed')}
               >
                 Join now
               </button>
@@ -338,7 +380,309 @@ const Waitlist = () => {
           </div>
         </div>
       </section>
-    
+
+      {/* Desktop & tablet layout — unchanged */}
+  <section id="waitlist" className="hidden sm:block py-20 px-6" style={{ scrollMarginTop: '-13vh', background: '#23243a', borderRadius: '0px' }}>
+        <div className="w-full flex justify-center">
+          {/* Waitlist form only, image removed */}
+          <div>
+            {/* ...existing code... duplicated from original desktop view ... */}
+            <div className="mb-8">
+              <h2 
+                className="mb-2 text-white font-bold"
+                style={{
+                  alignSelf: 'stretch',
+                  fontFamily: '"Anek Latin", sans-serif',
+                  fontSize: '64px',
+                  fontWeight: 700,
+                  lineHeight: '120%',
+                  color: '#FFF',
+                  textAlign: 'center'
+                }}
+              >
+                Waitlist
+              </h2>
+              <div
+                style={{
+                  color: '#fff',
+                  fontSize: '2rem',
+                  fontWeight: 500,
+                  textAlign: 'center',
+                  marginBottom: '32px',
+                  fontFamily: 'inherit'
+                }}
+              >
+                Signup to get exclusive rewards
+              </div>
+              {/* Rewards carousel section */}
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                marginBottom: '40px',
+              }}>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  gap: '32px',
+                  width: '100%',
+                  maxWidth: '800px',
+                  minHeight: '120px',
+                  transition: 'all 0.5s',
+                }}>
+                  {rewards.slice(carouselPage * 2, carouselPage * 2 + 2).map((reward, idx) => (
+                    <div key={reward.title} style={{
+                      display: 'flex',
+                      flexDirection: 'row',
+                      alignItems: 'flex-start',
+                      background: 'rgba(255,255,255,0.07)',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(255,255,255,0.18)',
+                      padding: '24px 32px',
+                      width: '328px',
+                      height: '121px',
+                      minWidth: '328px',
+                      maxWidth: '328px',
+                      minHeight: '121px',
+                      maxHeight: '121px',
+                      boxSizing: 'border-box',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                      overflow: 'hidden'
+                    }}>
+                      <div style={{
+                        width: '64px',
+                        height: '64px',
+                        minWidth: '64px',
+                        minHeight: '64px',
+                        maxWidth: '64px',
+                        maxHeight: '64px',
+                        flex: '0 0 64px',
+                        flexShrink: 0,
+                        background: '#D9D9D9',
+                        borderRadius: '8px',
+                        marginRight: '24px',
+                      }} />
+                      <div>
+                        <div style={{
+                          color: '#8349FF',
+                          fontWeight: 700,
+                          fontSize: '1.1rem',
+                          marginBottom: '6px',
+                        }}>
+                          {reward.title}
+                        </div>
+                        <div style={{
+                          color: '#fff',
+                          fontSize: '1rem',
+                          fontWeight: 400,
+                        }}>
+                          {reward.description}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {/* Carousel dots */}
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  gap: '8px',
+                  marginTop: '18px',
+                }}>
+                  {[0,1,2].map((i) => (
+                    <span key={i} style={{
+                      width: '10px',
+                      height: '10px',
+                      borderRadius: '50%',
+                      background: carouselPage === i ? '#fff' : 'rgba(255,255,255,0.3)',
+                      display: 'inline-block',
+                      transition: 'background 0.3s',
+                    }} />
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div style={{ border: '1.5px solid rgba(255,255,255,0.18)', borderRadius: '12px', background: 'rgba(255,255,255,0.04)', boxShadow: '0 2px 8px rgba(193,245,70,0.08)', padding: '32px 24px', maxWidth: '480px', margin: '0 auto' }}>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Signup heading */}
+                <h2 style={{
+                  color: '#FFF',
+                  fontFamily: '"Anek Latin"',
+                  fontSize: '32px',
+                  fontStyle: 'normal',
+                  fontWeight: 700,
+                  lineHeight: '150%',
+                  marginBottom: '12px',
+                  textAlign: 'left'
+                }}>Signup</h2>
+                {backendError && (
+                  <div style={{ color: '#FF4D4F', marginBottom: '12px', fontWeight: 500, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                    <span>{backendError}</span>
+                    <button
+                      type="button"
+                      onClick={handleRetry}
+                      disabled={submitting}
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        color: '#fff',
+                        textDecoration: 'underline',
+                        cursor: submitting ? 'not-allowed' : 'pointer',
+                        opacity: submitting ? 0.7 : 1
+                      }}
+                    >
+                      {submitting ? 'Retrying…' : 'Try again'}
+                    </button>
+                  </div>
+                )}
+                <div 
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'flex-start',
+                    gap: '8px',
+                    alignSelf: 'stretch'
+                  }}
+                >
+                  <label className="block text-texthigh mb-2">Name</label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    placeholder="Enter..."
+                    className="w-full rounded-lg px-4 py-3 text-texthigh placeholder-textlow focus:outline-none focus:ring-2 focus:ring-primgreen/60"
+                    style={{
+                      borderRadius: '8px',
+                      background: 'rgba(255, 255, 255, 0.20)',
+                      backdropFilter: 'blur(50px)',
+                      WebkitBackdropFilter: 'blur(50px)'
+                    }}
+                  />
+                  {errors.name && (
+                    <span style={{ color: '#FF4D4F', fontSize: '0.95rem', marginTop: '2px' }}>{errors.name}</span>
+                  )}
+                </div>
+
+                <div 
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'flex-start',
+                    gap: '8px',
+                    alignSelf: 'stretch'
+                  }}
+                >
+                  <label className="block text-texthigh mb-2">Mobile number</label>
+                  <input
+                    type="tel"
+                    name="mobile"
+                    value={formData.mobile}
+                    onChange={handleInputChange}
+                    placeholder="Enter..."
+                    className="w-full rounded-lg px-4 py-3 text-texthigh placeholder-textlow focus:outline-none focus:ring-2 focus:ring-primgreen/60"
+                    style={{
+                      borderRadius: '8px',
+                      background: 'rgba(255, 255, 255, 0.20)',
+                      backdropFilter: 'blur(50px)',
+                      WebkitBackdropFilter: 'blur(50px)'
+                    }}
+                  />
+                  {errors.mobile && (
+                    <span style={{ color: '#FF4D4F', fontSize: '0.95rem', marginTop: '2px' }}>{errors.mobile}</span>
+                  )}
+                </div>
+
+                <div 
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'flex-start',
+                    gap: '8px',
+                    alignSelf: 'stretch'
+                  }}
+                >
+                  <label className="block text-texthigh mb-2">Email address</label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    placeholder="Enter..."
+                    className="w-full rounded-lg px-4 py-3 text-texthigh placeholder-textlow focus:outline-none focus:ring-2 focus:ring-primgreen/60"
+                    style={{
+                      borderRadius: '8px',
+                      background: 'rgba(255, 255, 255, 0.20)',
+                      backdropFilter: 'blur(50px)',
+                      WebkitBackdropFilter: 'blur(50px)'
+                    }}
+                  />
+                  {errors.email && (
+                    <span style={{ color: '#FF4D4F', fontSize: '0.95rem', marginTop: '2px' }}>{errors.email}</span>
+                  )}
+                </div>
+
+                <div 
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'flex-start',
+                    gap: '8px',
+                    alignSelf: 'stretch'
+                  }}
+                >
+                  <label className="block text-texthigh mb-2">Location</label>
+                  <input
+                    type="text"
+                    name="location"
+                    value={formData.location}
+                    onChange={handleInputChange}
+                    placeholder="Enter..."
+                    className="w-full rounded-lg px-4 py-3 text-texthigh placeholder-textlow focus:outline-none focus:ring-2 focus:ring-primgreen/60"
+                    style={{
+                      borderRadius: '8px',
+                      background: 'rgba(255, 255, 255, 0.20)',
+                      backdropFilter: 'blur(50px)',
+                      WebkitBackdropFilter: 'blur(50px)'
+                    }}
+                  />
+                  {errors.location && (
+                    <span style={{ color: '#FF4D4F', fontSize: '0.95rem', marginTop: '2px' }}>{errors.location}</span>
+                  )}
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full font-semibold waitlist-join-btn"
+                  style={{
+                    display: 'flex',
+                    padding: '8px 16px',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    gap: '10px',
+                    flex: '1 0 0',
+                    borderRadius: '24px',
+                    borderBottom: '2px solid #C1F546',
+                    transition: 'background 0.3s, color 0.3s'
+                  }}
+                  disabled={submitting}
+                  onTouchStart={(e) => e.currentTarget.classList.add('is-pressed')}
+                  onTouchEnd={(e) => e.currentTarget.classList.remove('is-pressed')}
+                  onTouchCancel={(e) => e.currentTarget.classList.remove('is-pressed')}
+                  onMouseDown={(e) => e.currentTarget.classList.add('is-pressed')}
+                  onMouseUp={(e) => e.currentTarget.classList.remove('is-pressed')}
+                  onMouseLeave={(e) => e.currentTarget.classList.remove('is-pressed')}
+                >
+                  Join now
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+    </>
   )
 }
 

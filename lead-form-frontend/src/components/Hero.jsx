@@ -1,59 +1,53 @@
 import React, { useState, useEffect } from 'react'
+import Ellipse5 from '../assets/Ellipse 5.svg'
+import Ellipse6 from '../assets/Ellipse 6.svg'
 import CountdownTimer from './CountdownTimer'
 
 const Hero = ({ timerData }) => {
   // Touch swipe state
-  const touchStartX = React.useRef(null);
-  const touchEndX = React.useRef(null);
+  const touchStartX = React.useRef(null)
+  const touchEndX = React.useRef(null)
 
   // Handle touch start
   const handleTouchStart = (e) => {
     if (e.touches && e.touches.length === 1) {
-      touchStartX.current = e.touches[0].clientX;
-      touchEndX.current = null;
+      touchStartX.current = e.touches[0].clientX
+      touchEndX.current = null
     }
-  };
+  }
   // Handle touch move
   const handleTouchMove = (e) => {
     if (e.touches && e.touches.length === 1) {
-      touchEndX.current = e.touches[0].clientX;
+      touchEndX.current = e.touches[0].clientX
     }
-  };
+  }
   // Handle touch end
   const handleTouchEnd = () => {
     if (touchStartX.current !== null && touchEndX.current !== null) {
-      const delta = touchEndX.current - touchStartX.current;
-      if (Math.abs(delta) > 40) { // threshold for swipe
-        if (delta < 0) {
-          nextSlide(); // swipe left
-        } else {
-          prevSlide(); // swipe right
-        }
+      const delta = touchEndX.current - touchStartX.current
+      if (Math.abs(delta) > 40) {
+        if (delta < 0) nextSlide()
+        else prevSlide()
       }
     }
-    touchStartX.current = null;
-    touchEndX.current = null;
-  };
+    touchStartX.current = null
+    touchEndX.current = null
+  }
+
   const [currentSlide, setCurrentSlide] = useState(0)
-  // Track the last navigation direction: 'next' (slides move left) or 'prev' (slides move right)
   const [navDir, setNavDir] = useState('next')
-  // Autoplay control; will stop on any user interaction, and resume after 20s inactivity
   const [autoPlay, setAutoPlay] = useState(true)
   const autoRef = React.useRef(null)
   const resumeRef = React.useRef(null)
-  // Side offset so the image width equals the visible screen between the semicircle's side curves
-  // Responsive: min 24px, scale with viewport, cap at 180px to match the curve
-  // Height of each semicircle overlap into the hero (top from navbar, bottom in hero)
-  const curveOverlap = 150; // px
-  const screenSideOffset = 'clamp(24px, 7vw, 180px)';
-  // Vertical shift to align hero with the bottom edge of the navbar/logo
-  const heroShift = 0; // start hero flush under navbar; adjust only if needed
-  // Extra height added only to the bottom of the hero so the lower semicircle overlaps more
-  const heroBottomExtend = 240; // px (default upper bound; responsive var used below)
-  // Bottom curve overlap (inside the hero) in pixels; top remains at curveOverlap
-  const bottomCurveOverlap = 240; // px (default upper bound; responsive var used below)
-  
-  // Hero slides with 360-degree experience content
+
+  // Layout tuning
+  const curveOverlap = 150
+  const screenSideOffset = 'clamp(24px, 7vw, 180px)'
+  const heroShift = 0
+  const heroBottomExtend = 240
+  const bottomCurveOverlap = 240
+
+  // Slides
   const heroSlides = [
     {
       id: 1,
@@ -95,10 +89,8 @@ const Hero = ({ timerData }) => {
     autoRef.current = setInterval(() => {
       setNavDir('next')
       setCurrentSlide((prev) => (prev + 1) % heroSlides.length)
-    }, 5000) // Change slide every 5 seconds
-    return () => {
-      if (autoRef.current) clearInterval(autoRef.current)
-    }
+    }, 5000)
+    return () => { if (autoRef.current) clearInterval(autoRef.current) }
   }, [autoPlay, heroSlides.length])
 
   // Stop auto and start resume timer
@@ -144,7 +136,7 @@ const Hero = ({ timerData }) => {
   const TIMER_SW = 6
   const TIMER_DISPLAY_W = 'clamp(150px, 24vw, 200px)'
   const TIMER_DISPLAY_H = 'clamp(80px, 12vw, 100px)'
-  const TIMER_RIGHT_INSET = 'calc(2px + var(--content-right-pad) + 8px)'
+  const TIMER_RIGHT_INSET = 'calc(2px + var(--content-right-pad, 0px) + 8px)'
   const TIMER_BOTTOM_INSET = 'calc(var(--bottom-overlap) - 72px)'
 
   return (
@@ -156,9 +148,18 @@ const Hero = ({ timerData }) => {
       height: 'auto',
     }}
   >
+      {/* Mobile IMAX top curve using provided Ellipse 5 */}
+      <div className="absolute block sm:hidden w-full pointer-events-none" style={{ top: '-6px', left: 0, right: 0, zIndex: 44 }}>
+        <img
+          src={Ellipse5}
+          alt="imax top curve"
+          className="block w-full"
+          style={{ height: 'auto', transform: 'scaleX(1.012)', transformOrigin: 'center top' }}
+        />
+      </div>
       {/* Theater overlay consideration - content positioned to work with navbar curve */}
   <div
-    className="relative w-full"
+    className="relative w-full md:-mt-6 lg:mt-0"
     onPointerDown={stopAuto}
     onTouchStart={stopAuto}
     onWheel={stopAuto}
@@ -174,20 +175,20 @@ const Hero = ({ timerData }) => {
     }}
   >
         
-        {/* Sliding Images Container */}
+        {/* Sliding Images Container - Desktop/Tablets */}
         <div 
-          className="absolute"
+          className="absolute hidden sm:block"
           style={{
             // Match the navbar semicircle exact horizontal bounds
             left: '2px',
-            right: 'calc(2px + var(--content-right-pad))',
+            right: 'calc(2px + var(--content-right-pad, 0px))',
             top: 0,
             bottom: 0,
             // Define the inner visible screen offset once
             ['--screen-offset']: 'clamp(24px, 7vw, 180px)',
             // Unify side preview width and center gap for consistent proportions across devices
-            ['--side-width']: 'clamp(60px, 16vw, 150px)',
-            ['--center-gap']: 'clamp(16px, 4.5vw, 32px)',
+            ['--side-width']: 'clamp(75px, 21vw, 205px)', // decreased side image width by 15px
+            ['--center-gap']: 'clamp(17px, 4vw, 49px)', // decreased gap by 10px more
             ['--side-margin']: '12px'
           }}
           onTouchStart={handleTouchStart}
@@ -275,9 +276,9 @@ const Hero = ({ timerData }) => {
                 style={{
                   top: 0,
                   bottom: 0,
-                  left: 'calc(var(--side-width) + var(--center-gap) + var(--side-margin))',
+                  left: 'calc(var(--side-width) + var(--center-gap) + var(--side-margin) - 15px)',
                   // Compensate for extra right padding reserved for timer so gaps match
-                  right: 'calc(var(--side-width) + var(--center-gap) + var(--side-margin) - var(--content-right-pad))',
+                  right: 'calc(var(--side-width) + var(--center-gap) + var(--side-margin) - var(--content-right-pad, 0px) - 15px)',
                   zIndex: z
                 }}
               >
@@ -312,8 +313,66 @@ const Hero = ({ timerData }) => {
           })}
         </div>
 
+        {/* Sliding Images Container - Mobile-only (single image view, fixed dimensions) */}
+        <div
+          className="absolute block sm:hidden"
+          style={{
+            left: '50%',
+            transform: 'translateX(-50%)',
+            top: 0,
+            width: '375px',
+            height: '326px',
+            flexShrink: 0
+          }}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
+          {/* Solid base background */}
+          <div className="absolute inset-0" style={{ background: 'rgba(17, 17, 17, 1)', zIndex: 0 }} />
+
+          {/* Current slide full-bleed between curves */}
+          <div className="absolute inset-0">
+            <div
+              className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+              style={{ backgroundImage: `url(${heroSlides[currentSlide].image})` }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/70"></div>
+            </div>
+
+            {/* Text content centered */}
+            <div
+              className="relative z-10 flex items-center justify-center h-full px-4"
+              style={{ paddingTop: `${curveOverlap + 24}px`, paddingBottom: 'var(--bottom-overlap)' }}
+            >
+              <div className="text-center">
+                <h2 className="text-2xl font-bold text-white leading-tight mb-2">
+                  {heroSlides[currentSlide].title}
+                </h2>
+                <h2 className="text-2xl font-bold text-white leading-tight">
+                  {heroSlides[currentSlide].subtitle}
+                </h2>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile IMAX lower curve using Ellipse 6 */}
+        <div className="absolute block sm:hidden w-full pointer-events-none" style={{ top: '300px', left: 0, right: 0, zIndex: 44 }}>
+          <img
+            src={Ellipse6}
+            alt="imax lower curve"
+            className="block w-full"
+            style={{ 
+              height: 'auto', 
+              transform: 'scaleX(1.012)', 
+              transformOrigin: 'center bottom'
+            }}
+          />
+        </div>
+
         {/* Navigation Controls */}
-        <div className="absolute top-1/2 left-4 transform -translate-y-1/2 z-20">
+  <div className="absolute top-1/2 left-4 transform -translate-y-1/2 z-20 hidden sm:block">
           <button 
             onClick={prevSlide}
             className="p-3 bg-white/10 backdrop-blur-sm border border-white/30 rounded-full text-white hover:bg-white/20 transition-all duration-300 hover:scale-110"
@@ -324,7 +383,7 @@ const Hero = ({ timerData }) => {
           </button>
         </div>
 
-        <div className="absolute top-1/2 right-4 transform -translate-y-1/2 z-20">
+  <div className="absolute top-1/2 right-4 transform -translate-y-1/2 z-20 hidden sm:block">
           <button 
             onClick={nextSlide}
             className="p-3 bg-white/10 backdrop-blur-sm border border-white/30 rounded-full text-white hover:bg-white/20 transition-all duration-300 hover:scale-110"
@@ -335,8 +394,8 @@ const Hero = ({ timerData }) => {
           </button>
         </div>
 
-        {/* Slide Indicators */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20">
+        {/* Slide Indicators - desktop/tablet only (hidden on mobile) */}
+  <div className="absolute bottom-6 sm:bottom-8 left-1/2 transform -translate-x-1/2 z-20 hidden sm:block">
           <div className="flex space-x-3">
             {heroSlides.map((_, index) => (
               <button
@@ -352,25 +411,28 @@ const Hero = ({ timerData }) => {
           </div>
         </div>
 
-        {/* Bottom Semicircle overlay - mirrors the top navbar curve to complete theater view */}
-    <div className="absolute w-full pointer-events-none" style={{ zIndex: 45, height: '0px', bottom: '0px' }}>
-          <div 
+        {/* Bottom Semicircle overlay - desktop only (removed from mobile) */}
+        {/* Mobile: no bottom semicircle to avoid overlap with features */}
+        
+        {/* Desktop/Tablet: preserve original responsive curve */}
+        <div className="absolute w-full pointer-events-none hidden sm:block" style={{ zIndex: 45, height: '0px', bottom: '0px' }}>
+          <div
             className="absolute"
             style={{
-      width: 'calc(100% - 4px)', // Match exact dimensions with top semicircle
-              height: 'var(--bottom-curve-h)', // Slightly shallower curve at bottom for openness
-              borderRadius: '50% 50% 0px 0px', // Create upward facing curve (opposite of navbar)
-      background: 'rgba(17, 17, 17, 1)', // Dark background
-              bottom: 'calc(var(--bottom-overlap) - var(--bottom-curve-h))', // Use bottom curve height for positioning
-              left: '2px', // Exact same left alignment as navbar semicircle
+              width: 'calc(100% - 4px)',
+              height: 'var(--bottom-curve-h)',
+              borderRadius: '50% 50% 0px 0px',
+              background: 'rgba(17, 17, 17, 1)',
+              bottom: 'calc(var(--bottom-overlap) - var(--bottom-curve-h))',
+              left: '2px',
             }}
-          >
-          </div>
+          />
         </div>
 
         {/* Global timer above the bottom semicircle, anchored to the inner right edge */}
+        {/* Desktop/Tablet timer only (removed mobile timer) */}
         <div
-          className="absolute pointer-events-auto"
+          className="absolute pointer-events-auto hidden sm:block"
           style={{
             zIndex: 1000,
             right: TIMER_RIGHT_INSET,
@@ -380,6 +442,34 @@ const Hero = ({ timerData }) => {
           {!timerData ? (
             <div className="flex items-center justify-center w-full h-full">
               <span className="animate-pulse text-white text-lg">Loading timer…</span>
+            </div>
+          ) : (
+            <CountdownTimer
+              remainingSeconds={timerData.remainingSeconds}
+              endTime={timerData.endTime}
+              startTime={timerData.startTime}
+              width={TIMER_W}
+              height={TIMER_H}
+              radius={TIMER_R}
+              strokeWidth={TIMER_SW}
+              displayWidth={TIMER_DISPLAY_W}
+              displayHeight={TIMER_DISPLAY_H}
+            />
+          )}
+        </div>
+
+        {/* Mobile timer: overlay on lower ellipse, right side (smaller size) */}
+        <div
+          className="absolute pointer-events-none block sm:hidden"
+          style={{
+            zIndex: 1001,
+            right: '12px',
+            top: 'calc(300px + 20px)'
+          }}
+        >
+          {!timerData ? (
+            <div className="flex items-center justify-center w-full h-full">
+              <span className="animate-pulse text-white text-sm">Loading…</span>
             </div>
           ) : (
             <CountdownTimer

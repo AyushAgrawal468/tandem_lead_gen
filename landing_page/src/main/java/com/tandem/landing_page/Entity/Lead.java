@@ -1,6 +1,10 @@
 package com.tandem.landing_page.Entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name="lead")
@@ -8,9 +12,24 @@ public class Lead {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @NotBlank(message = "Name is required")
+    @Pattern(regexp = "^[A-Za-z ]+$", message = "Name must contain only alphabets and spaces")
     private String name;
+
+    // Validates mobile number to be 10 digits
+    @NotBlank(message = "Mobile number is required")
+    @Size(min = 10, max = 10, message = "Mobile number must be exactly 10 digits")
+    @Pattern(regexp = "^[0-9]{10}$", message = "Mobile number must be numeric and 10 digits")
     private String mobile;
+
+    //Email validation
+    @NotBlank(message = "Email is required")
+    @Email(message = "Email should be valid (e.g. user@example.com)")
     private String email;
+
+    @NotBlank(message = "Location is required")
+    @Pattern(regexp = "^[A-Za-z ]+$", message = "Location must contain only alphabets and spaces")
     private String location;
     private String sessionId;
     private String locationFetched;

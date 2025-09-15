@@ -97,7 +97,7 @@ const CountdownTimer = ({
 
   return (
     <div
-      className={`relative flex items-center justify-center countdown-bg ${className}`}
+      className={`relative flex items-center justify-center countdown-timer ${className}`}
       style={{
         width: displayWidth ?? W,
         height: displayHeight ?? H,
@@ -110,12 +110,33 @@ const CountdownTimer = ({
         boxSizing: 'border-box',
       }}
     >
+      {/* Gradient fill strictly inside the stroke area */}
+      <div
+        className="absolute countdown-bg"
+        style={{
+          top: strokeWidth,
+          right: strokeWidth,
+          bottom: strokeWidth,
+          left: strokeWidth,
+          borderRadius: Math.max(0, radius - strokeWidth),
+          zIndex: 0,
+          pointerEvents: 'none'
+        }}
+      />
+      <style>{`
+        @media (max-width: 640px) {
+          .countdown-timer { width: 140px !important; }
+          .countdown-timer .countdown-days { font-size: 44px !important; }
+          .countdown-timer .countdown-label { font-size: 14px !important; }
+        }
+      `}</style>
       {/* Content */}
       <div
         className="flex flex-col items-center leading-none select-none"
         style={{ gap: 2, zIndex: 1, position: 'relative' }}
       >
         <div
+          className="countdown-days"
           style={{
             fontSize: 64,
             fontWeight: 700,
@@ -125,6 +146,7 @@ const CountdownTimer = ({
           {daysText}
         </div>
         <div
+          className="countdown-label"
           style={{
             fontSize: 18,
             fontWeight: 700,

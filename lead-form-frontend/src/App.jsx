@@ -9,44 +9,45 @@ import FAQ from "./components/FAQ";
 import Footer from "./components/Footer";
 import CountdownTimer from "./components/CountdownTimer"; // ✅ import timer
 
+// Generate a fresh session id on every page load/refresh
+let runtimeSessionId = null;
 function getSessionId() {
-  let sessionId = localStorage.getItem("sessionId");
-  if (!sessionId) {
-    sessionId =
+  if (!runtimeSessionId) {
+    runtimeSessionId =
       Math.random().toString(36).substring(2) + Date.now().toString(36);
-    localStorage.setItem("sessionId", sessionId);
+    try {
+      // Overwrite any stored value so other code sees the current session
+      localStorage.setItem("sessionId", runtimeSessionId);
+      sessionStorage.setItem("sessionId", runtimeSessionId);
+    } catch (_) {}
   }
-  return sessionId;
+  return runtimeSessionId;
 }
 
 function App() {
   const [showConsent, setShowConsent] = useState(false);
   const [timerData, setTimerData] = useState(null);
 
-  // fetch countdown from backend every minute
+  // Local countdown (mirrors backend logic): fixed start + 9 days
   useEffect(() => {
     let isMounted = true;
-    const fetchCountdown = () => {
-      fetch("http://localhost:8080/countdown")
-        .then((res) => res.json())
-        .then((data) => {
-          console.log('⏳ Backend countdown data:', data);
-          // Ensure startTime, endTime, remainingSeconds are present and correct
-          // If remainingSeconds is in seconds, convert to ms for timer
-          let timerObj = { ...data };
-          if (typeof timerObj.remainingSeconds === 'number' && timerObj.remainingSeconds < 1000000000000) {
-            // If value is in seconds, convert to ms
-            timerObj.remainingSeconds = timerObj.remainingSeconds * 1000;
-          }
-          if (!timerObj.startTime && timerObj.endTime && timerObj.remainingSeconds) {
-            timerObj.startTime = timerObj.endTime - timerObj.remainingSeconds;
-          }
-          if (isMounted) setTimerData(timerObj);
-        })
-        .catch((err) => console.error("❌ Error fetching countdown:", err));
+    const FIXED_START_TIME = 1757894460000; // Sep 15, 2025 00:00:00 UTC (ms)
+    const COUNTDOWN_DURATION_MS = 9 * 24 * 60 * 60 * 1000; // 9 days
+    const END_TIME = FIXED_START_TIME + COUNTDOWN_DURATION_MS;
+
+    const computeCountdown = () => {
+      const now = Date.now();
+      const remainingMs = Math.max(END_TIME - now, 0);
+      const timerObj = {
+        startTime: FIXED_START_TIME,
+        endTime: END_TIME,
+        remainingSeconds: remainingMs, // keep ms to match timer expectations
+      };
+      if (isMounted) setTimerData(timerObj);
     };
-    fetchCountdown();
-    const interval = setInterval(fetchCountdown, 60 * 1000); // every minute
+
+    computeCountdown();
+    const interval = setInterval(computeCountdown, 1000); // update every second for smoother UX
     return () => {
       isMounted = false;
       clearInterval(interval);
@@ -164,15 +165,12 @@ function App() {
       );
     };
 
-    const consent = getCookie(CONSENT_KEY);
     const stored = readLocation();
-
-    if (consent === "granted" && stored) {
+    if (stored) {
       loadLocationContent(stored);
-    } else if (!consent) {
-      const timer = setTimeout(() => setShowConsent(true), 1500);
-      return () => clearTimeout(timer);
     }
+    const timer = setTimeout(() => setShowConsent(true), 800);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleConsent = (allowed) => {

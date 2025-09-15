@@ -10,6 +10,8 @@ public class LocationRequest {
     private Long userId;   // ✅ add this
     private String sessionId; // ✅ add this
 
+    private String city;
+
     // Getters and Setters
     public Double getLat() { return lat; }
     public void setLat(Double lat) { this.lat = lat; }
@@ -31,4 +33,7 @@ public class LocationRequest {
 
     public String getSessionId() { return sessionId; }
     public void setSessionId(String sessionId) { this.sessionId = sessionId; }
+
+    public String getCity() { return city; }
+    public void setCity(String city) { this.city = city; }
 }

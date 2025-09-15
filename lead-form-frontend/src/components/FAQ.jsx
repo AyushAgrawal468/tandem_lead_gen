@@ -23,7 +23,7 @@ const FAQ = () => {
   }
 
   return (
-    <section id="faq" className="py-20 px-6">
+  <section id="faq" className="py-20 px-6" style={{ background: '#232323' }}>
       <div className="max-w-4xl mx-auto">
         <h2 className="text-4xl md:text-5xl font-bold text-texthigh text-center mb-16">FAQ</h2>
 
@@ -35,7 +35,8 @@ const FAQ = () => {
               style={{ background: 'rgba(255, 255, 255, 0.10)', backdropFilter: 'blur(50px)' }}
             >
               <button
-                className="w-full px-6 py-4 text-left flex justify-between items-center bg-transparent hover:bg-white/10 transition-colors"
+                className="w-full px-6 py-4 text-left flex justify-between items-center bg-transparent hover:bg-white/10 transition-colors rounded-lg focus:outline-none active:outline-none ring-0 focus:ring-0 active:ring-0"
+                style={{ WebkitTapHighlightColor: 'transparent', outline: 'none', appearance: 'none', border: 'none' }}
                 onClick={() => toggleFAQ(index)}
               >
                 <span className="text-texthigh font-semibold">{faq.question}</span>
