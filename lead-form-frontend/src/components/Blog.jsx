@@ -1,9 +1,11 @@
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 
 const Blog = () => {
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [expandedPosts, setExpandedPosts] = useState({})
+  const [expandedId, setExpandedId] = useState(null)
+  const [isExiting, setIsExiting] = useState(false)
+  const closeTimeoutRef = useRef(null)
   
   const blogPosts = [
     {
@@ -43,24 +45,56 @@ const Blog = () => {
     }
   ]
 
+  const handleCloseOverlay = () => {
+    if (!expandedId) return
+    setIsExiting(true)
+    if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current)
+    // Match CSS exit duration (~600ms)
+    closeTimeoutRef.current = setTimeout(() => {
+      setIsExiting(false)
+      setExpandedId(null)
+      closeTimeoutRef.current = null
+    }, 640)
+  }
+
+  const openOverlay = (id) => {
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current)
+      closeTimeoutRef.current = null
+    }
+    setIsExiting(false)
+    setExpandedId(id)
+  }
+
   const nextSlide = () => {
     setCurrentIndex((prev) => (prev + 1) % Math.max(1, blogPosts.length - 1));
-    setExpandedPosts({});
+    if (expandedId) handleCloseOverlay()
   }
 
   const prevSlide = () => {
     setCurrentIndex((prev) => (prev - 1 + Math.max(1, blogPosts.length - 1)) % Math.max(1, blogPosts.length - 1));
-    setExpandedPosts({});
+    if (expandedId) handleCloseOverlay()
   }
 
   const visiblePosts = blogPosts.slice(currentIndex, currentIndex + 2)
   const mobilePost = blogPosts[currentIndex % blogPosts.length]
+  const expandedPost = expandedId ? blogPosts.find(p => p.id === expandedId) : null
+
+  // Close overlay on ESC
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') handleCloseOverlay() }
+    window.addEventListener('keydown', onKey)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current)
+    }
+  }, [expandedId])
 
   return (
     <>
       {/* Mobile-only layout */}
-      <section id="blogs" className="block sm:hidden py-12 px-4">
-        <h2 className="text-4xl font-bold text-texthigh mb-6">Blogs</h2>
+  <section id="blogs" className="block sm:hidden py-10 xxs:py-12 xs:py-14 px-4 xxs:px-5 xs:px-6 relative">
+        <h2 className="text-[34px] xxs:text-[38px] xs:text-[42px] font-bold text-texthigh mb-5">Blogs</h2>
         <div
           className="rounded-2xl p-6"
           style={{
@@ -84,7 +118,7 @@ const Blog = () => {
           </h3>
 
           <p className="text-textmid mb-6 leading-relaxed">
-            {expandedPosts[mobilePost.id] ? mobilePost.content : mobilePost.excerpt}
+            {mobilePost.excerpt}
           </p>
 
           <button
@@ -100,9 +134,9 @@ const Blog = () => {
               padding: 0,
               outline: 'none'
             }}
-            onClick={() => setExpandedPosts(prev => ({ ...prev, [mobilePost.id]: !prev[mobilePost.id] }))}
+            onClick={() => openOverlay(mobilePost.id)}
           >
-            {expandedPosts[mobilePost.id] ? 'Show less' : mobilePost.readMore}
+            {mobilePost.readMore}
           </button>
         </div>
 
@@ -149,10 +183,34 @@ const Blog = () => {
             </svg>
           </button>
         </div>
+        {/* Mobile overlay within blogs section */}
+        {expandedPost && (
+          <div className={`absolute inset-0 z-50 px-4 xxs:px-5 xs:px-6 py-4 xxs:py-5 xs:py-6 blog-overlay ${isExiting ? 'is-exiting' : ''}`} style={{ background: 'rgba(0,0,0,0.0)' }}>
+            <div
+              className="relative h-full w-full rounded-2xl p-6 overflow-y-auto blog-overlay-card"
+              style={{
+                background: 'rgba(255, 255, 255, 0.10)',
+                backdropFilter: 'blur(50px)',
+                WebkitBackdropFilter: 'blur(50px)'
+              }}
+            >
+              <button
+                aria-label="Close"
+                onClick={handleCloseOverlay}
+                className="absolute top-3 right-3 w-12 h-12 rounded-full flex items-center justify-center hover:opacity-80"
+                style={{ backgroundColor: 'rgba(60,60,60,1)', border: 'none' }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              </button>
+              <h3 className="text-2xl font-bold text-texthigh mb-4 leading-tight" style={{ paddingRight: '72px' }}>{expandedPost.title}</h3>
+              <p className="text-textmid leading-relaxed whitespace-pre-line">{expandedPost.content}</p>
+            </div>
+          </div>
+        )}
       </section>
 
       {/* Desktop & tablet layout — unchanged, visible from sm and up */}
-      <section id="blogs" className="hidden sm:block py-20 px-6 md:px-20 lg:px-40">
+  <section id="blogs" className="hidden sm:block py-20 px-6 md:px-20 lg:px-40 relative">
         <div className="w-full">
           <div className="flex justify-between items-stretch">
             {/* Left side - Blogs heading and navigation buttons */}
@@ -256,7 +314,7 @@ const Blog = () => {
                     </h3>
 
                     <p className="text-textmid mb-6 md:mb-4 leading-relaxed blog-text-md">
-                      {expandedPosts[post.id] ? post.content : post.excerpt}
+                      {post.excerpt}
                     </p>
 
                     <button
@@ -272,9 +330,9 @@ const Blog = () => {
                         padding: 0,
                         outline: 'none'
                       }}
-                      onClick={() => setExpandedPosts(prev => ({ ...prev, [post.id]: !prev[post.id] }))}
+                      onClick={() => openOverlay(post.id)}
                     >
-                      {expandedPosts[post.id] ? 'Show less' : post.readMore}
+                      {post.readMore}
                     </button>
                   </div>
                 ))}
@@ -282,9 +340,50 @@ const Blog = () => {
             </div>
           </div>
         </div>
+
+        {/* Desktop/tablet overlay within blogs section */}
+        {expandedPost && (
+          <div className={`absolute inset-0 z-50 p-6 md:p-10 blog-overlay ${isExiting ? 'is-exiting' : ''}`} style={{ background: 'rgba(0,0,0,0.0)' }}>
+            <div
+              className="relative h-full w-full rounded-2xl p-8 md:p-10 overflow-y-auto blog-overlay-card"
+              style={{
+                background: 'rgba(255, 255, 255, 0.10)',
+                backdropFilter: 'blur(50px)',
+                WebkitBackdropFilter: 'blur(50px)'
+              }}
+            >
+              <button
+                aria-label="Close"
+                onClick={handleCloseOverlay}
+                className="absolute top-4 right-4 w-14 h-14 rounded-full flex items-center justify-center hover:opacity-80"
+                style={{ backgroundColor: 'rgba(60,60,60,1)', border: 'none' }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              </button>
+              <h3 className="text-3xl md:text-4xl font-bold text-texthigh mb-6 leading-tight">{expandedPost.title}</h3>
+              <p className="text-textmid text-lg md:text-xl leading-relaxed whitespace-pre-line">{expandedPost.content}</p>
+            </div>
+          </div>
+        )}
       </section>
       {/* md-only text clamp to reduce card height without affecting lg */}
       <style>{`
+        /* Overlay/card animations without changing opacity */
+        .blog-overlay { 
+          /* No opacity animation to keep same visual density */
+        }
+        .blog-overlay.is-exiting { 
+          pointer-events: none;
+        }
+        .blog-overlay-card { 
+          transform-origin: center center;
+          animation: blogCardIn 450ms cubic-bezier(0.22, 1, 0.36, 1) forwards; 
+        }
+        .blog-overlay.is-exiting .blog-overlay-card { 
+          animation: blogCardOut 600ms cubic-bezier(0.33, 1, 0.68, 1) forwards; 
+        }
+        @keyframes blogCardIn { from { transform: translateY(12px) scale(0.98) } to { transform: translateY(0) scale(1) } }
+        @keyframes blogCardOut { from { transform: translateY(0) scale(1) } to { transform: translateY(10px) scale(0.86) } }
         @media (min-width: 768px) and (max-width: 1023.98px) {
           .blog-text-md {
             display: -webkit-box;

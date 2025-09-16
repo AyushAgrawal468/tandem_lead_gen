@@ -16,14 +16,38 @@ const Navbar = () => {
 
   // Smooth scroll to section
   const scrollToSection = (sectionId) => {
-    const element = document.getElementById(sectionId)
-    if (element) {
-      element.scrollIntoView({ 
-        behavior: 'smooth',
-        block: 'start'
-      })
+    let target = document.getElementById(sectionId)
+    const nodes = Array.from(document.querySelectorAll(`#${sectionId}`))
+    const visible = nodes.find((el) => {
+      const style = window.getComputedStyle(el)
+      return style.display !== 'none' && style.visibility !== 'hidden'
+    })
+    if (visible) target = visible
+    if (!target) return
+
+    const isMobile = window.innerWidth < 640 // Tailwind sm breakpoint
+
+    // For mobile, center the Features section vertically in viewport
+    if (isMobile && sectionId === 'features') {
+      const rect = target.getBoundingClientRect()
+      const absoluteY = window.pageYOffset + rect.top
+      let y = absoluteY + rect.height / 2 - window.innerHeight / 2
+      const maxY = Math.max(0, document.documentElement.scrollHeight - window.innerHeight)
+      y = Math.max(0, Math.min(y, maxY))
+      window.scrollTo({ top: y, behavior: 'smooth' })
+    } else {
+      try {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      } catch (_) {
+        target.scrollIntoView()
+      }
     }
-  // no mobile menu; keep navbar consistent across sizes
+
+    try {
+      if (window.location.hash !== `#${sectionId}`) {
+        history.replaceState(null, '', `#${sectionId}`)
+      }
+    } catch (_) {}
   }
 
   // Handle join now button click
@@ -53,9 +77,9 @@ const Navbar = () => {
           }
         `}
       >
-  <div className="flex items-center pl-0 pr-4 sm:pr-8 py-3 md:py-4 w-full">
+  <div className="flex items-center pl-0 pr-4 xxs:pr-5 xs:pr-6 sm:pr-8 py-3 xxs:py-3.5 md:py-4 w-full">
           {/* Logo - Left aligned (nudged a bit more right) */}
-          <div className="flex items-center flex-shrink-0 ml-1 sm:ml-2">
+          <div className="flex items-center flex-shrink-0 ml-1 xs:ml-2 sm:ml-2">
             <div
               className="cursor-pointer hover:opacity-80 transition-opacity"
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
@@ -71,7 +95,7 @@ const Navbar = () => {
                   fill="none"
                   role="img"
                   aria-label="tandem logo"
-                  className="w-[137.591px] h-8 shrink-0"
+                  className="w-[130px] h-7 xxs:w-[137.591px] xxs:h-8 shrink-0"
                   style={{ aspectRatio: '137.59 / 32' }}
                 >
                   <path d="M106.158 26.746C105.688 26.8963 105.167 26.9279 104.645 26.9596C100.043 27.2568 95.657 28.0021 91.1908 29.1812C88.2301 29.719 85.6288 30.5719 82.6125 30.8232C81.8726 30.8957 81.0702 30.9767 80.3854 30.7623C77.7696 30.2908 76.4328 27.45 77.5342 25.09C79.1465 21.7461 84.3384 20.0003 87.6763 18.9562L87.6797 18.9612C89.1689 18.4523 90.7568 17.9067 92.3104 17.5065C92.3792 17.4857 92.4799 17.4656 92.5748 17.4344C92.6254 17.4178 92.6739 17.3981 92.7153 17.3735C92.809 17.328 92.828 17.2709 92.828 17.232C92.8318 17.2127 92.8318 17.1919 92.8276 17.1691C92.8019 17.0881 92.7062 17.0897 92.6366 17.0901C89.7194 17.4294 86.7524 17.3692 83.8257 17.1641C81.844 17.06 81.3255 14.3496 82.976 13.3953C85.6097 12.1445 94.1366 9.30068 98.2579 7.77658V7.76927L100.681 7.01395C101.027 6.90598 101.394 7.103 101.498 7.45234L102.222 9.89215C102.328 10.2461 102.122 10.6182 101.769 10.7145C98.7507 11.4579 95.8344 12.5297 92.9089 13.5707C92.8604 13.6016 92.7398 13.6371 92.5939 13.6775C92.5939 13.6775 92.5926 13.6783 92.5918 13.6783C92.4326 13.7404 92.2714 13.7959 92.1135 13.8402C92.1135 13.8402 91.9978 13.8819 91.9866 13.9945C91.9866 13.9945 91.9315 14.1984 92.2747 14.2354C92.2747 14.2354 92.2776 14.2362 92.283 14.2373L92.2842 14.2378C92.4902 14.2513 92.6983 14.2582 92.9006 14.2817C94.0516 14.4271 95.2056 14.6719 96.3686 14.6896C97.4036 14.8084 100.132 15.1245 100.917 15.3061C101.772 15.5243 102.261 16.1316 102.275 17.0053C102.29 17.9487 101.58 18.7561 100.657 18.8498C99.4715 18.9701 98.3109 19.1679 97.1587 19.4732C95.8339 19.8457 94.5167 20.2447 93.2106 20.6781C91.2447 21.3297 89.3036 22.0591 87.4057 22.8923C85.4928 23.7321 83.6446 24.6837 81.8544 25.7624C81.7997 25.7956 81.7446 25.8284 81.6903 25.8623C81.6306 25.9244 81.5609 25.9768 81.4975 26.0342C81.4291 26.0959 81.3218 26.2 81.3744 26.3037C81.3744 26.3037 81.4212 26.4495 81.6438 26.3353C81.6438 26.3353 81.9112 26.2363 82.1039 26.1765H82.1043C82.7762 25.8815 83.4697 25.639 84.1822 25.4632C91.0806 23.7078 97.5458 22.2388 104.903 21.8509C107.947 21.5784 109.222 25.6714 106.158 26.746Z" fill="white"/>
@@ -169,7 +193,7 @@ const Navbar = () => {
           </div>
 
           {/* Mobile hamburger (hidden on desktop) */}
-          <div className="ml-auto pr-2 sm:hidden">
+          <div className="ml-auto pr-2 xxs:pr-3 xs:pr-4 sm:hidden">
             <button
               aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
               onClick={() => setIsMenuOpen((v) => !v)}
@@ -215,7 +239,7 @@ const Navbar = () => {
             </button>
           </div>
 
-          <nav className="mt-6 pr-6 pl-[29px] space-y-6">
+          <nav className="mt-6 pr-6 pl-5 xxs:pl-6 xs:pl-[29px] space-y-6">
             <div
               onClick={() => { scrollToSection('features'); setIsMenuOpen(false) }}
               className="text-white font-bold text-2xl cursor-pointer hover:text-gray-300 focus:text-gray-300 active:text-gray-300 transition-colors"
@@ -256,7 +280,7 @@ const Navbar = () => {
           style={{
             width: 'calc(100% - 4px)',
             height: 'clamp(200px, 45vw, 300px)',
-            top: 'calc(clamp(200px, 45vw, 300px) / -2 + 24px)',
+            top: 'calc(clamp(200px, 45vw, 300px) / -2 + 8px)',
             left: '2px',
           }}
         >
@@ -273,7 +297,7 @@ const Navbar = () => {
           style={{
             width: 'calc(100% - 4px)',
             height: 'clamp(200px, 45vw, 300px)',
-            top: 'calc(clamp(200px, 45vw, 300px) / -2 + 56px)',
+            top: 'calc(clamp(200px, 45vw, 300px) / -2 + 36px)',
             left: '2px',
           }}
         >

@@ -24,6 +24,13 @@ export default {
                 "heading-r": "var(--heading-r-font-family)",
                 typography: "var(--typography-font-family)",
             },
+            screens: {
+                xxs: "360px",  // Galaxy S8+
+                xs: "480px",   // wide phones
+                sm: "640px",   // tablets
+                md: "768px",
+                lg: "1024px",
+            },
             animation: {
                 'fade-in': 'fade-in 1s ease forwards',
                 'fade-up': 'fade-up 1s ease forwards',

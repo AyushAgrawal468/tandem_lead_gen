@@ -15,8 +15,11 @@ const Features = () => {
   const touchStartYRef = React.useRef(0)
   const touchActiveRef = React.useRef(false)
   const horizontalLockRef = React.useRef(false)
+  // Mobile viewport (full-width) used as sliding step
   const frameRef = React.useRef(null)
-  const [frameW, setFrameW] = React.useState(343)
+  const [frameW, setFrameW] = React.useState(360)
+  const [frameH, setFrameH] = React.useState(394)
+  const [ratios, setRatios] = React.useState(mobileImages.map(() => 1))
   const [dragDx, setDragDx] = React.useState(0)
   const [isDragging, setIsDragging] = React.useState(false)
 
@@ -78,27 +81,50 @@ const Features = () => {
 
   // (removed duplicate frame binding block to avoid double-processing)
 
-  // Measure frame width for accurate slide distance
+  // Measure viewport width/height for accurate slide distance and sizing
   React.useEffect(() => {
     const update = () => {
-      if (frameRef.current) setFrameW(frameRef.current.clientWidth || 343)
+      if (frameRef.current) {
+        setFrameW(frameRef.current.clientWidth || 360)
+        setFrameH(frameRef.current.clientHeight || 394)
+      }
     }
     update()
     window.addEventListener('resize', update)
     return () => window.removeEventListener('resize', update)
   }, [])
 
+  // Preload images to obtain aspect ratios (w/h) for exact width sizing
+  React.useEffect(() => {
+    let alive = true
+    const load = (src, idx) => new Promise((resolve) => {
+      const img = new Image()
+      img.onload = () => resolve({ idx, r: img.naturalWidth && img.naturalHeight ? img.naturalWidth / img.naturalHeight : 1 })
+      img.onerror = () => resolve({ idx, r: 1 })
+      img.src = src
+    })
+    Promise.all(mobileImages.map((src, i) => load(src, i))).then((arr) => {
+      if (!alive) return
+      const next = [...ratios]
+      arr.forEach(({ idx, r }) => { next[idx] = r || 1 })
+      setRatios(next)
+    })
+    return () => { alive = false }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mobileImages.join('|')])
+
   return (
-    <section id="features" className="pt-2 pb-8 sm:pb-16 lg:pb-24" style={{ zIndex: 50, position: 'relative', marginTop: '-45px', scrollMarginTop: '40px' }}>
+  <section id="features" className="pt-2 xs:pt-4 pb-8 xs:pb-12 sm:pb-32 md:pb-40 lg:pb-48" style={{ zIndex: 50, position: 'relative', marginTop: '-45px', scrollMarginTop: '40px' }}>
       {/* Mobile-only layout (do not affect desktop) */}
-  <div className="block sm:hidden" style={{ marginTop: '-400px' }}>
+      <div className="block sm:hidden" style={{ marginTop: '-360px' }}>
         {/* Heading */}
-        <div className="relative px-6" style={{ marginBottom: '16px' }}>
+        <div className="relative px-4 xxs:px-5 xs:px-6" style={{ marginBottom: '16px' }}>
           <h2
             className="text-left font-bold text-white"
             style={{
               fontFamily: '"Anek Latin", sans-serif',
-              fontSize: '40px',
+              fontSize: '34px',
+              
               lineHeight: '120%',
               color: '#FFF'
             }}
@@ -108,14 +134,14 @@ const Features = () => {
             Tandem?
           </h2>
           {/* Top-right slide number (dynamic) - disable pointer events so it won't block swipes */}
-          <div style={{ position: 'absolute', right: '18px', top: '-6px', pointerEvents: 'none' }}>
+          <div style={{ position: 'absolute', right: '12px', top: '-6px', pointerEvents: 'none' }}>
             <span
               style={{
                 WebkitTextStrokeWidth: '1px',
                 WebkitTextStrokeColor: '#FFFFFF',
                 color: 'transparent',
                 fontFamily: '"Anek Latin", sans-serif',
-                fontSize: '72px',
+                fontSize: '60px',
                 fontWeight: 700,
                 lineHeight: '100%'
               }}
@@ -125,49 +151,60 @@ const Features = () => {
           </div>
         </div>
 
-        {/* Feature card frame-only (one SVG per slide) */}
+        {/* Mobile viewport: whole frames slide out/in like desktop */}
         <div
+          ref={frameRef}
           className="overflow-hidden"
           style={{
-            background: '#23243a',
-            border: '1px solid rgba(255,255,255,0.15)',
-            borderRadius: '16px',
-            padding: 0,
-            width: '343px',
-            height: '394px',
-            flexShrink: 0,
-            margin: '0 auto',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.35)',
+            width: '100%',
+            height: 'min(90vw, 394px)',
             touchAction: 'pan-y'
           }}
-          ref={frameRef}
         >
-          {/* Sliding track with one image per slide */}
           <div
-            className="h-full flex will-change-transform sliding-track"
+            className="h-full flex will-change-transform"
             style={{
-              width: `${mobileImages.length * 100}%`,
-              transform: `translateX(${-(mobileIndex * (frameW || 343)) + (isDragging ? dragDx : 0)}px)`,
+              transform: `translateX(${-(mobileIndex * (frameW || 360)) + (isDragging ? dragDx : 0)}px)`,
               transition: isDragging ? 'none' : 'transform 400ms ease',
               position: 'relative',
               zIndex: 1
             }}
           >
-            {mobileImages.map((src, i) => (
-              <div key={i} className="h-full" style={{ width: frameW, minWidth: frameW, position: 'relative' }}>
-                <img
-                  src={src}
-                  alt={`Feature ${i + 1}`}
-                  style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center center', background: '#23243a', pointerEvents: 'none' }}
-                  draggable={false}
-                />
+            {mobileImages.map((src, i) => {
+              const r = ratios[i] || 1
+              const exactW = Math.min(frameW, Math.max(1, Math.round(r * (frameH || 394))))
+              return (
+              <div
+                key={i}
+                className="h-full flex items-center justify-center"
+                style={{ width: frameW, minWidth: frameW }}
+              >
+                {/* Framed container that moves fully on/off screen */}
+                <div
+                  className="overflow-hidden"
+                  style={{
+                    background: '#23243a',
+                    border: '1px solid rgba(255,255,255,0.15)',
+                    borderRadius: '16px',
+                    width: `${exactW}px`,
+                    height: `${frameH}px`,
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.35)'
+                  }}
+                >
+                  <img
+                    src={src}
+                    alt={`Feature ${i + 1}`}
+                    style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center center', background: '#23243a', pointerEvents: 'none' }}
+                    draggable={false}
+                  />
+                </div>
               </div>
-            ))}
+            )})}
           </div>
         </div>
 
         {/* Slider under card */}
-        <div className="px-6" style={{ marginTop: '22px', paddingBottom: '40px' }}>
+        <div className="px-4 xxs:px-5 xs:px-6" style={{ marginTop: '18px', paddingBottom: '36px' }}>
           <input
             type="range"
             min={0}
@@ -189,7 +226,7 @@ const Features = () => {
             input[type="range"]::-webkit-slider-thumb {
               -webkit-appearance: none;
               appearance: none;
-              width: 32px; height: 16px;
+              width: 28px; height: 14px;
               background: #FFF;
               border-radius: 8px;
               box-shadow: none;
@@ -197,7 +234,7 @@ const Features = () => {
               cursor: pointer;
             }
             input[type="range"]::-moz-range-thumb {
-              width: 32px; height: 16px; border: 0;
+              width: 28px; height: 14px; border: 0;
               background: #FFF;
               border-radius: 8px;
               box-shadow: none;
@@ -211,9 +248,8 @@ const Features = () => {
       <div className="hidden sm:block pt-32">
         {/* Full-bleed container spanning the full viewport width */}
         <div className="relative" style={{ width: '100vw', marginLeft: 'calc(50% - 50vw)', marginRight: 'calc(50% - 50vw)' }}>
-          <div className="px-6 md:px-10">
-            {/* Carousel with heading slotted just under the left previews */}
-            <FeatureCarousel
+          {/* Carousel with heading slotted just under the left previews */}
+          <FeatureCarousel
               belowLeft={(
                 <>
                   {/* sm-only (640-767px): keep desktop size */}
@@ -267,7 +303,8 @@ const Features = () => {
                 </>
               )}
             />
-          </div>
+          {/* Extra spacer for desktop/tablet to ensure carousel clears next section */}
+          <div className="hidden sm:block h-32 md:h-40 lg:h-48"></div>
         </div>
       </div>
     </section>

@@ -139,6 +139,38 @@ const Hero = ({ timerData }) => {
   const TIMER_RIGHT_INSET = 'calc(2px + var(--content-right-pad, 0px) + 8px)'
   const TIMER_BOTTOM_INSET = 'calc(var(--bottom-overlap) - 72px)'
 
+  // Normalize bottom ellipse in md only (e.g., iPad Mini/Air/Pro portrait)
+  const [vw, setVw] = useState(typeof window !== 'undefined' ? window.innerWidth : 0)
+  const [vh, setVh] = useState(typeof window !== 'undefined' ? window.innerHeight : 0)
+  useEffect(() => {
+    const onResize = () => { setVw(window.innerWidth); setVh(window.innerHeight) }
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
+  const isTablet = vw >= 768 && vw < 1024
+  // iPad Pro 11" portrait typically reports ~834x1194. Allow small ranges for robustness.
+  const isIpadPro11Portrait = isTablet && vw >= 830 && vw <= 838 && vh >= 1180
+  // iPad Pro 12.9" portrait typically reports ~1024x1366 CSS px
+  const isIpadPro129Portrait = vw >= 1020 && vw <= 1030 && vh >= 1340
+
+  let BOTTOM_CURVE_H_VAR
+  let BOTTOM_OVERLAP_VAR
+  if (isIpadPro11Portrait) {
+    // Tighter clamps on iPad Pro 11" so it matches other tablets visually
+    BOTTOM_CURVE_H_VAR = 'clamp(180px, 17vh, 240px)'
+    BOTTOM_OVERLAP_VAR = 'clamp(60px, 8vh, 120px)'
+  } else if (isIpadPro129Portrait) {
+    // Treat 12.9" as tablet with slightly reduced vh scaling to align with others
+    BOTTOM_CURVE_H_VAR = 'clamp(180px, 20vh, 280px)'
+    BOTTOM_OVERLAP_VAR = 'clamp(90px, 12vh, 160px)'
+  } else if (isTablet) {
+    BOTTOM_CURVE_H_VAR = 'clamp(180px, 22vh, 280px)'
+    BOTTOM_OVERLAP_VAR = 'clamp(60px, 10vh, 140px)'
+  } else {
+    BOTTOM_CURVE_H_VAR = 'clamp(40px, 24vw, 200px)'
+    BOTTOM_OVERLAP_VAR = 'clamp(6px, 8vw, 96px)'
+  }
+
   return (
   <section
     className="relative overflow-hidden hero-section-responsive"
@@ -149,7 +181,7 @@ const Hero = ({ timerData }) => {
     }}
   >
       {/* Mobile IMAX top curve using provided Ellipse 5 */}
-      <div className="absolute block sm:hidden w-full pointer-events-none" style={{ top: '-6px', left: 0, right: 0, zIndex: 44 }}>
+      <div className="absolute block sm:hidden w-full pointer-events-none" style={{ top: '-14px', left: 0, right: 0, zIndex: 44 }}>
         <img
           src={Ellipse5}
           alt="imax top curve"
@@ -167,11 +199,11 @@ const Hero = ({ timerData }) => {
       top: `-${heroShift}px`,
       // Use a shorter height for mobile, keep desktop as is
       height: 'min(calc(100vh + ' + heroShift + 'px + var(--hero-bottom-extend)), var(--hero-max-h))',
-  ['--curve-h']: 'clamp(100px, 45vw, 300px)', // further reduce min for mobile
-  ['--bottom-overlap']: 'clamp(6px, 8vw, 96px)', // further reduce min for mobile
-  ['--hero-bottom-extend']: 'clamp(8px, 5vw, 80px)', // further reduce min for mobile
-  ['--hero-max-h']: 'clamp(220px, 100vh, 100vh)', // further reduce min for mobile
-  ['--bottom-curve-h']: 'clamp(40px, 24vw, 200px)', // further reduce min for mobile
+  ['--curve-h']: 'clamp(100px, 45vw, 300px)',
+  ['--bottom-overlap']: BOTTOM_OVERLAP_VAR,
+  ['--hero-bottom-extend']: 'clamp(8px, 5vw, 80px)',
+  ['--hero-max-h']: 'clamp(220px, 100vh, 100vh)',
+  ['--bottom-curve-h']: BOTTOM_CURVE_H_VAR,
     }}
   >
         
@@ -298,10 +330,10 @@ const Hero = ({ timerData }) => {
               >
                 <div className="max-w-5xl text-center">
                   {/* Two-line headline only, both in H2 size */}
-                  <h2 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-white leading-tight max-w-4xl mx-auto mb-2">
+                  <h2 className="text-2xl xs:text-[28px] md:text-3xl lg:text-4xl xl:text-5xl font-bold text-white leading-tight max-w-4xl mx-auto mb-2">
                     {slide.title}
                   </h2>
-                  <h2 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-white leading-tight">
+                  <h2 className="text-2xl xs:text-[28px] md:text-3xl lg:text-4xl xl:text-5xl font-bold text-white leading-tight">
                     {slide.subtitle}
                   </h2>
                 </div>
@@ -313,14 +345,14 @@ const Hero = ({ timerData }) => {
           })}
         </div>
 
-        {/* Sliding Images Container - Mobile-only (single image view, fixed dimensions) */}
+        {/* Sliding Images Container - Mobile-only (smooth sliding between images) */}
         <div
           className="absolute block sm:hidden"
           style={{
             left: '50%',
             transform: 'translateX(-50%)',
             top: 0,
-            width: '375px',
+            width: 'min(90vw, 360px)',
             height: '326px',
             flexShrink: 0
           }}
@@ -331,29 +363,56 @@ const Hero = ({ timerData }) => {
           {/* Solid base background */}
           <div className="absolute inset-0" style={{ background: 'rgba(17, 17, 17, 1)', zIndex: 0 }} />
 
-          {/* Current slide full-bleed between curves */}
-          <div className="absolute inset-0">
-            <div
-              className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-              style={{ backgroundImage: `url(${heroSlides[currentSlide].image})` }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/70"></div>
-            </div>
-
-            {/* Text content centered */}
-            <div
-              className="relative z-10 flex items-center justify-center h-full px-4"
-              style={{ paddingTop: `${curveOverlap + 24}px`, paddingBottom: 'var(--bottom-overlap)' }}
-            >
-              <div className="text-center">
-                <h2 className="text-2xl font-bold text-white leading-tight mb-2">
-                  {heroSlides[currentSlide].title}
-                </h2>
-                <h2 className="text-2xl font-bold text-white leading-tight">
-                  {heroSlides[currentSlide].subtitle}
-                </h2>
-              </div>
-            </div>
+          {/* Sliding stack of slides with slow flowing transition */}
+          <div className="absolute inset-0 overflow-hidden">
+            {heroSlides.map((slide, index) => {
+              const total = heroSlides.length
+              const delta = (index - currentSlide + total) % total
+              const position = delta === 0
+                ? 'center'
+                : navDir === 'prev'
+                  ? (delta === total - 1 ? 'left' : 'right')
+                  : (delta === 1 ? 'right' : 'left')
+              const baseTransforms = {
+                center: 'translateX(0%) scale(1)',
+                left: 'translateX(-100%) scale(0.98)',
+                right: 'translateX(100%) scale(0.98)'
+              }
+              const z = position === 'center' ? 12 : position === 'right' ? 11 : 9
+              return (
+                <div
+                  key={slide.id}
+                  className="absolute inset-0 will-change-transform"
+                  style={{
+                    transform: baseTransforms[position],
+                    transition: 'transform 1200ms cubic-bezier(0.22, 1, 0.36, 1), opacity 1200ms ease',
+                    opacity: position === 'center' ? 1 : 0.85,
+                    zIndex: z
+                  }}
+                >
+                  <div
+                    className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+                    style={{ backgroundImage: `url(${slide.image})` }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/70"></div>
+                  </div>
+                  {/* Text content centered */}
+                  <div
+                    className="relative z-10 flex items-center justify-center h-full px-4 xs:px-5"
+                    style={{ paddingTop: `${curveOverlap + 24}px`, paddingBottom: 'var(--bottom-overlap)' }}
+                  >
+                    <div className="text-center">
+                      <h2 className="text-[22px] xxs:text-[24px] xs:text-[28px] font-bold text-white leading-tight mb-2">
+                        {slide.title}
+                      </h2>
+                      <h2 className="text-[22px] xxs:text-[24px] xs:text-[28px] font-bold text-white leading-tight">
+                        {slide.subtitle}
+                      </h2>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
           </div>
         </div>
 

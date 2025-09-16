@@ -5,8 +5,7 @@ const Waitlist = () => {
   const [formData, setFormData] = useState({
     name: '',
     mobile: '',
-    email: '',
-    location: ''
+    email: ''
   });
   const [errors, setErrors] = useState({});
   const [backendError, setBackendError] = useState('');
@@ -62,7 +61,7 @@ const Waitlist = () => {
     }
     autoIntervalRef.current = setInterval(() => {
       setCarouselPage((prev) => (prev + 1) % 3);
-    }, 6000);
+    }, 2000);
     return () => {
       if (autoIntervalRef.current) clearInterval(autoIntervalRef.current);
     };
@@ -93,7 +92,7 @@ const Waitlist = () => {
 
   const handleRewardsTouchEnd = (e) => {
     if (!touchActiveRef.current) {
-      scheduleResume();
+      scheduleResume(2000);
       return;
     }
     const touch = e.changedTouches && e.changedTouches[0];
@@ -111,17 +110,18 @@ const Waitlist = () => {
       }
     }
     touchActiveRef.current = false;
-    scheduleResume();
+    scheduleResume(2000);
   };
 
   const handleRewardsTouchCancel = () => {
     touchActiveRef.current = false;
-    scheduleResume();
+    scheduleResume(2000);
   };
 
   const validate = () => {
     const newErrors = {};
     const alphaSpace = /^[A-Za-z ]+$/;
+    const cleanedMobile = (formData.mobile || '').replace(/\D/g, '');
     // Name: required + alphabets and spaces only
     if (!formData.name.trim()) {
       newErrors.name = 'Name is required';
@@ -129,9 +129,9 @@ const Waitlist = () => {
       newErrors.name = 'Name must contain only alphabets and spaces';
     }
     // Mobile: required, 10 digits, numeric
-    if (!formData.mobile) {
+    if (!cleanedMobile) {
       newErrors.mobile = 'Mobile number is required';
-    } else if (!/^[0-9]{10}$/.test(formData.mobile)) {
+    } else if (cleanedMobile.length !== 10) {
       newErrors.mobile = 'Mobile number must be exactly 10 digits';
     }
     // Email: required, valid format
@@ -140,12 +140,7 @@ const Waitlist = () => {
     } else if (!/^([a-zA-Z0-9_\-.]+)@([a-zA-Z0-9_\-.]+)\.([a-zA-Z]{2,})$/.test(formData.email)) {
       newErrors.email = 'Email should be valid (e.g. user@example.com)';
     }
-    // Location: required + alphabets and spaces only
-    if (!formData.location.trim()) {
-      newErrors.location = 'Location is required';
-    } else if (!alphaSpace.test(formData.location.trim())) {
-      newErrors.location = 'Location must contain only alphabets and spaces';
-    }
+    // Location removed
     return newErrors;
   };
 
@@ -199,7 +194,7 @@ const Waitlist = () => {
       console.log("✅ Lead saved:", data);
       setShowConsole(true);
       setTimeout(() => setShowConsole(false), 3500);
-      setFormData({ name: '', mobile: '', email: '', location: '' });
+  setFormData({ name: '', mobile: '', email: '' });
       setErrors({});
       setBackendError('');
     } catch (err) {
@@ -218,7 +213,11 @@ const Waitlist = () => {
       setErrors(validationErrors);
       return;
     }
-    const payload = { ...formData, sessionId: getSessionId() };
+    const payload = { 
+      ...formData, 
+      mobile: (formData.mobile || '').replace(/\D/g, '').slice(-10),
+      sessionId: getSessionId() 
+    };
     await submitLead(payload);
   }
 
@@ -229,7 +228,11 @@ const Waitlist = () => {
       setErrors(validationErrors);
       return;
     }
-    const payload = { ...formData, sessionId: getSessionId() };
+    const payload = { 
+      ...formData, 
+      mobile: (formData.mobile || '').replace(/\D/g, '').slice(-10),
+      sessionId: getSessionId() 
+    };
     await submitLead(payload);
   };
 
@@ -255,10 +258,10 @@ const Waitlist = () => {
       )}
 
       {/* Mobile-only layout: stacked rewards + form */}
-  <section id="waitlist" className="block sm:hidden py-12 px-4" style={{ scrollMarginTop: '-13vh', background: '#23243a', borderRadius: '0px' }}>
+  <section id="waitlist" className="block sm:hidden py-10 xxs:py-12 xs:py-14 px-4 xxs:px-5 xs:px-6" style={{ scrollMarginTop: '-13vh', background: '#23243a', borderRadius: '0px' }}>
         <div className="w-full max-w-xl mx-auto">
-          <h2 className="text-white font-bold text-4xl text-center" style={{ fontFamily: 'Anek Latin, sans-serif', lineHeight: '120%' }}>Waitlist</h2>
-          <div className="mt-2 text-center text-white/90 text-lg">Signup to get exclusive rewards</div>
+          <h2 className="text-white font-bold text-[34px] xxs:text-[38px] xs:text-4xl text-center" style={{ fontFamily: 'Anek Latin, sans-serif', lineHeight: '120%' }}>Waitlist</h2>
+          <div className="mt-1 xxs:mt-2 text-center text-white/90 text-base xxs:text-lg">Signup to get exclusive rewards</div>
 
           {/* Rewards (two cards stacked) with swipe support */}
           <div
@@ -293,8 +296,8 @@ const Waitlist = () => {
                   marginRight: '24px'
                 }} />
                 <div>
-                  <div style={{ color: '#8349FF', fontWeight: 700, fontSize: '1.05rem', marginBottom: '4px' }}>{reward.title}</div>
-                  <div style={{ color: '#fff', fontSize: '0.98rem' }}>{reward.description}</div>
+                  <div style={{ color: '#8349FF', fontWeight: 700, fontSize: '1rem', lineHeight: '1.25', marginBottom: '2px' }}>{reward.title}</div>
+                  <div style={{ color: '#fff', fontSize: '0.95rem', lineHeight: '1.35' }}>{reward.description}</div>
                 </div>
               </div>
             ))}
@@ -307,13 +310,13 @@ const Waitlist = () => {
           </div>
 
           {/* Signup card */}
-          <div className="mt-6" style={{ border: '1.5px solid rgba(255,255,255,0.18)', borderRadius: '12px', background: 'rgba(255,255,255,0.04)', boxShadow: '0 2px 8px rgba(193,245,70,0.08)', padding: '24px' }}>
-            <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="mt-6" style={{ border: '1.5px solid rgba(255,255,255,0.18)', borderRadius: '12px', background: 'rgba(255,255,255,0.04)', boxShadow: '0 2px 8px rgba(193,245,70,0.08)', padding: '20px' }}>
+            <form onSubmit={handleSubmit} className="space-y-5" autoComplete="on">
               <h3
                 style={{
                   color: '#FFF',
                   fontFamily: '"Anek Latin"',
-                  fontSize: '32px',
+                  fontSize: '28px',
                   fontStyle: 'normal',
                   fontWeight: 700,
                   lineHeight: '150%',
@@ -344,24 +347,34 @@ const Waitlist = () => {
               )}
               <div>
                 <label className="block text-texthigh mb-2">Name</label>
-                <input type="text" name="name" value={formData.name} onChange={handleInputChange} placeholder="Enter" className="w-full rounded-lg px-4 py-3 text-texthigh placeholder-textlow focus:outline-none focus:ring-2 focus:ring-primgreen/60" style={{ background: 'rgba(255,255,255,0.20)', borderRadius: '8px', backdropFilter: 'blur(50px)', WebkitBackdropFilter: 'blur(50px)' }} />
+                <input type="text" name="name" autoComplete="name" value={formData.name} onChange={handleInputChange} placeholder="Enter your name" className="w-full rounded-lg px-4 py-3 text-texthigh placeholder-textlow focus:outline-none focus:ring-2 focus:ring-primgreen/60" style={{ background: 'rgba(255,255,255,0.20)', borderRadius: '8px', backdropFilter: 'blur(50px)', WebkitBackdropFilter: 'blur(50px)' }} />
                 {errors.name && (<span style={{ color: '#FF4D4F', fontSize: '0.95rem' }}>{errors.name}</span>)}
               </div>
               <div>
                 <label className="block text-texthigh mb-2">Mobile number</label>
-                <input type="tel" name="mobile" value={formData.mobile} onChange={handleInputChange} placeholder="Enter" className="w-full rounded-lg px-4 py-3 text-texthigh placeholder-textlow focus:outline-none focus:ring-2 focus:ring-primgreen/60" style={{ background: 'rgba(255,255,255,0.20)', borderRadius: '8px', backdropFilter: 'blur(50px)', WebkitBackdropFilter: 'blur(50px)' }} />
+                <input type="tel" name="mobile" autoComplete="tel" inputMode="tel" value={formData.mobile} onChange={handleInputChange} placeholder="Enter mobile number" className="w-full rounded-lg px-4 py-3 text-texthigh placeholder-textlow focus:outline-none focus:ring-2 focus:ring-primgreen/60" style={{ background: 'rgba(255,255,255,0.20)', borderRadius: '8px', backdropFilter: 'blur(50px)', WebkitBackdropFilter: 'blur(50px)' }} />
                 {errors.mobile && (<span style={{ color: '#FF4D4F', fontSize: '0.95rem' }}>{errors.mobile}</span>)}
               </div>
               <div>
-                <label className="block text-texthigh mb-2">Email address</label>
-                <input type="email" name="email" value={formData.email} onChange={handleInputChange} placeholder="Enter" className="w-full rounded-lg px-4 py-3 text-texthigh placeholder-textlow focus:outline-none focus:ring-2 focus:ring-primgreen/60" style={{ background: 'rgba(255,255,255,0.20)', borderRadius: '8px', backdropFilter: 'blur(50px)', WebkitBackdropFilter: 'blur(50px)' }} />
+                <label htmlFor="waitlist-email-mobile" className="block text-texthigh mb-2">Email address</label>
+                <input
+                  id="waitlist-email-mobile"
+                  type="email"
+                  name="email"
+                  autoComplete="email"
+                  inputMode="email"
+                  autoCapitalize="off"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  placeholder="Enter email address"
+                  className="w-full rounded-lg px-4 py-3 text-texthigh placeholder-textlow focus:outline-none focus:ring-2 focus:ring-primgreen/60"
+                  style={{ background: 'rgba(255,255,255,0.20)', borderRadius: '8px', backdropFilter: 'blur(50px)', WebkitBackdropFilter: 'blur(50px)' }}
+                />
                 {errors.email && (<span style={{ color: '#FF4D4F', fontSize: '0.95rem' }}>{errors.email}</span>)}
               </div>
-              <div>
-                <label className="block text-texthigh mb-2">Location</label>
-                <input type="text" name="location" value={formData.location} onChange={handleInputChange} placeholder="Enter" className="w-full rounded-lg px-4 py-3 text-texthigh placeholder-textlow focus:outline-none focus:ring-2 focus:ring-primgreen/60" style={{ background: 'rgba(255,255,255,0.20)', borderRadius: '8px', backdropFilter: 'blur(50px)', WebkitBackdropFilter: 'blur(50px)' }} />
-                {errors.location && (<span style={{ color: '#FF4D4F', fontSize: '0.95rem' }}>{errors.location}</span>)}
-              </div>
+              
               <button
                 type="submit"
                 className="w-full font-semibold waitlist-join-btn"
@@ -382,7 +395,7 @@ const Waitlist = () => {
       </section>
 
       {/* Desktop & tablet layout — unchanged */}
-  <section id="waitlist" className="hidden sm:block py-20 px-6" style={{ scrollMarginTop: '-13vh', background: '#23243a', borderRadius: '0px' }}>
+  <section id="waitlist" className="hidden sm:block px-6 pt-20 md:pt-12 lg:pt-20 pb-20 md:-mt-40 lg:-mt-[180px]" style={{ scrollMarginTop: '-13vh', background: '#23243a', borderRadius: '0px' }}>
         <div className="w-full flex justify-center">
           {/* Waitlist form only, image removed */}
           <div>
@@ -421,7 +434,11 @@ const Waitlist = () => {
                 alignItems: 'center',
                 marginBottom: '40px',
               }}>
-                <div style={{
+                <div 
+                  onTouchStart={handleRewardsTouchStart}
+                  onTouchEnd={handleRewardsTouchEnd}
+                  onTouchCancel={handleRewardsTouchCancel}
+                  style={{
                   display: 'flex',
                   justifyContent: 'center',
                   gap: '32px',
@@ -466,14 +483,16 @@ const Waitlist = () => {
                         <div style={{
                           color: '#8349FF',
                           fontWeight: 700,
-                          fontSize: '1.1rem',
-                          marginBottom: '6px',
+                          fontSize: '1rem',
+                          lineHeight: '1.25',
+                          marginBottom: '2px',
                         }}>
                           {reward.title}
                         </div>
                         <div style={{
                           color: '#fff',
-                          fontSize: '1rem',
+                          fontSize: '0.95rem',
+                          lineHeight: '1.35',
                           fontWeight: 400,
                         }}>
                           {reward.description}
@@ -505,7 +524,7 @@ const Waitlist = () => {
             </div>
 
             <div style={{ border: '1.5px solid rgba(255,255,255,0.18)', borderRadius: '12px', background: 'rgba(255,255,255,0.04)', boxShadow: '0 2px 8px rgba(193,245,70,0.08)', padding: '32px 24px', maxWidth: '480px', margin: '0 auto' }}>
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6" autoComplete="on">
                 {/* Signup heading */}
                 <h2 style={{
                   color: '#FFF',
@@ -550,9 +569,10 @@ const Waitlist = () => {
                   <input
                     type="text"
                     name="name"
+                    autoComplete="name"
                     value={formData.name}
                     onChange={handleInputChange}
-                    placeholder="Enter..."
+                    placeholder="Enter your name"
                     className="w-full rounded-lg px-4 py-3 text-texthigh placeholder-textlow focus:outline-none focus:ring-2 focus:ring-primgreen/60"
                     style={{
                       borderRadius: '8px',
@@ -579,9 +599,11 @@ const Waitlist = () => {
                   <input
                     type="tel"
                     name="mobile"
+                    autoComplete="tel"
+                    inputMode="tel"
                     value={formData.mobile}
                     onChange={handleInputChange}
-                    placeholder="Enter..."
+                    placeholder="Enter mobile number"
                     className="w-full rounded-lg px-4 py-3 text-texthigh placeholder-textlow focus:outline-none focus:ring-2 focus:ring-primgreen/60"
                     style={{
                       borderRadius: '8px',
@@ -604,13 +626,19 @@ const Waitlist = () => {
                     alignSelf: 'stretch'
                   }}
                 >
-                  <label className="block text-texthigh mb-2">Email address</label>
+                  <label htmlFor="waitlist-email-desktop" className="block text-texthigh mb-2">Email address</label>
                   <input
+                    id="waitlist-email-desktop"
                     type="email"
                     name="email"
+                    autoComplete="email"
+                    inputMode="email"
+                    autoCapitalize="off"
+                    autoCorrect="off"
+                    spellCheck={false}
                     value={formData.email}
                     onChange={handleInputChange}
-                    placeholder="Enter..."
+                    placeholder="Enter email address"
                     className="w-full rounded-lg px-4 py-3 text-texthigh placeholder-textlow focus:outline-none focus:ring-2 focus:ring-primgreen/60"
                     style={{
                       borderRadius: '8px',
@@ -624,34 +652,7 @@ const Waitlist = () => {
                   )}
                 </div>
 
-                <div 
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'flex-start',
-                    gap: '8px',
-                    alignSelf: 'stretch'
-                  }}
-                >
-                  <label className="block text-texthigh mb-2">Location</label>
-                  <input
-                    type="text"
-                    name="location"
-                    value={formData.location}
-                    onChange={handleInputChange}
-                    placeholder="Enter..."
-                    className="w-full rounded-lg px-4 py-3 text-texthigh placeholder-textlow focus:outline-none focus:ring-2 focus:ring-primgreen/60"
-                    style={{
-                      borderRadius: '8px',
-                      background: 'rgba(255, 255, 255, 0.20)',
-                      backdropFilter: 'blur(50px)',
-                      WebkitBackdropFilter: 'blur(50px)'
-                    }}
-                  />
-                  {errors.location && (
-                    <span style={{ color: '#FF4D4F', fontSize: '0.95rem', marginTop: '2px' }}>{errors.location}</span>
-                  )}
-                </div>
+                
 
                 <button
                   type="submit"

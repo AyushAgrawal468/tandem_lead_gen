@@ -23,9 +23,9 @@ const FAQ = () => {
   }
 
   return (
-  <section id="faq" className="py-20 px-6" style={{ background: '#232323' }}>
+  <section id="faq" className="py-16 xxs:py-[72px] xs:py-20 px-4 xxs:px-5 xs:px-8" style={{ background: '#232323' }}>
       <div className="max-w-4xl mx-auto">
-        <h2 className="text-4xl md:text-5xl font-bold text-texthigh text-center mb-16">FAQ</h2>
+        <h2 className="text-[34px] xxs:text-[38px] xs:text-[42px] md:text-5xl font-bold text-texthigh text-center mb-12">FAQ</h2>
 
         <div className="space-y-4">
           {faqs.map((faq, index) => (
@@ -35,7 +35,7 @@ const FAQ = () => {
               style={{ background: 'rgba(255, 255, 255, 0.10)', backdropFilter: 'blur(50px)' }}
             >
               <button
-                className="w-full px-6 py-4 text-left flex justify-between items-center bg-transparent hover:bg-white/10 transition-colors rounded-lg focus:outline-none active:outline-none ring-0 focus:ring-0 active:ring-0"
+                className="w-full px-4 xxs:px-5 xs:px-6 py-3 xxs:py-3.5 xs:py-4 text-left flex justify-between items-center bg-transparent hover:bg-white/10 transition-colors rounded-lg focus:outline-none active:outline-none ring-0 focus:ring-0 active:ring-0"
                 style={{ WebkitTapHighlightColor: 'transparent', outline: 'none', appearance: 'none', border: 'none' }}
                 onClick={() => toggleFAQ(index)}
               >
@@ -53,7 +53,7 @@ const FAQ = () => {
               </button>
               
               {openFAQ === index && (
-                <div className="px-6 py-4 bg-transparent">
+                <div className="px-4 xxs:px-5 xs:px-6 py-3 xxs:py-3.5 xs:py-4 bg-transparent">
                   <p className="text-textmid leading-relaxed">{faq.answer}</p>
                 </div>
               )}

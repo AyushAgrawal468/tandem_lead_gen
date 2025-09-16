@@ -24,6 +24,13 @@ module.exports = {
                 "heading-r": "var(--heading-r-font-family)",
                 typography: "var(--typography-font-family)",
             },
+            screens: {
+                xxs: "360px",  // Galaxy S8+
+                xs: "480px",   // wide phones
+                sm: "640px",   // small tablets / phablets
+                md: "768px",   // tablets
+                lg: "1024px",  // laptops
+            },
             animation: {
                 'fade-in': 'fade-in 1s ease forwards',
                 'fade-up': 'fade-up 1s ease forwards',

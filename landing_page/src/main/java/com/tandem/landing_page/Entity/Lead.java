@@ -28,21 +28,18 @@ public class Lead {
     @Email(message = "Email should be valid (e.g. user@example.com)")
     private String email;
 
-    @NotBlank(message = "Location is required")
-    @Pattern(regexp = "^[A-Za-z ]+$", message = "Location must contain only alphabets and spaces")
-    private String location;
+
     private String sessionId;
     private String locationFetched;
 
     public Lead() {
     }
 
-    public Lead(Long id, String name, String mobile, String email, String location, String sessionId, String locationFetched) {
+    public Lead(Long id, String name, String mobile, String email, String sessionId, String locationFetched) {
         this.id = id;
         this.name = name;
         this.mobile = mobile;
         this.email = email;
-        this.location = location;
         this.sessionId=sessionId;
         this.locationFetched = locationFetched;
     }
@@ -77,14 +74,6 @@ public class Lead {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public String getLocation() {
-        return location;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
     }
 
     public String getSessionId() {
