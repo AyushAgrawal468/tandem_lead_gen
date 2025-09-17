@@ -25,9 +25,9 @@ export default {
                 typography: "var(--typography-font-family)",
             },
             screens: {
-                xxs: "360px",  // Galaxy S8+
-                xs: "480px",   // wide phones
-                sm: "640px",   // tablets
+                xxs: "320px",  // Galaxy S8+
+                xs: "385px",   // wide phones
+                sm: "640px",   
                 md: "768px",
                 lg: "1024px",
             },

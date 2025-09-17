@@ -114,7 +114,16 @@ const Features = () => {
   }, [mobileImages.join('|')])
 
   return (
-  <section id="features" className="pt-2 xs:pt-4 pb-8 xs:pb-12 sm:pb-32 md:pb-40 lg:pb-48" style={{ zIndex: 50, position: 'relative', marginTop: '-45px', scrollMarginTop: '40px' }}>
+  <section id="features" className="pt-2 xs:pt-4 pb-8 xs:pb-12 sm:pb-32 md:pb-40 lg:pb-48" style={{ zIndex: 50, position: 'relative', marginTop: 'var(--features-mt, -45px)', scrollMarginTop: '40px' }}>
+      {/* xxs-only: push section down by 50px (from -45px to +5px) */}
+      <style>{`
+        @media (min-width: 320px) and (max-width: 399.98px) {
+          #features { --features-mt: 120px; }
+        }
+        @media (min-width: 380px) and (max-width: 639.98px) {
+          #features { --features-mt: -30px; }
+        
+      `}</style>
       {/* Mobile-only layout (do not affect desktop) */}
       <div className="block sm:hidden" style={{ marginTop: '-360px' }}>
         {/* Heading */}
@@ -123,8 +132,8 @@ const Features = () => {
             className="text-left font-bold text-white"
             style={{
               fontFamily: '"Anek Latin", sans-serif',
-              fontSize: '34px',
-              
+              fontSize: '32px',
+              marginLeft: '24px',
               lineHeight: '120%',
               color: '#FFF'
             }}
@@ -134,7 +143,7 @@ const Features = () => {
             Tandem?
           </h2>
           {/* Top-right slide number (dynamic) - disable pointer events so it won't block swipes */}
-          <div style={{ position: 'absolute', right: '12px', top: '-6px', pointerEvents: 'none' }}>
+          <div style={{ position: 'absolute', right: '50px', top: '10px', pointerEvents: 'none' }}>
             <span
               style={{
                 WebkitTextStrokeWidth: '1px',
@@ -260,7 +269,8 @@ const Features = () => {
                       fontSize: '60px',
                       fontWeight: 700,
                       lineHeight: '120%',
-                      color: 'rgba(255, 255, 255, 1)'
+                      color: 'rgba(255, 255, 255, 1)',
+                      marginLeft: '10px'
                     }}
                   >
                     Why be on

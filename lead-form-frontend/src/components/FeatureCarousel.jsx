@@ -240,7 +240,17 @@ const FeatureCarousel = ({ items = sampleItems, belowLeft = null }) => {
         </span>
       </div>
       <style>{`
-        /* Shift slide number 30px to the right on tablet (md) only */
+        /* Move slide number down by 5px on xxs/xs/sm only */
+        @media (min-width: 320px) and (max-width: 399.98px) {
+          .fc-slide-number { top: -47px !important; right: 20px; }
+        }
+        @media (min-width: 400px) and (max-width: 639.98px) {
+          .fc-slide-number { top: -47px !important; right: 20px; }
+        }
+        @media (min-width: 640px) and (max-width: 767.98px) {
+          .fc-slide-number { top: -47px !important; right: 20px; }
+        }
+        /* Keep md behavior as previously specified */
         @media (min-width: 768px) and (max-width: 1023.98px) {
           .fc-slide-number { right: 0px; }
         }
