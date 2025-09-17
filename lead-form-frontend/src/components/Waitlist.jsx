@@ -61,7 +61,7 @@ const Waitlist = () => {
     }
     autoIntervalRef.current = setInterval(() => {
       setCarouselPage((prev) => (prev + 1) % 3);
-    }, 2000);
+    }, 4000);
     return () => {
       if (autoIntervalRef.current) clearInterval(autoIntervalRef.current);
     };

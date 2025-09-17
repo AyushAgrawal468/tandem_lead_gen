@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import feature1 from '../assets/features/feature1.svg'
-import feature2 from '../assets/features/feature2.svg'
-import feature3 from '../assets/features/feature3.svg'
-import feature4 from '../assets/features/feature4.svg'
-import feature5 from '../assets/features/feature5.svg'
-import feature6 from '../assets/features/feature6.svg'
+import feature1 from '../assets/features/feature1.png'
+import feature2 from '../assets/features/feature2.png'
+import feature3 from '../assets/features/feature3.png'
+import feature4 from '../assets/features/feature4.png'
+import feature5 from '../assets/features/feature5.png'
+import feature6 from '../assets/features/feature6.png'
 
 const sampleItems = [
   { id: 1, image: feature1 },
@@ -304,6 +304,7 @@ const FeatureCarousel = ({ items = sampleItems, belowLeft = null }) => {
                     : "h-full w-auto"}
                   style={{ display: 'block', margin: 0, padding: 0, background: '#23243a', maxWidth: isActive ? undefined : 'var(--card-w)' }}
                   draggable={false}
+                  loading="lazy"
                 />
               </div>
             );

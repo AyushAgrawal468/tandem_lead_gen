@@ -1,11 +1,11 @@
 import React from 'react'
 import FeatureCarousel from './FeatureCarousel'
-import feature1 from '../assets/features/feature1.svg'
-import feature2 from '../assets/features/feature2.svg'
-import feature3 from '../assets/features/feature3.svg'
-import feature4 from '../assets/features/feature4.svg'
-import feature5 from '../assets/features/feature5.svg'
-import feature6 from '../assets/features/feature6.svg'
+import feature1 from '../assets/features/feature1.png'
+import feature2 from '../assets/features/feature2.png'
+import feature3 from '../assets/features/feature3.png'
+import feature4 from '../assets/features/feature4.png'
+import feature5 from '../assets/features/feature5.png'
+import feature6 from '../assets/features/feature6.png'
 
 const Features = () => {
   // Mobile carousel state (one SVG per slide)
@@ -122,7 +122,10 @@ const Features = () => {
         }
         @media (min-width: 380px) and (max-width: 639.98px) {
           #features { --features-mt: -30px; }
-        
+        }
+        @media (min-width: 400px) and (max-width: 639.98px) {
+          #features { margin-top: -105px !important; }
+        }
       `}</style>
       {/* Mobile-only layout (do not affect desktop) */}
       <div className="block sm:hidden" style={{ marginTop: '-360px' }}>

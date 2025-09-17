@@ -195,13 +195,15 @@ const Navbar = () => {
           {/* Mobile hamburger (hidden on desktop) */}
           <div className="ml-auto pr-2 xxs:pr-3 xs:pr-4 sm:hidden">
             <button
+              type="button"
               aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
               onClick={() => setIsMenuOpen((v) => !v)}
-              className="p-2 focus:outline-none"
+              className="inline-flex items-center justify-center p-2 focus:outline-none appearance-none bg-transparent hover:bg-transparent active:bg-transparent rounded-none border-0"
+              style={{ background: 'transparent', border: 'none' }}
             >
               {isMenuOpen ? (
                 // Close icon (X)
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" className="w-6 h-6">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" className="w-6 h-6 block">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 6l12 12M18 6l-12 12" />
                 </svg>
               ) : (
@@ -212,7 +214,7 @@ const Navbar = () => {
                   height="24"
                   viewBox="0 0 24 24"
                   fill="none"
-                  className="w-6 h-6 shrink-0"
+                  className="w-6 h-6 shrink-0 block"
                 >
                   <path d="M3 12H21" stroke="white" strokeLinecap="round" strokeLinejoin="round" />
                   <path d="M3 6H21" stroke="white" strokeLinecap="round" strokeLinejoin="round" />
@@ -229,11 +231,13 @@ const Navbar = () => {
         <div className="sm:hidden fixed inset-0 z-[60] bg-black" style={{ background: 'rgba(0,0,0,0.96)' }}>
           <div className="flex items-start justify-between px-6 pt-6">
             <button
+              type="button"
               aria-label="Close menu"
               onClick={() => setIsMenuOpen(false)}
-              className="p-2 -ml-2"
+              className="inline-flex items-center justify-center p-2 -ml-2 focus:outline-none appearance-none bg-transparent hover:bg-transparent active:bg-transparent rounded-none border-0"
+              style={{ background: 'transparent', border: 'none' }}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" className="w-7 h-7">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" className="w-7 h-7 block">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 6l12 12M18 6l-12 12" />
               </svg>
             </button>
