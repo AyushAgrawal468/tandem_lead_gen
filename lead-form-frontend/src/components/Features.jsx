@@ -140,6 +140,19 @@ const Features = () => {
         @media (max-width: 639.98px) and (max-height: 620px) {
           #features .mobile-features-wrap { margin-top: -280px !important; }
         }
+        /* Tall-screen adjustments (e.g., iPhone 14 Pro Max ~932px height) */
+        @media (max-width: 639.98px) and (min-height: 800px) {
+          #features .mobile-features-wrap { margin-top: -350px !important; }
+        }
+        @media (max-width: 639.98px) and (min-height: 860px) {
+          #features .mobile-features-wrap { margin-top: -340px !important; }
+        }
+        @media (max-width: 639.98px) and (min-height: 900px) {
+          #features .mobile-features-wrap { margin-top: -330px !important; }
+        }
+        @media (max-width: 639.98px) and (min-height: 940px) {
+          #features .mobile-features-wrap { margin-top: -320px !important; }
+        }
       `}</style>
       {/* Mobile-only layout (do not affect desktop) */}
       <div className="block sm:hidden mobile-features-wrap" style={{ marginTop: '-360px' }}>
