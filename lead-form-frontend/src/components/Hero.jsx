@@ -517,13 +517,13 @@ const Hero = ({ timerData }) => {
           )}
         </div>
 
-        {/* Mobile timer: overlay on lower ellipse, right side (smaller size) */}
+        {/* Mobile timer: moved further down and slightly reduced to avoid overlap with Features heading */}
         <div
           className="absolute pointer-events-none block sm:hidden"
           style={{
             zIndex: 1001,
             right: '12px',
-            top: 'calc(300px + 20px)'
+            top: 'calc(300px + 36px)'
           }}
         >
           {!timerData ? (
@@ -535,8 +535,8 @@ const Hero = ({ timerData }) => {
               remainingSeconds={timerData.remainingSeconds}
               endTime={timerData.endTime}
               startTime={timerData.startTime}
-              width={TIMER_W}
-              height={TIMER_H}
+              width={TIMER_W - 30}
+              height={TIMER_H - 20}
               radius={TIMER_R}
               strokeWidth={TIMER_SW}
               displayWidth={TIMER_DISPLAY_W}
