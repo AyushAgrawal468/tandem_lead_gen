@@ -126,9 +126,23 @@ const Features = () => {
         @media (min-width: 400px) and (max-width: 639.98px) {
           #features { margin-top: -105px !important; }
         }
+        /* Height-based overrides to reduce upward pull on short screens (mobile only) */
+        
+        @media (max-width: 639.98px) and (max-height: 740px) {
+          #features .mobile-features-wrap { margin-top: -330px !important; }
+        }
+        @media (max-width: 639.98px) and (max-height: 700px) {
+          #features .mobile-features-wrap { margin-top: -310px !important; }
+        }
+        @media (max-width: 639.98px) and (max-height: 660px) {
+          #features .mobile-features-wrap { margin-top: -295px !important; }
+        }
+        @media (max-width: 639.98px) and (max-height: 620px) {
+          #features .mobile-features-wrap { margin-top: -280px !important; }
+        }
       `}</style>
       {/* Mobile-only layout (do not affect desktop) */}
-      <div className="block sm:hidden" style={{ marginTop: '-360px' }}>
+      <div className="block sm:hidden mobile-features-wrap" style={{ marginTop: '-360px' }}>
         {/* Heading */}
         <div className="relative px-4 xxs:px-5 xs:px-6" style={{ marginBottom: '16px' }}>
           <h2
