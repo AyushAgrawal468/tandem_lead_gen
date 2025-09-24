@@ -10,8 +10,9 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
-                .allowedOrigins("http://localhost:3000") // Update with frontend domain in prod
-                .allowedMethods("GET", "POST", "PUT", "DELETE")
-                .allowCredentials(false);
+                .allowedOrigins("http://localhost:3000", "https://tandem.it.com") // allow both dev & prod
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // include OPTIONS
+                .allowedHeaders("*")  // allow all headers
+                .allowCredentials(false); // set true if you’re using cookies/auth headers
     }
 }
