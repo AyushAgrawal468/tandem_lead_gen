@@ -9,6 +9,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
+        System.out.println("CORS config loaded");
         registry.addMapping("/api/**")
                 .allowedOrigins("http://localhost:3000", "https://tandem.it.com") // allow both dev & prod
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // include OPTIONS
