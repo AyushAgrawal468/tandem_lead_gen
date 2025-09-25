@@ -3,6 +3,14 @@ import Ellipse5 from '../assets/Ellipse 5.svg'
 import Ellipse6 from '../assets/Ellipse 6.svg'
 import CountdownTimer from './CountdownTimer'
 
+// Dynamically import up to 5 hero images from assets/hero-images
+// Users should place their images there; we sort by filename for stable order.
+const heroImageModules = import.meta.glob('../assets/hero-images/*.{jpg,jpeg,png,webp}', { eager: true })
+const heroImageEntries = Object.entries(heroImageModules)
+  .sort((a, b) => a[0].localeCompare(b[0]))
+  .slice(0, 5)
+const heroImages = heroImageEntries.map(([_, mod]) => mod.default || mod)
+
 const Hero = ({ timerData }) => {
   // Touch swipe state
   const touchStartX = React.useRef(null)
@@ -48,40 +56,47 @@ const Hero = ({ timerData }) => {
   const bottomCurveOverlap = 240
 
   // Slides
-  const heroSlides = [
-    {
-      id: 1,
-      image: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2670&q=80",
-      title: "Swipe on fun things to do, match with friends,",
-      subtitle: "and make it happen — that's Tandem.",
-      position: "center",
-      isMain: true
-    },
-    {
-      id: 2,
-      image: "https://images.unsplash.com/photo-1551632811-561732d1e306?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2670&q=80",
-      title: "Discover Together",
-      subtitle: "Explore new experiences with friends",
-      description: "Turn your matches into real-world adventures. Plan activities, coordinate schedules, and create unforgettable memories together.",
-      position: "center"
-    },
-    {
-      id: 3,
-      image: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2670&q=80",
-      title: "Make It Happen",
-      subtitle: "From idea to reality in minutes",
-      description: "Our smart coordination tools help you turn spontaneous ideas into organized meetups. No more endless group chats!",
-      position: "center"
-    },
-    {
-      id: 4,
-      image: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2662&q=80",
-      title: "Build Community",
-      subtitle: "Join a network of active explorers",
-      description: "Connect with a vibrant community of people who believe life is better when shared. Every swipe brings new possibilities.",
-      position: "center"
-    }
-  ]
+  // Build slides from discovered images or provide a fallback single slide
+  const heroSlides = (heroImages.length ? heroImages : [null]).map((img, idx) => ({
+    id: idx + 1,
+    image: img || '',
+    position: 'center',
+    alt: img ? `Hero slide ${idx + 1}` : 'Add images to assets/hero-images'
+  }))
+
+  // Preload & decode images to avoid late paint when slides shift.
+  const [loadedMap, setLoadedMap] = useState(() => new Map())
+  const [allDecoded, setAllDecoded] = useState(false)
+  useEffect(() => {
+    let cancelled = false
+    const entries = heroSlides.filter(s => s.image)
+    if (!entries.length) return
+    const loaders = entries.map(slide => {
+      return new Promise(resolve => {
+        // If already cached by browser, onload may fire synchronously.
+        const imgEl = new Image()
+        imgEl.src = slide.image
+        const markLoaded = () => {
+          if (cancelled) return
+            setLoadedMap(prev => {
+              if (prev.get(slide.image)) return prev
+              const next = new Map(prev)
+              next.set(slide.image, true)
+              return next
+            })
+            resolve()
+        }
+        if (imgEl.decode) {
+          imgEl.decode().then(markLoaded).catch(() => markLoaded())
+        } else {
+          imgEl.onload = markLoaded
+          imgEl.onerror = markLoaded
+        }
+      })
+    })
+    Promise.all(loaders).then(() => { if (!cancelled) setAllDecoded(true) })
+    return () => { cancelled = true }
+  }, [heroSlides.length])
 
   // Auto-slide functionality (stops when autoPlay is false)
   useEffect(() => {
@@ -111,6 +126,8 @@ const Hero = ({ timerData }) => {
     }, 10000)
   }
 
+  const isSmall = () => (typeof window !== 'undefined' ? window.innerWidth < 768 : true)
+
   const nextSlide = () => {
     stopAuto()
     setNavDir('next')
@@ -119,8 +136,14 @@ const Hero = ({ timerData }) => {
 
   const prevSlide = () => {
     stopAuto()
-    setNavDir('prev')
-    setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length)
+    // For xxs, xs, sm: force left-only flow by treating prev as next
+    if (isSmall()) {
+      setNavDir('next')
+      setCurrentSlide((prev) => (prev + 1) % heroSlides.length)
+    } else {
+      setNavDir('prev')
+      setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length)
+    }
   }
 
   const goToSlide = (index) => {
@@ -232,114 +255,123 @@ const Hero = ({ timerData }) => {
             className="absolute inset-0"
             style={{ background: 'rgba(17, 17, 17, 1)', zIndex: 0 }}
           />
-          {/* Previous Image Preview - Left Side */}
-          <div
-            className="absolute transition-all duration-1000 ease-in-out transform"
-            style={{
-              top: 'calc(var(--curve-h) / -2)', // Match the top curve depth responsively
-              bottom: 0,
-              left: 'var(--side-margin)',
-              width: 'var(--side-width)',
-              opacity: 0.9,
-              transform: 'scale(1)',
-              zIndex: 5
-            }}
-          >
-            <div 
-              className="absolute inset-0 bg-cover bg-center bg-no-repeat rounded-lg shadow-xl"
-              style={{ backgroundImage: `url(${heroSlides[(currentSlide - 1 + heroSlides.length) % heroSlides.length].image})` }}
-            >
-              <div className="absolute inset-0 bg-black/30 rounded-lg"></div>
-            </div>
-          </div>
-
-          {/* Next Image Preview - Right Side */}
-          <div
-            className="absolute transition-all duration-1000 ease-in-out transform"
-            style={{
-              top: 'calc(var(--curve-h) / -2)', // Match the top curve depth responsively
-              bottom: 0,
-              // Pull into the reserved right pad so it visually fills the remaining space
-              right: 'calc(var(--side-margin) - var(--content-right-pad))',
-              width: 'var(--side-width)',
-              opacity: 0.9,
-              transform: 'scale(1)',
-              zIndex: 5
-            }}
-          >
-            <div 
-              className="absolute inset-0 bg-cover bg-center bg-no-repeat rounded-lg shadow-xl"
-              style={{ backgroundImage: `url(${heroSlides[(currentSlide + 1) % heroSlides.length].image})` }}
-            >
-              <div className="absolute inset-0 bg-black/30 rounded-lg"></div>
-            </div>
-          </div>
-
-          {/* Main Center Images */}
+          {/* Unified slide system (desktop/tablet): center slide moves into left slot; new slides enter from right slot */}
           {heroSlides.map((slide, index) => {
             const total = heroSlides.length
-            // Base delta mod N from current
-            const delta = (index - currentSlide + total) % total
-            // Direction-aware positioning
-            // - next: immediate next (delta=1) sits right; others left
-            // - prev: immediate previous (delta=total-1) sits left; others right
-            const position = delta === 0
-              ? 'center'
-              : navDir === 'prev'
-                ? (delta === total - 1 ? 'left' : 'right')
-                : (delta === 1 ? 'right' : 'left')
-            const z = position === 'center' ? 12 : position === 'right' ? 11 : 9
-            useEffect(() => {
-              return () => {
-                if (resumeRef.current) clearTimeout(resumeRef.current)
+            const leftIndex = (currentSlide - 1 + total) % total
+            const rightIndex = (currentSlide + 1) % total
+            // Preload the next-right (for 'next' flow) or next-left (for 'prev' flow) so it is already in place
+            // when it transitions into visibility. This removes the "late load" pop-in effect.
+            let preloadRightIndex = null
+            let preloadLeftIndex = null
+            if (total > 3) {
+              if (navDir === 'next') {
+                preloadRightIndex = (currentSlide + 2) % total
+              } else if (navDir === 'prev') {
+                preloadLeftIndex = (currentSlide - 2 + total) % total
               }
-            }, [])
+            }
 
+            let role
+            if (index === currentSlide) role = 'center'
+            else if (index === leftIndex) role = 'left'
+            else if (index === rightIndex) role = 'right'
+            else if (preloadRightIndex !== null && index === preloadRightIndex) role = 'preload-right'
+            else if (preloadLeftIndex !== null && index === preloadLeftIndex) role = 'preload-left'
+            else role = 'hidden'
+
+            // Shared base styles
+            const baseStyle = {
+              position: 'absolute',
+              top: 'calc(var(--curve-h) / -2)',
+              bottom: 0,
+              transition: 'left 900ms cubic-bezier(0.22,1,0.36,1), right 900ms cubic-bezier(0.22,1,0.36,1), width 900ms cubic-bezier(0.22,1,0.36,1), opacity 700ms ease, transform 900ms cubic-bezier(0.22,1,0.36,1)',
+              overflow: 'hidden',
+              borderRadius: '14px',
+              willChange: 'left, right, width, opacity, transform',
+              backfaceVisibility: 'hidden',
+              WebkitBackfaceVisibility: 'hidden',
+              transformStyle: 'preserve-3d',
+              contain: 'layout paint style'
+            }
+
+            let positionalStyle = {}
+            if (role === 'center') {
+              positionalStyle = {
+                left: 'calc(var(--side-width) + var(--center-gap) + var(--side-margin) - 15px)',
+                right: 'calc(var(--side-width) + var(--center-gap) + var(--side-margin) - var(--content-right-pad, 0px) - 15px)',
+                width: 'auto',
+                opacity: 1,
+                zIndex: 12,
+                transform: 'scale(1) translateZ(0)'
+              }
+            } else if (role === 'left') {
+              positionalStyle = {
+                left: 'var(--side-margin)',
+                width: 'var(--side-width)',
+                right: 'auto',
+                opacity: 1,
+                zIndex: 10,
+                transform: 'scale(0.98) translateZ(0)'
+              }
+            } else if (role === 'right') {
+              positionalStyle = {
+                right: 'calc(var(--side-margin) - var(--content-right-pad, 0px))',
+                width: 'var(--side-width)',
+                left: 'auto',
+                opacity: 1,
+                zIndex: 10,
+                transform: 'scale(0.98) translateZ(0)'
+              }
+            } else if (role === 'preload-right') {
+              // Already placed in right slot but invisible; will fade in next cycle becoming 'right'
+              positionalStyle = {
+                right: 'calc(var(--side-margin) - var(--content-right-pad, 0px))',
+                width: 'var(--side-width)',
+                left: 'auto',
+                opacity: 0,
+                zIndex: 5,
+                transform: 'scale(0.95) translateZ(0)'
+              }
+            } else if (role === 'preload-left') {
+              positionalStyle = {
+                left: 'var(--side-margin)',
+                width: 'var(--side-width)',
+                right: 'auto',
+                opacity: 0,
+                zIndex: 5,
+                transform: 'scale(0.95) translateZ(0)'
+              }
+            } else {
+              positionalStyle = {
+                left: '50%',
+                // Keep width collapsed to avoid layout / overlapping; hidden slides will be reassigned later.
+                width: '0px',
+                opacity: 0,
+                zIndex: 1,
+                transform: 'scale(0.9) translateZ(0)'
+              }
+            }
+
+            const isLoaded = slide.image ? loadedMap.get(slide.image) : true
+            const finalOpacity = positionalStyle.opacity
+            // If not yet loaded and it's about to be needed (right or preload-right), keep it transparent until ready.
+            const delayOpacity = !isLoaded && (role === 'right' || role === 'preload-right' || role === 'center')
             return (
-              <div
-                key={slide.id}
-                className={`absolute transition-all duration-1000 ease-out transform ${
-                  position === 'center'
-                    ? 'translate-x-0 opacity-100 scale-100'
-                    : position === 'left'
-                      ? '-translate-x-full opacity-0 scale-95'
-                      : 'translate-x-full opacity-0 scale-95'
-                }`}
-                style={{
-                  top: 0,
-                  bottom: 0,
-                  left: 'calc(var(--side-width) + var(--center-gap) + var(--side-margin) - 15px)',
-                  // Compensate for extra right padding reserved for timer so gaps match
-                  right: 'calc(var(--side-width) + var(--center-gap) + var(--side-margin) - var(--content-right-pad, 0px) - 15px)',
-                  zIndex: z
-                }}
-              >
-              {/* Background Image - Width matches theater curve exactly */}
-              <div 
-                className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-                style={{ backgroundImage: `url(${slide.image})` }}
-              >
-                {/* Vertical overlay to emphasize horizontal stage, not a vertical stripe */}
-                <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/70"></div>
-              </div>
-
-              {/* Content positioned to stay inside the non-overlapping screen area */}
-              <div
-                className="relative z-10 flex items-center justify-center h-full px-4 md:px-6"
-                style={{ paddingTop: `${curveOverlap + 40}px`, paddingBottom: 'var(--bottom-overlap)' }}
-              >
-                <div className="max-w-5xl text-center">
-                  {/* Two-line headline only, both in H2 size */}
-                  <h2 className="text-2xl xs:text-[28px] md:text-3xl lg:text-4xl xl:text-5xl font-bold text-white leading-tight max-w-4xl mx-auto mb-2">
-                    {slide.title}
-                  </h2>
-                  <h2 className="text-2xl xs:text-[28px] md:text-3xl lg:text-4xl xl:text-5xl font-bold text-white leading-tight">
-                    {slide.subtitle}
-                  </h2>
+              <div key={slide.id} style={{ ...baseStyle, ...positionalStyle, opacity: delayOpacity ? 0 : finalOpacity }}>
+                <div 
+                  className="absolute inset-0 bg-cover bg-center bg-no-repeat will-change-transform"
+                  style={{ 
+                    backgroundImage: slide.image ? `url(${slide.image})` : 'none',
+                    backgroundColor: '#1d1d1d',
+                    backfaceVisibility: 'hidden',
+                    WebkitBackfaceVisibility: 'hidden',
+                    willChange: 'opacity, transform'
+                  }}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/70" />
                 </div>
-              </div>
-
-              {/* No per-slide timer */}
+                {/* Text removed as per request (plain image only) */}
               </div>
             )
           })}
@@ -368,16 +400,31 @@ const Hero = ({ timerData }) => {
             {heroSlides.map((slide, index) => {
               const total = heroSlides.length
               const delta = (index - currentSlide + total) % total
-              const position = delta === 0
-                ? 'center'
-                : navDir === 'prev'
-                  ? (delta === total - 1 ? 'left' : 'right')
-                  : (delta === 1 ? 'right' : 'left')
-              const baseTransforms = {
-                center: 'translateX(0%) scale(1)',
-                left: 'translateX(-100%) scale(0.98)',
-                right: 'translateX(100%) scale(0.98)'
+              // Force left-only flow on mobile stack
+              let position
+              if (isSmall()) {
+                if (delta === 0) position = 'center'
+                else if (delta === 1) position = 'right'
+                else position = 'left'
+              } else {
+                position = delta === 0
+                  ? 'center'
+                  : navDir === 'prev'
+                    ? (delta === total - 1 ? 'left' : 'right')
+                    : (delta === 1 ? 'right' : 'left')
               }
+              const small = isSmall()
+              const baseTransforms = small
+                ? {
+                    center: 'translate3d(0%, 0, 0) scale(1)',
+                    left: 'translate3d(-110%, 0, 0) scale(0.98)',
+                    right: 'translate3d(110%, 0, 0) scale(0.98)'
+                  }
+                : {
+                    center: 'translateX(0%) scale(1)',
+                    left: 'translateX(-100%) scale(0.98)',
+                    right: 'translateX(100%) scale(0.98)'
+                  }
               const z = position === 'center' ? 12 : position === 'right' ? 11 : 9
               return (
                 <div
@@ -385,31 +432,23 @@ const Hero = ({ timerData }) => {
                   className="absolute inset-0 will-change-transform"
                   style={{
                     transform: baseTransforms[position],
-                    transition: 'transform 1200ms cubic-bezier(0.22, 1, 0.36, 1), opacity 1200ms ease',
-                    opacity: position === 'center' ? 1 : 0.85,
-                    zIndex: z
+                    transition: 'transform 900ms cubic-bezier(0.22, 1, 0.36, 1), opacity 700ms ease',
+                    // On mobile, hide non-center slides completely to avoid any faded preview
+                    opacity: isSmall() ? (position === 'center' ? 1 : 0) : (position === 'center' ? 1 : 0.85),
+                    zIndex: z,
+                    willChange: 'transform, opacity',
+                    backfaceVisibility: 'hidden',
+                    WebkitBackfaceVisibility: 'hidden'
                   }}
                 >
                   <div
                     className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-                    style={{ backgroundImage: `url(${slide.image})` }}
+                    style={{ backgroundImage: `url(${slide.image})`, backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', willChange: 'transform, opacity' }}
                   >
                     <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/70"></div>
                   </div>
                   {/* Text content centered */}
-                  <div
-                    className="relative z-10 flex items-center justify-center h-full px-4 xs:px-5"
-                    style={{ paddingTop: `${curveOverlap + 24}px`, paddingBottom: 'var(--bottom-overlap)' }}
-                  >
-                    <div className="text-center">
-                      <h2 className="text-[22px] xxs:text-[24px] xs:text-[28px] font-bold text-white leading-tight mb-2">
-                        {slide.title}
-                      </h2>
-                      <h2 className="text-[22px] xxs:text-[24px] xs:text-[28px] font-bold text-white leading-tight">
-                        {slide.subtitle}
-                      </h2>
-                    </div>
-                  </div>
+                  {/* Text removed for mobile as well */}
                 </div>
               )
             })}

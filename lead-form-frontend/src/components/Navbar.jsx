@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import Ellipse7 from '../assets/Ellipse 7.svg'
+import GradientImage from '../assets/navbarEllipse-background.svg';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -68,6 +69,25 @@ const Navbar = () => {
 
   return (
     <>
+      {/* Top cover: navbar + upper ellipse area (all views) */}
+      <img
+        src={GradientImage}
+        alt=""
+        aria-hidden
+        className="pointer-events-none"
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: 'calc(clamp(200px, 45vw, 300px) + 120px)',
+          zIndex: 49, // just under header (z-50), above ellipse (z~45)
+          objectFit: 'cover',
+          objectPosition: 'top center',
+          mixBlendMode: 'screen',
+        }}
+      />
+
       <header 
         className={`
           relative top-0 left-0 w-full z-50 transition-all duration-300 ease-in-out
@@ -195,31 +215,25 @@ const Navbar = () => {
           {/* Mobile hamburger (hidden on desktop) */}
           <div className="ml-auto pr-2 xxs:pr-3 xs:pr-4 sm:hidden">
             <button
+              aria-expanded={isMenuOpen}
               type="button"
               aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
               onClick={() => setIsMenuOpen((v) => !v)}
-              className="inline-flex items-center justify-center p-2 focus:outline-none appearance-none bg-transparent hover:bg-transparent active:bg-transparent rounded-none border-0"
-              style={{ background: 'transparent', border: 'none' }}
+              className="navbar-toggle p-2 focus:outline-none focus:ring-0 bg-transparent border-0 shadow-none rounded-none appearance-none"
+              style={{ backgroundColor: 'transparent', border: 'none', borderRadius: 0, boxShadow: 'none', outline: 'none' }}
             >
               {isMenuOpen ? (
                 // Close icon (X)
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" className="w-6 h-6 block">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" className="w-6 h-6 transition-opacity duration-150 hover:opacity-80 active:opacity-70">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 6l12 12M18 6l-12 12" />
                 </svg>
               ) : (
-                // Hamburger icon (24x24, shrink-0) per spec
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  className="w-6 h-6 shrink-0 block"
-                >
-                  <path d="M3 12H21" stroke="white" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M3 6H21" stroke="white" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M3 18H21" stroke="white" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+                // Pure CSS hamburger (three bars)
+                <span className="block w-6 h-5 relative transition-opacity duration-150 hover:opacity-80 active:opacity-70" aria-hidden="true">
+                  <span className="absolute left-0 top-0 block h-[2px] w-6 bg-white rounded"></span>
+                  <span className="absolute left-0 top-1/2 -translate-y-1/2 block h-[2px] w-6 bg-white rounded"></span>
+                  <span className="absolute left-0 bottom-0 block h-[2px] w-6 bg-white rounded"></span>
+                </span>
               )}
             </button>
           </div>
@@ -234,10 +248,10 @@ const Navbar = () => {
               type="button"
               aria-label="Close menu"
               onClick={() => setIsMenuOpen(false)}
-              className="inline-flex items-center justify-center p-2 -ml-2 focus:outline-none appearance-none bg-transparent hover:bg-transparent active:bg-transparent rounded-none border-0"
-              style={{ background: 'transparent', border: 'none' }}
+              className="navbar-toggle p-2 -ml-2 focus:outline-none focus:ring-0 bg-transparent border-0 shadow-none rounded-none appearance-none"
+              style={{ backgroundColor: 'transparent', border: 'none', borderRadius: 0, boxShadow: 'none', outline: 'none' }}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" className="w-7 h-7 block">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" className="w-7 h-7 transition-opacity duration-150 hover:opacity-80 active:opacity-70">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 6l12 12M18 6l-12 12" />
               </svg>
             </button>

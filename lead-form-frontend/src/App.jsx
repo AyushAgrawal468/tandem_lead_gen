@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { apiUrl } from './lib/api';
 import LocationConsent from "./components/LocationConsent";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
@@ -27,11 +28,14 @@ function getSessionId() {
 function App() {
   const [showConsent, setShowConsent] = useState(false);
   const [timerData, setTimerData] = useState(null);
+  // One-time log guards to avoid console spam in dev/StrictMode
+  const logGuardsRef = useRef({ usedStoredLog: false, consentPrecheckLog: false });
+  const consentTimerRef = useRef(null);
 
   // Local countdown (mirrors backend logic): fixed start + 9 days
   useEffect(() => {
     let isMounted = true;
-    const FIXED_START_TIME = 1757894460000; // Sep 15, 2025 00:00:00 UTC (ms)
+    const FIXED_START_TIME = 1758672000000; // Sep 15, 2025 00:00:00 UTC (ms)
     const COUNTDOWN_DURATION_MS = 9 * 24 * 60 * 60 * 1000; // 9 days
     const END_TIME = FIXED_START_TIME + COUNTDOWN_DURATION_MS;
 
@@ -57,7 +61,7 @@ function App() {
   // helper to post location with fresh sessionId
   const postLocation = (loc) => {
     const sessionId = getSessionId(); // ✅ always fetch latest
-    fetch("http://localhost:8080/api/location", {
+    fetch(apiUrl('/api/location'), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -69,25 +73,22 @@ function App() {
         sessionId: sessionId,
       }),
     })
-      .then((res) => res.json())
+      .then(async (res) => {
+        if (!res.ok) {
+          const text = await res.text().catch(() => "");
+          throw new Error(`HTTP ${res.status} ${res.statusText} ${text ? '- ' + text : ''}`);
+        }
+        return res.json();
+      })
       .then((data) => console.log("✅ Saved to backend:", data))
-      .catch((err) => console.error("❌ Error sending location:", err));
+      .catch((err) => {
+        // Common causes: backend not running on 8080, proxy misconfig, CORS, or network
+        console.error("❌ Error sending location:", err);
+      });
   };
 
   useEffect(() => {
-    const CONSENT_KEY = "location_consent";
-    const LOCATION_KEY = "user_location";
-    const EXPIRE_DAYS = 365;
-
-    const setCookie = (name, value, days = EXPIRE_DAYS) => {
-      const expires = new Date(
-        Date.now() + days * 24 * 60 * 60 * 1000
-      ).toUTCString();
-      document.cookie = `${name}=${encodeURIComponent(
-        value
-      )}; expires=${expires}; path=/; SameSite=Lax`;
-    };
-
+    // Check if LocationConsent component has already handled consent
     const getCookie = (name) => {
       return document.cookie
         .split("; ")
@@ -98,111 +99,72 @@ function App() {
         );
     };
 
-    const saveConsent = (consent) => setCookie(CONSENT_KEY, consent);
+    const locationConsent = getCookie("locationConsent");
+    const userLocation = getCookie("userLocation");
+    const handled = (() => {
+      try { return sessionStorage.getItem("locationHandled") === "true"; } catch { return false; }
+    })();
 
-    const saveLocation = (obj) => {
-      setCookie(LOCATION_KEY, JSON.stringify(obj));
-      postLocation(obj); // ✅ reuse helper
-    };
-
-    const readLocation = () => {
-      try {
-        return JSON.parse(getCookie(LOCATION_KEY) || "null");
-      } catch {
-        return null;
+    // If LocationConsent component already handled this, don't show popup
+    if ((locationConsent === "true" && userLocation) || handled) {
+      if (!logGuardsRef.current.consentPrecheckLog) {
+        console.log("📍 Location consent already granted, using stored location");
+        logGuardsRef.current.consentPrecheckLog = true;
       }
-    };
-
-    const loadLocationContent = (location) => {
-      console.log("📍 Location loaded:", location);
-    };
-
-    const ipFallback = async () => {
-      try {
-        const res = await fetch("https://ipapi.co/json/");
-        if (!res.ok) throw new Error("IP lookup failed");
-        const j = await res.json();
-        if (j?.latitude && j?.longitude) {
-          const loc = {
-            lat: j.latitude,
-            lon: j.longitude,
-            city: j.city || null,
-            source: "ip",
-            ts: Date.now(),
-          };
-          saveLocation(loc);
-          loadLocationContent(loc);
-        }
-      } catch (e) {
-        console.warn("❌ IP fallback failed", e);
-      }
-    };
-
-    const requestGeolocation = () => {
-      if (!navigator.geolocation) {
-        ipFallback();
-        return;
-      }
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const loc = {
-            lat: pos.coords.latitude,
-            lon: pos.coords.longitude,
-            accuracy: pos.coords.accuracy,
-            city: null,
-            source: "device",
-            ts: Date.now(),
-          };
-          saveLocation(loc);
-          loadLocationContent(loc);
-        },
-        (err) => {
-          console.warn("❌ Geolocation error:", err);
-          if (err.code === err.PERMISSION_DENIED) saveConsent("denied");
-          ipFallback();
-        },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
-      );
-    };
-
-    const stored = readLocation();
-    if (stored) {
-      loadLocationContent(stored);
+      return;
     }
-    const timer = setTimeout(() => setShowConsent(true), 800);
-    return () => clearTimeout(timer);
+
+    // Only show consent popup if not already handled by LocationConsent component
+    const timer = setTimeout(() => {
+      // Double-check that LocationConsent didn't handle it in the meantime
+      const recheckConsent = getCookie("locationConsent");
+      let recheckHandled = false;
+      try { recheckHandled = sessionStorage.getItem("locationHandled") === "true"; } catch {}
+      if (recheckConsent !== "true" && !recheckHandled) {
+        setShowConsent(true);
+      }
+    }, 800);
+    consentTimerRef.current = timer;
+    
+    return () => {
+      if (consentTimerRef.current) {
+        clearTimeout(consentTimerRef.current);
+        consentTimerRef.current = null;
+      }
+    };
   }, []);
 
-  const handleConsent = (allowed) => {
-    const CONSENT_KEY = "location_consent";
+  const handleConsent = (allowed, sessionId, locationData, isFromStoredData = false) => {
     setShowConsent(false);
-    if (allowed) {
-      document.cookie = `${CONSENT_KEY}=granted; path=/; SameSite=Lax`;
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            const LOCATION_KEY = "user_location";
-            const loc = {
-              lat: pos.coords.latitude,
-              lon: pos.coords.longitude,
-              accuracy: pos.coords.accuracy,
-              city: null,
-              source: "device",
-              ts: Date.now(),
-            };
-            document.cookie = `${LOCATION_KEY}=${JSON.stringify(
-              loc
-            )}; path=/; SameSite=Lax`;
-            postLocation(loc); // ✅ reuse helper
-          },
-          (err) => {
-            console.warn("❌ Geolocation error:", err);
-          },
-          { enableHighAccuracy: true }
-        );
+    try { sessionStorage.setItem("locationHandled", "true"); } catch {}
+    if (consentTimerRef.current) {
+      clearTimeout(consentTimerRef.current);
+      consentTimerRef.current = null;
+    }
+    
+    if (allowed && locationData) {
+      // Only send to backend if this is fresh location data, not from stored cookies
+      if (!isFromStoredData) {
+        const loc = {
+          lat: locationData.latitude,
+          lon: locationData.longitude,
+          accuracy: locationData.accuracy || null,
+          city: null,
+          source: "device",
+          ts: locationData.timestamp,
+        };
+        postLocation(loc);
+        console.log("📍 Fresh location received and sent to backend:", loc);
+      } else {
+        if (!logGuardsRef.current.usedStoredLog) {
+          console.log("📍 Using stored location data (not sending to backend again)");
+          logGuardsRef.current.usedStoredLog = true;
+        }
       }
+    } else if (allowed && !locationData) {
+      console.log("📍 Permission granted but no location data received");
     } else {
-      document.cookie = `${CONSENT_KEY}=denied; path=/; SameSite=Lax`;
+      console.log("📍 Location permission denied by user");
     }
   };
 

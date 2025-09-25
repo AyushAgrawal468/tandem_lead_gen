@@ -33,6 +33,6 @@ public class LocationController {
     @PostMapping
     public ResponseEntity<LocationResponse> saveLocation(@Valid @RequestBody LocationRequest request) {
         UserLocation saved = service.saveLocationWithCity(request);
-        return ResponseEntity.ok(new LocationResponse(saved.getCity(), saved.getSessionId()));
+        return ResponseEntity.ok(new LocationResponse(saved.getCity(), saved.getSessionId(), saved.getLat(), saved.getLon(), saved.getAccuracy()));
     }
 }

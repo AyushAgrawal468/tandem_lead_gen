@@ -6,6 +6,9 @@ const Blog = () => {
   const [expandedId, setExpandedId] = useState(null)
   const [isExiting, setIsExiting] = useState(false)
   const closeTimeoutRef = useRef(null)
+  const mobileScrollRef = useRef(null)
+  const desktopScrollRef = useRef(null)
+  const [visibleSections, setVisibleSections] = useState(new Set())
   
   const blogPosts = [
     {
@@ -179,6 +182,8 @@ The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools have
     if (!expandedId) return
     setIsExiting(true)
     if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current)
+    // Reset visible sections when closing
+    setVisibleSections(new Set())
     // Match CSS exit duration (~600ms)
     closeTimeoutRef.current = setTimeout(() => {
       setIsExiting(false)
@@ -194,6 +199,8 @@ The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools have
     }
     setIsExiting(false)
     setExpandedId(id)
+    // Reset visible sections when opening new overlay
+    setVisibleSections(new Set())
   }
 
   const nextSlide = () => {
@@ -209,6 +216,85 @@ The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools have
   const visiblePosts = blogPosts.slice(currentIndex, currentIndex + 2)
   const mobilePost = blogPosts[currentIndex % blogPosts.length]
   const expandedPost = expandedId ? blogPosts.find(p => p.id === expandedId) : null
+
+  // Scroll animation observer for text sections
+  useEffect(() => {
+    if (!expandedPost) return
+
+    let observer = null
+    
+    const setupObserver = () => {
+      // Clean up previous observer
+      if (observer) observer.disconnect()
+      
+      // Determine which scroll container to use based on screen size
+      const isMobile = window.innerWidth < 640
+      const scrollContainer = isMobile ? mobileScrollRef.current : desktopScrollRef.current
+      
+      if (!scrollContainer) {
+        console.log('No scroll container found:', { isMobile, mobile: !!mobileScrollRef.current, desktop: !!desktopScrollRef.current })
+        return
+      }
+
+      observer = new IntersectionObserver(
+        (entries) => {
+          setVisibleSections(prev => {
+            const newVisibleSections = new Set(prev)
+            entries.forEach((entry) => {
+              const sectionId = entry.target.dataset.sectionId
+              if (entry.isIntersecting && entry.intersectionRatio > 0.15) {
+                newVisibleSections.add(sectionId)
+              } else {
+                newVisibleSections.delete(sectionId)
+              }
+            })
+            return newVisibleSections
+          })
+        },
+        {
+          root: scrollContainer,
+          rootMargin: '-10% 0px -60% 0px',
+          threshold: [0.1, 0.15, 0.3, 0.5]
+        }
+      )
+
+      // Small delay to ensure DOM is ready
+      setTimeout(() => {
+        const textSections = scrollContainer.querySelectorAll('.blog-text-section')
+        console.log('Found text sections:', textSections.length)
+        textSections.forEach((section) => observer.observe(section))
+      }, 200)
+    }
+
+    setupObserver()
+    
+    // Listen for window resize to reestablish observer
+    const handleResize = () => {
+      setTimeout(setupObserver, 100)
+    }
+    window.addEventListener('resize', handleResize)
+
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      if (observer) observer.disconnect()
+    }
+  }, [expandedPost])
+
+  // Split content into paragraphs for individual animation
+  const formatContentWithSections = (content) => {
+    const paragraphs = content.split('\n\n').filter(p => p.trim())
+    return paragraphs.map((paragraph, index) => (
+      <p
+        key={index}
+        data-section-id={`section-${index}`}
+        className={`blog-text-section ${
+          visibleSections.has(`section-${index}`) ? 'text-active' : ''
+        }`}
+      >
+        {paragraph}
+      </p>
+    ))
+  }
 
   // Close overlay on ESC
   useEffect(() => {
@@ -317,23 +403,28 @@ The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools have
         {expandedPost && (
           <div className={`absolute inset-0 z-50 px-4 xxs:px-5 xs:px-6 py-4 xxs:py-5 xs:py-6 blog-overlay ${isExiting ? 'is-exiting' : ''}`} style={{ background: 'rgba(0,0,0,0.0)' }}>
             <div
-              className="relative h-full w-full rounded-2xl p-6 overflow-y-auto blog-overlay-card"
+              className="relative h-full w-full rounded-2xl p-6 blog-overlay-card flex flex-col"
               style={{
                 background: 'rgba(255, 255, 255, 0.10)',
                 backdropFilter: 'blur(50px)',
                 WebkitBackdropFilter: 'blur(50px)'
               }}
             >
+              {/* Close button pinned to card corner; content below scrolls */}
               <button
                 aria-label="Close"
                 onClick={handleCloseOverlay}
-                className="absolute top-3 right-3 w-12 h-12 rounded-full flex items-center justify-center hover:opacity-80"
+                className="blog-close-btn absolute top-3 right-3 w-12 h-12 rounded-full flex items-center justify-center z-20"
                 style={{ backgroundColor: 'rgba(60,60,60,1)', border: 'none' }}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
               </button>
-              <h3 className="text-2xl font-bold text-texthigh mb-4 leading-tight" style={{ paddingRight: '72px' }}>{expandedPost.title}</h3>
-              <p className="text-textmid leading-relaxed whitespace-pre-line">{expandedPost.content}</p>
+              <div className="flex-1 overflow-y-auto blog-scroll pr-1" style={{ paddingTop: '4px', paddingBottom: '50vh' }} ref={mobileScrollRef}>
+                <h3 className="text-2xl font-bold text-texthigh mb-4 leading-tight" style={{ paddingRight: '72px' }}>{expandedPost.title}</h3>
+                <div className="text-textmid">
+                  {formatContentWithSections(expandedPost.content)}
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -475,23 +566,28 @@ The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools have
         {expandedPost && (
           <div className={`absolute inset-0 z-50 p-6 md:p-10 blog-overlay ${isExiting ? 'is-exiting' : ''}`} style={{ background: 'rgba(0,0,0,0.0)' }}>
             <div
-              className="relative h-full w-full rounded-2xl p-8 md:p-10 overflow-y-auto blog-overlay-card"
+              className="relative h-full w-full rounded-2xl p-8 md:p-10 blog-overlay-card flex flex-col"
               style={{
                 background: 'rgba(255, 255, 255, 0.10)',
                 backdropFilter: 'blur(50px)',
                 WebkitBackdropFilter: 'blur(50px)'
               }}
             >
+              {/* Close button pinned to card corner; content below scrolls */}
               <button
                 aria-label="Close"
                 onClick={handleCloseOverlay}
-                className="absolute top-4 right-4 w-14 h-14 rounded-full flex items-center justify-center hover:opacity-80"
+                className="blog-close-btn absolute top-4 right-4 w-14 h-14 rounded-full flex items-center justify-center z-20"
                 style={{ backgroundColor: 'rgba(60,60,60,1)', border: 'none' }}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
               </button>
-              <h3 className="text-3xl md:text-4xl font-bold text-texthigh mb-6 leading-tight">{expandedPost.title}</h3>
-              <p className="text-textmid text-lg md:text-xl leading-relaxed whitespace-pre-line">{expandedPost.content}</p>
+              <div className="flex-1 overflow-y-auto blog-scroll pr-2" style={{ paddingTop: '4px', paddingBottom: '50vh' }} ref={desktopScrollRef}>
+                <h3 className="text-3xl md:text-4xl font-bold text-texthigh mb-6 leading-tight">{expandedPost.title}</h3>
+                <div className="text-textmid text-lg md:text-xl">
+                  {formatContentWithSections(expandedPost.content)}
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -507,13 +603,62 @@ The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools have
         }
         .blog-overlay-card { 
           transform-origin: center center;
-          animation: blogCardIn 450ms cubic-bezier(0.22, 1, 0.36, 1) forwards; 
+          animation: blogCardIn 450ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
         }
+        .blog-scroll { 
+          /* Hide scrollbar for all browsers */
+          scrollbar-width: none; /* Firefox */
+          -ms-overflow-style: none; /* IE 10+ */
+          scroll-behavior: smooth;
+        }
+        .blog-scroll::-webkit-scrollbar { display: none; }
         .blog-overlay.is-exiting .blog-overlay-card { 
           animation: blogCardOut 600ms cubic-bezier(0.33, 1, 0.68, 1) forwards; 
         }
         @keyframes blogCardIn { from { transform: translateY(12px) scale(0.98) } to { transform: translateY(0) scale(1) } }
         @keyframes blogCardOut { from { transform: translateY(0) scale(1) } to { transform: translateY(10px) scale(0.86) } }
+        
+        /* Scroll-based text animation effects */
+        .blog-text-section {
+          transform-origin: left center;
+          will-change: opacity, transform, font-weight, color;
+          transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+          line-height: 1.7;
+          margin-bottom: 1.5rem;
+          /* Default faded state */
+          opacity: 0.4;
+          font-weight: 400;
+          color: rgba(255, 255, 255, 0.6);
+          transform: translateY(4px) scale(0.99);
+          text-shadow: none;
+        }
+        
+        /* Active state - in viewport - using attribute selector for better specificity */
+        .blog-text-section.text-active {
+          opacity: 1 !important;
+          font-weight: 600 !important;
+          color: rgba(255, 255, 255, 0.95) !important;
+          transform: translateY(0) scale(1) !important;
+          text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Enhanced contrast for mobile */
+        @media (max-width: 640px) {
+          .blog-text-section {
+            opacity: 0.3 !important;
+            font-weight: 300 !important;
+            color: rgba(255, 255, 255, 0.5) !important;
+            transform: translateY(6px) scale(0.98) !important;
+          }
+          .blog-text-section.text-active {
+            opacity: 1 !important;
+            font-weight: 700 !important;
+            color: rgba(255, 255, 255, 1) !important;
+            transform: translateY(0) scale(1) !important;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+          }
+        }
+        
         @media (min-width: 768px) and (max-width: 1023.98px) {
           .blog-text-md {
             display: -webkit-box;
@@ -527,6 +672,53 @@ The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools have
             -webkit-box-orient: vertical;
             overflow: hidden;
           }
+        }
+
+        /* Unified close button interaction (white pulse everywhere) */
+        .blog-close-btn { 
+          position: absolute; 
+          cursor: pointer; 
+          transition: transform .25s, background-color .25s, opacity .25s; 
+          -webkit-tap-highlight-color: transparent !important; 
+          -webkit-touch-callout: none !important;
+          -webkit-user-select: none !important;
+          -moz-user-select: none !important;
+          -ms-user-select: none !important;
+          user-select: none !important;
+          outline: none !important; 
+          tap-highlight-color: transparent !important;
+        }
+        .blog-close-btn:hover { opacity: .85; }
+        .blog-close-btn:active { 
+          transform: scale(.92); 
+          background-color: rgba(255,255,255,0.15) !important;
+        }
+        .blog-close-btn:focus { outline: none !important; }
+        .blog-close-btn:focus-visible { 
+          box-shadow: 0 0 0 3px rgba(255,255,255,0.35) !important; 
+          outline: none !important;
+        }
+        .blog-close-btn::before { 
+          content: ""; 
+          position: absolute; 
+          inset: -8px; 
+          border-radius: 50%; 
+          background: rgba(255,255,255,0.2); 
+          opacity: 0; 
+          transform: scale(.3); 
+          transition: opacity .3s ease, transform .4s cubic-bezier(.22,1,.36,1); 
+          pointer-events: none; 
+          z-index: -1;
+        }
+        .blog-close-btn:active::before { 
+          opacity: 1; 
+          transform: scale(1.2); 
+          animation: blogCloseRipple .5s ease-out forwards; 
+        }
+        @keyframes blogCloseRipple { 
+          0% { opacity: .6; transform: scale(.3); background: rgba(255,255,255,0.4); } 
+          50% { opacity: .3; transform: scale(1); background: rgba(255,255,255,0.25); } 
+          100% { opacity: 0; transform: scale(1.4); background: rgba(255,255,255,0); } 
         }
       `}</style>
     </>

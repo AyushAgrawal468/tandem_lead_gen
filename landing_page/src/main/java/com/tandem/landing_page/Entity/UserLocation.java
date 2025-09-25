@@ -10,6 +10,9 @@ public class UserLocation {
     private Long id;
     private String city;
     private String sessionId;
+    private Double lat;
+    private Double lon;
+    private Double accuracy;
 
     // Getters and Setters
 
@@ -35,6 +38,30 @@ public class UserLocation {
 
     public void setSessionId(String sessionId) {
         this.sessionId = sessionId;
+    }
+
+    public Double getLat() {
+        return lat;
+    }
+
+    public void setLat(Double lat) {
+        this.lat = lat;
+    }
+
+    public Double getLon() {
+        return lon;
+    }
+
+    public void setLon(Double lon) {
+        this.lon = lon;
+    }
+
+    public Double getAccuracy() {
+        return accuracy;
+    }
+
+    public void setAccuracy(Double accuracy) {
+        this.accuracy = accuracy;
     }
 }
 

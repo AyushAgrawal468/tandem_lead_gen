@@ -58,10 +58,13 @@ public class LocationService {
             e.printStackTrace();
         }
 
-        // Save only city + sessionId
+        // Save city, sessionId, lat, lon, and accuracy
         UserLocation loc = new UserLocation();
         loc.setCity(city);
         loc.setSessionId(request.getSessionId());
+        loc.setLat(request.getLat());
+        loc.setLon(request.getLon());
+        loc.setAccuracy(request.getAccuracy());
 
         return repository.save(loc);
     }

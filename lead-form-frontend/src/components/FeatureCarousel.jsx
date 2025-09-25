@@ -279,10 +279,11 @@ const FeatureCarousel = ({ items = sampleItems, belowLeft = null }) => {
             const isActive = i === index;
             const preview = !isActive;
             return (
-              <div
+              <img
                 key={it.id}
-                // no external measurement refs needed; widths are computed analytically
-                className="relative shrink-0 rounded-2xl overflow-hidden bg-gray-800/40 flex items-center justify-center"
+                src={it.image}
+                alt={`Feature ${it.id}`}
+                className="shrink-0 rounded-2xl"
                 style={{
                   boxSizing: 'border-box',
                   width: isActive ? (isMd ? `${activeWidths[i] ?? cardW}px` : 'var(--card-w)') : 'auto',
@@ -292,21 +293,16 @@ const FeatureCarousel = ({ items = sampleItems, belowLeft = null }) => {
                   border: isActive ? '2px solid rgba(255,255,255,0.6)' : '1px solid rgba(255,255,255,0.15)',
                   boxShadow: isActive ? '0 8px 24px rgba(0,0,0,0.35)' : 'none',
                   transform: `${isActive ? 'scale(1.02)' : 'scale(0.96)'}${(preview && i > index && vw >= 640) ? ` translateY(${rightPreviewOffset}px)` : ''}`,
-                  transition: 'transform 400ms, box-shadow 400ms, border-color 400ms, height 400ms',
-                  background: '#23243a',
+                  transition: 'transform 400ms, box-shadow 400ms, border-color 400ms, height 400ms, width 400ms',
+                  objectFit: 'contain',
+                  objectPosition: 'center center',
+                  display: 'block',
+                  margin: 0,
+                  padding: 0,
                 }}
-              >
-                <img
-                  src={it.image}
-                  alt={`Feature ${it.id}`}
-                  className={isActive 
-                    ? "w-full h-full object-contain"
-                    : "h-full w-auto"}
-                  style={{ display: 'block', margin: 0, padding: 0, background: '#23243a', maxWidth: isActive ? undefined : 'var(--card-w)' }}
-                  draggable={false}
-                  loading="lazy"
-                />
-              </div>
+                draggable={false}
+                loading="lazy"
+              />
             );
           })}
         </div>

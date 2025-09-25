@@ -1,4 +1,6 @@
 import React, { useState } from 'react'
+import { apiUrl } from '../lib/api'
+import WaitlistBg from '../assets/waitlist-background.svg'
 
 const Waitlist = () => {
 
@@ -166,7 +168,7 @@ const Waitlist = () => {
   const submitLead = async (payload) => {
     setSubmitting(true);
     try {
-      const res = await fetch("http://localhost:8080/api/leads", {
+      const res = await fetch(apiUrl('https://tandem.it.com/api/leads'), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -258,8 +260,33 @@ const Waitlist = () => {
       )}
 
       {/* Mobile-only layout: stacked rewards + form */}
-  <section id="waitlist" className="block sm:hidden py-10 xxs:py-12 xs:py-14 px-4 xxs:px-5 xs:px-6" style={{ scrollMarginTop: '-13vh', background: '#23243a', borderRadius: '0px' }}>
-        <div className="w-full max-w-xl mx-auto">
+  <section
+        id="waitlist"
+        className="block sm:hidden py-10 xxs:py-12 xs:py-14 px-4 xxs:px-5 xs:px-6"
+        style={{
+          scrollMarginTop: '-13vh',
+          borderRadius: '0px',
+          backgroundColor: '#191919',
+          position: 'relative',
+        }}
+      >
+        {/* Exact SVG as contained background via img */}
+        <img
+          src={WaitlistBg}
+          alt=""
+          aria-hidden
+          className="pointer-events-none absolute inset-0 w-full h-full object-contain waitlist-bg-mobile"
+          style={{ zIndex: 0 }}
+        />
+        {/* Gradient overlay for mobile */}
+        <div 
+          className="pointer-events-none absolute inset-0 w-full h-full"
+          style={{ 
+            zIndex: 1,
+            background: 'linear-gradient(180deg, rgba(25,25,25,0.1) 0%, rgba(25,25,25,0.3) 40%, rgba(25,25,25,0.6) 80%, rgba(25,25,25,0.8) 100%)'
+          }}
+        />
+        <div className="w-full max-w-xl mx-auto" style={{ position: 'relative', zIndex: 2 }}>
           <h2 className="text-white font-bold text-[34px] xxs:text-[38px] xs:text-4xl text-center" style={{ fontFamily: 'Anek Latin, sans-serif', lineHeight: '120%' }}>Waitlist</h2>
           <div className="mt-1 xxs:mt-2 text-center text-white/90 text-base xxs:text-lg">Signup to get exclusive rewards</div>
 
@@ -395,8 +422,33 @@ const Waitlist = () => {
       </section>
 
       {/* Desktop & tablet layout — unchanged */}
-  <section id="waitlist" className="hidden sm:block px-6 pt-20 md:pt-12 lg:pt-20 pb-20 md:-mt-40 lg:-mt-[180px]" style={{ scrollMarginTop: '-13vh', background: '#23243a', borderRadius: '0px' }}>
-        <div className="w-full flex justify-center">
+  <section
+        id="waitlist"
+        className="hidden sm:block px-6 pt-20 md:pt-12 lg:pt-20 pb-20 md:-mt-40 lg:-mt-[180px]"
+        style={{
+          scrollMarginTop: '-13vh',
+          borderRadius: '0px',
+          backgroundColor: '#191919',
+          position: 'relative',
+        }}
+      >
+        {/* Exact SVG as contained background via img */}
+        <img
+          src={WaitlistBg}
+          alt=""
+          aria-hidden
+          className="pointer-events-none absolute inset-0 w-full h-full sm:object-contain sm:object-top md:object-cover md:object-top sm:waitlist-bg-sm"
+          style={{ zIndex: 0 }}
+        />
+        {/* sm-only gradient overlay covering full height; hidden on md+ to avoid desktop tamper */}
+        <div
+          className="pointer-events-none hidden sm:block md:hidden absolute inset-0 w-full h-full"
+          style={{
+            zIndex: 1,
+            background: 'linear-gradient(180deg, rgba(25,25,25,0.1) 0%, rgba(25,25,25,0.3) 40%, rgba(25,25,25,0.6) 80%, rgba(25,25,25,0.8) 100%)'
+          }}
+        />
+        <div className="w-full flex justify-center" style={{ position: 'relative', zIndex: 1 }}>
           {/* Waitlist form only, image removed */}
           <div>
             {/* ...existing code... duplicated from original desktop view ... */}
