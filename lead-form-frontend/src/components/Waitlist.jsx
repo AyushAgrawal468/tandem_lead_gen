@@ -168,7 +168,7 @@ const Waitlist = () => {
   const submitLead = async (payload) => {
     setSubmitting(true);
     try {
-      const res = await fetch(apiUrl('https://tandem.it.com/api/leads'), {
+      const res = await fetch(apiUrl('/api/leads'), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -262,7 +262,7 @@ const Waitlist = () => {
       {/* Mobile-only layout: stacked rewards + form */}
   <section
         id="waitlist"
-        className="block sm:hidden py-10 xxs:py-12 xs:py-14 px-4 xxs:px-5 xs:px-6"
+        className="block md:hidden py-10 xxs:py-12 xs:py-14 px-4 xxs:px-5 xs:px-6"
         style={{
           scrollMarginTop: '-13vh',
           borderRadius: '0px',
@@ -270,22 +270,18 @@ const Waitlist = () => {
           position: 'relative',
         }}
       >
-        {/* Exact SVG as contained background via img */}
-        <img
-          src={WaitlistBg}
-          alt=""
+        {/* Removed mobile SVG image to eliminate previous top-only gradient; now using pure CSS gradient below */}
+        <div aria-hidden className="absolute inset-0" style={{ zIndex: 0, background: '#191919' }} />
+        {/* Full-height mobile gradient overlay to replicate Figma green (top) -> purple (bottom) glow */}
+        <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 w-full h-full object-contain waitlist-bg-mobile"
-          style={{ zIndex: 0 }}
-        />
-        {/* Gradient overlay for mobile */}
-        <div 
-          className="pointer-events-none absolute inset-0 w-full h-full"
-          style={{ 
+          className="pointer-events-none absolute inset-0"
+          style={{
             zIndex: 1,
-            background: 'linear-gradient(180deg, rgba(25,25,25,0.1) 0%, rgba(25,25,25,0.3) 40%, rgba(25,25,25,0.6) 80%, rgba(25,25,25,0.8) 100%)'
+            background: `linear-gradient(180deg, rgba(202,255,77,0.18) 0%, rgba(202,255,77,0.12) 8%, rgba(25,25,25,0) 38%, rgba(131,73,255,0.06) 62%, rgba(131,73,255,0.12) 80%, rgba(131,73,255,0.16) 100%)`
           }}
         />
+        {/* SVG background shows naturally without overlay */}
         <div className="w-full max-w-xl mx-auto" style={{ position: 'relative', zIndex: 2 }}>
           <h2 className="text-white font-bold text-[34px] xxs:text-[38px] xs:text-4xl text-center" style={{ fontFamily: 'Anek Latin, sans-serif', lineHeight: '120%' }}>Waitlist</h2>
           <div className="mt-1 xxs:mt-2 text-center text-white/90 text-base xxs:text-lg">Signup to get exclusive rewards</div>
@@ -323,7 +319,7 @@ const Waitlist = () => {
                   marginRight: '24px'
                 }} />
                 <div>
-                  <div style={{ color: '#8349FF', fontWeight: 700, fontSize: '1rem', lineHeight: '1.25', marginBottom: '2px' }}>{reward.title}</div>
+                  <div style={{ color: 'rgba(146, 95, 255, 1)', fontWeight: 700, fontSize: '1rem', lineHeight: '1.25', marginBottom: '2px' }}>{reward.title}</div>
                   <div style={{ color: '#fff', fontSize: '0.95rem', lineHeight: '1.35' }}>{reward.description}</div>
                 </div>
               </div>
@@ -421,10 +417,10 @@ const Waitlist = () => {
         </div>
       </section>
 
-      {/* Desktop & tablet layout — unchanged */}
-  <section
+      {/* Desktop & tablet layout (md and up) */}
+      <section
         id="waitlist"
-        className="hidden sm:block px-6 pt-20 md:pt-12 lg:pt-20 pb-20 md:-mt-40 lg:-mt-[180px]"
+        className="hidden md:block px-6 pt-20 md:pt-12 lg:pt-20 pb-20 md:-mt-40 lg:-mt-[180px]"
         style={{
           scrollMarginTop: '-13vh',
           borderRadius: '0px',
@@ -437,21 +433,14 @@ const Waitlist = () => {
           src={WaitlistBg}
           alt=""
           aria-hidden
-          className="pointer-events-none absolute inset-0 w-full h-full sm:object-contain sm:object-top md:object-cover md:object-top sm:waitlist-bg-sm"
-          style={{ zIndex: 0 }}
+          // For small screens (sm) use object-cover to fill full height; md+ already uses object-cover, so desktop unchanged.
+          className="pointer-events-none absolute inset-0 w-full h-full sm:object-cover sm:object-top md:object-cover md:object-top sm:waitlist-bg-sm"
+          style={{ zIndex: 0, objectPosition: 'top center' }}
         />
-        {/* sm-only gradient overlay covering full height; hidden on md+ to avoid desktop tamper */}
-        <div
-          className="pointer-events-none hidden sm:block md:hidden absolute inset-0 w-full h-full"
-          style={{
-            zIndex: 1,
-            background: 'linear-gradient(180deg, rgba(25,25,25,0.1) 0%, rgba(25,25,25,0.3) 40%, rgba(25,25,25,0.6) 80%, rgba(25,25,25,0.8) 100%)'
-          }}
-        />
-        <div className="w-full flex justify-center" style={{ position: 'relative', zIndex: 1 }}>
+        {/* SVG background shows naturally on sm without overlay */}
+        <div className="w-full flex justify-center" style={{ position: 'relative', zIndex: 2 }}>
           {/* Waitlist form only, image removed */}
           <div>
-            {/* ...existing code... duplicated from original desktop view ... */}
             <div className="mb-8">
               <h2 
                 className="mb-2 text-white font-bold"
@@ -499,7 +488,7 @@ const Waitlist = () => {
                   minHeight: '120px',
                   transition: 'all 0.5s',
                 }}>
-                  {rewards.slice(carouselPage * 2, carouselPage * 2 + 2).map((reward, idx) => (
+                  {rewards.slice(carouselPage * 2, carouselPage * 2 + 2).map((reward) => (
                     <div key={reward.title} style={{
                       display: 'flex',
                       flexDirection: 'row',
@@ -704,8 +693,6 @@ const Waitlist = () => {
                   )}
                 </div>
 
-                
-
                 <button
                   type="submit"
                   className="w-full font-semibold waitlist-join-btn"
@@ -735,6 +722,7 @@ const Waitlist = () => {
           </div>
         </div>
       </section>
+
     </>
   )
 }

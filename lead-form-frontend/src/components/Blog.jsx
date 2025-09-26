@@ -283,17 +283,23 @@ The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools have
   // Split content into paragraphs for individual animation
   const formatContentWithSections = (content) => {
     const paragraphs = content.split('\n\n').filter(p => p.trim())
-    return paragraphs.map((paragraph, index) => (
-      <p
-        key={index}
-        data-section-id={`section-${index}`}
-        className={`blog-text-section ${
-          visibleSections.has(`section-${index}`) ? 'text-active' : ''
-        }`}
-      >
-        {paragraph}
-      </p>
-    ))
+    return paragraphs.map((paragraph, index) => {
+      const isLastParagraph = index === paragraphs.length - 1
+      const isCallToAction = paragraph.toLowerCase().includes('conclusion') || paragraph.toLowerCase().includes('call to action')
+      return (
+        <p
+          key={index}
+          data-section-id={`section-${index}`}
+          className={`blog-text-section ${
+            visibleSections.has(`section-${index}`) ? 'text-active' : ''
+          } ${
+            isLastParagraph || isCallToAction ? 'conclusion-text' : ''
+          }`}
+        >
+          {paragraph}
+        </p>
+      )
+    })
   }
 
   // Close overlay on ESC
@@ -419,7 +425,7 @@ The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools have
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
               </button>
-              <div className="flex-1 overflow-y-auto blog-scroll pr-1" style={{ paddingTop: '4px', paddingBottom: '50vh' }} ref={mobileScrollRef}>
+              <div className="flex-1 overflow-y-auto blog-scroll pr-1" style={{ paddingTop: '4px', paddingBottom: '25vh' }} ref={mobileScrollRef}>
                 <h3 className="text-2xl font-bold text-texthigh mb-4 leading-tight" style={{ paddingRight: '72px' }}>{expandedPost.title}</h3>
                 <div className="text-textmid">
                   {formatContentWithSections(expandedPost.content)}
@@ -582,9 +588,9 @@ The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools have
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
               </button>
-              <div className="flex-1 overflow-y-auto blog-scroll pr-2" style={{ paddingTop: '4px', paddingBottom: '50vh' }} ref={desktopScrollRef}>
-                <h3 className="text-3xl md:text-4xl font-bold text-texthigh mb-6 leading-tight">{expandedPost.title}</h3>
-                <div className="text-textmid text-lg md:text-xl">
+              <div className="flex-1 overflow-y-auto blog-scroll pr-2" style={{ paddingTop: '4px', paddingBottom: '25vh' }} ref={desktopScrollRef}>
+                <h3 className="text-3xl md:text-4xl font-bold text-texthigh mb-6 leading-tight max-w-full break-words" style={{ paddingRight: '80px' }}>{expandedPost.title}</h3>
+                <div className="text-textmid text-lg md:text-xl max-w-full break-words overflow-wrap-anywhere">
                   {formatContentWithSections(expandedPost.content)}
                 </div>
               </div>
@@ -610,8 +616,22 @@ The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools have
           scrollbar-width: none; /* Firefox */
           -ms-overflow-style: none; /* IE 10+ */
           scroll-behavior: smooth;
+          /* Ensure proper containment */
+          contain: layout style paint;
         }
         .blog-scroll::-webkit-scrollbar { display: none; }
+        
+        /* Desktop overlay text container constraints */
+        @media (min-width: 640px) {
+          .blog-overlay-card {
+            max-width: 100vw;
+            overflow: hidden;
+          }
+          .blog-scroll {
+            width: 100%;
+            max-width: calc(100vw - 8rem);
+          }
+        }
         .blog-overlay.is-exiting .blog-overlay-card { 
           animation: blogCardOut 600ms cubic-bezier(0.33, 1, 0.68, 1) forwards; 
         }
@@ -631,6 +651,12 @@ The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools have
           color: rgba(255, 255, 255, 0.6);
           transform: translateY(4px) scale(0.99);
           text-shadow: none;
+          /* Ensure proper text wrapping */
+          word-wrap: break-word;
+          overflow-wrap: break-word;
+          hyphens: auto;
+          max-width: 100%;
+          white-space: pre-wrap;
         }
         
         /* Active state - in viewport - using attribute selector for better specificity */
@@ -640,6 +666,18 @@ The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools have
           color: rgba(255, 255, 255, 0.95) !important;
           transform: translateY(0) scale(1) !important;
           text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Conclusion/Call-to-Action text styling */
+        .blog-text-section.conclusion-text {
+          font-weight: 700 !important;
+          color: rgba(255, 255, 255, 0.9) !important;
+          margin-bottom: 2rem !important;
+        }
+        .blog-text-section.conclusion-text.text-active {
+          font-weight: 800 !important;
+          color: rgba(255, 255, 255, 1) !important;
+          text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
         }
         
         /* Enhanced contrast for mobile */
@@ -656,6 +694,11 @@ The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools have
             color: rgba(255, 255, 255, 1) !important;
             transform: translateY(0) scale(1) !important;
             text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+          }
+          .blog-text-section.conclusion-text.text-active {
+            font-weight: 800 !important;
+            color: rgba(255, 255, 255, 1) !important;
+            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4) !important;
           }
         }
         

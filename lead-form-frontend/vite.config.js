@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://tandem.it.com/api/leads',
+        target: 'https://tandem.it.com',
         changeOrigin: true,
         secure: false,
       },

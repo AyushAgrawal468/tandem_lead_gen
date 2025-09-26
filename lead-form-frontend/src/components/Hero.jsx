@@ -201,6 +201,8 @@ const Hero = ({ timerData }) => {
       zIndex: 10,
       minHeight: 'calc(100vh - 80px)',
       height: 'auto',
+      backgroundColor: 'transparent',
+      isolation: 'isolate'
     }}
   >
       {/* Mobile IMAX top curve using provided Ellipse 5 */}
@@ -227,6 +229,7 @@ const Hero = ({ timerData }) => {
   ['--hero-bottom-extend']: 'clamp(8px, 5vw, 80px)',
   ['--hero-max-h']: 'clamp(220px, 100vh, 100vh)',
   ['--bottom-curve-h']: BOTTOM_CURVE_H_VAR,
+      backgroundColor: 'transparent'
     }}
   >
         
@@ -253,7 +256,7 @@ const Hero = ({ timerData }) => {
           {/* Solid base background so side areas don't show any image through */}
           <div
             className="absolute inset-0"
-            style={{ background: 'rgba(17, 17, 17, 1)', zIndex: 0 }}
+            style={{ background: 'transparent', zIndex: 0 }}
           />
           {/* Unified slide system (desktop/tablet): center slide moves into left slot; new slides enter from right slot */}
           {heroSlides.map((slide, index) => {
@@ -363,13 +366,12 @@ const Hero = ({ timerData }) => {
                   className="absolute inset-0 bg-cover bg-center bg-no-repeat will-change-transform"
                   style={{ 
                     backgroundImage: slide.image ? `url(${slide.image})` : 'none',
-                    backgroundColor: '#1d1d1d',
+                    backgroundColor: 'transparent',
                     backfaceVisibility: 'hidden',
                     WebkitBackfaceVisibility: 'hidden',
                     willChange: 'opacity, transform'
                   }}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/70" />
                 </div>
                 {/* Text removed as per request (plain image only) */}
               </div>
@@ -386,14 +388,15 @@ const Hero = ({ timerData }) => {
             top: 0,
             width: 'min(90vw, 360px)',
             height: '326px',
-            flexShrink: 0
+            flexShrink: 0,
+            backgroundColor: 'transparent'
           }}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
           {/* Solid base background */}
-          <div className="absolute inset-0" style={{ background: 'rgba(17, 17, 17, 1)', zIndex: 0 }} />
+          <div className="absolute inset-0" style={{ background: 'transparent', zIndex: 0 }} />
 
           {/* Sliding stack of slides with slow flowing transition */}
           <div className="absolute inset-0 overflow-hidden">
@@ -443,9 +446,8 @@ const Hero = ({ timerData }) => {
                 >
                   <div
                     className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-                    style={{ backgroundImage: `url(${slide.image})`, backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', willChange: 'transform, opacity' }}
+                    style={{ backgroundImage: `url(${slide.image})`, backgroundColor: 'transparent', backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', willChange: 'transform, opacity' }}
                   >
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/70"></div>
                   </div>
                   {/* Text content centered */}
                   {/* Text removed for mobile as well */}
