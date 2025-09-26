@@ -80,11 +80,13 @@ const Navbar = () => {
           top: 0,
           left: 0,
           width: '100%',
-          height: 'calc(clamp(200px, 45vw, 300px) + 120px)',
+          height: 'calc(clamp(200px, 45vw, 300px) - 85px)',
           zIndex: 49, // just under header (z-50), above ellipse (z~45)
           objectFit: 'cover',
           objectPosition: 'top center',
           mixBlendMode: 'screen',
+          maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%)',
+          WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%)',
         }}
       />
 
@@ -213,7 +215,7 @@ const Navbar = () => {
           </div>
 
           {/* Mobile hamburger (hidden on desktop) */}
-          <div className="ml-auto pr-2 xxs:pr-3 xs:pr-4 sm:hidden">
+          <div className="ml-auto pr-[14px] xxs:pr-[14px] xs:pr-[14px] sm:hidden">
             <button
               aria-expanded={isMenuOpen}
               type="button"

@@ -223,7 +223,7 @@ const Hero = ({ timerData }) => {
     style={{
       top: `-${heroShift}px`,
       // Use a shorter height for mobile, keep desktop as is
-      height: 'min(calc(100vh + ' + heroShift + 'px + var(--hero-bottom-extend)), var(--hero-max-h))',
+      height: 'min(calc(100vh + ' + heroShift + 'px + var(--hero-bottom-extend) - 100px), var(--hero-max-h))',
   ['--curve-h']: 'clamp(100px, 45vw, 300px)',
   ['--bottom-overlap']: BOTTOM_OVERLAP_VAR,
   ['--hero-bottom-extend']: 'clamp(8px, 5vw, 80px)',
@@ -369,7 +369,8 @@ const Hero = ({ timerData }) => {
                     backgroundColor: 'transparent',
                     backfaceVisibility: 'hidden',
                     WebkitBackfaceVisibility: 'hidden',
-                    willChange: 'opacity, transform'
+                    willChange: 'opacity, transform',
+                    filter: 'brightness(1.1) contrast(1.05) saturate(1.1)'
                   }}
                 >
                 </div>
@@ -437,7 +438,7 @@ const Hero = ({ timerData }) => {
                     transform: baseTransforms[position],
                     transition: 'transform 900ms cubic-bezier(0.22, 1, 0.36, 1), opacity 700ms ease',
                     // On mobile, hide non-center slides completely to avoid any faded preview
-                    opacity: isSmall() ? (position === 'center' ? 1 : 0) : (position === 'center' ? 1 : 0.85),
+                    opacity: isSmall() ? (position === 'center' ? 1 : 0) : (position === 'center' ? 1 : 1),
                     zIndex: z,
                     willChange: 'transform, opacity',
                     backfaceVisibility: 'hidden',
@@ -446,7 +447,14 @@ const Hero = ({ timerData }) => {
                 >
                   <div
                     className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-                    style={{ backgroundImage: `url(${slide.image})`, backgroundColor: 'transparent', backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', willChange: 'transform, opacity' }}
+                    style={{ 
+                      backgroundImage: `url(${slide.image})`, 
+                      backgroundColor: 'transparent', 
+                      backfaceVisibility: 'hidden', 
+                      WebkitBackfaceVisibility: 'hidden', 
+                      willChange: 'transform, opacity',
+                      filter: 'brightness(1.1) contrast(1.05) saturate(1.1)'
+                    }}
                   >
                   </div>
                   {/* Text content centered */}
