@@ -4,7 +4,7 @@ const Footer = () => {
   const [showTerms, setShowTerms] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
   return (
-    <footer
+  <footer id="footer"
       className="w-full border-t border-gray-800"
       style={{ backgroundColor: '#121212', flexShrink: 0 }}
     >

@@ -27,16 +27,20 @@ const Navbar = () => {
     if (!target) return
 
     const isMobile = window.innerWidth < 640 // Tailwind sm breakpoint
-
-    // For mobile, center the Features section vertically in viewport
-    if (isMobile && sectionId === 'features') {
+    // Always center Features section (all viewports) instead of default top alignment
+    if (sectionId === 'features') {
       const rect = target.getBoundingClientRect()
       const absoluteY = window.pageYOffset + rect.top
+      // Center the midpoint of the section vertically first
       let y = absoluteY + rect.height / 2 - window.innerHeight / 2
+      // Shift upward slightly so more of the top content is visible ("a little bit higher")
+      const OFFSET = Math.min(120, Math.max(40, Math.round(window.innerHeight * 0.08))) // between 40px and 120px
+      y -= OFFSET
       const maxY = Math.max(0, document.documentElement.scrollHeight - window.innerHeight)
       y = Math.max(0, Math.min(y, maxY))
       window.scrollTo({ top: y, behavior: 'smooth' })
     } else {
+      // Default behavior for other sections
       try {
         target.scrollIntoView({ behavior: 'smooth', block: 'start' })
       } catch (_) {

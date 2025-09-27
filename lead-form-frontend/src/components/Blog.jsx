@@ -8,7 +8,7 @@ const Blog = () => {
   const closeTimeoutRef = useRef(null)
   const mobileScrollRef = useRef(null)
   const desktopScrollRef = useRef(null)
-  const [visibleSections, setVisibleSections] = useState(new Set())
+    const [activeSectionIdx, setActiveSectionIdx] = useState(0)
   
   const blogPosts = [
     {
@@ -182,8 +182,8 @@ The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools have
     if (!expandedId) return
     setIsExiting(true)
     if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current)
-    // Reset visible sections when closing
-    setVisibleSections(new Set())
+    // Reset active section when closing
+    setActiveSectionIdx(0)
     // Match CSS exit duration (~600ms)
     closeTimeoutRef.current = setTimeout(() => {
       setIsExiting(false)
@@ -199,8 +199,8 @@ The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools have
     }
     setIsExiting(false)
     setExpandedId(id)
-    // Reset visible sections when opening new overlay
-    setVisibleSections(new Set())
+      // Reset active highlight when opening new overlay
+      setActiveSectionIdx(0)
   }
 
   const nextSlide = () => {
@@ -217,66 +217,54 @@ The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools have
   const mobilePost = blogPosts[currentIndex % blogPosts.length]
   const expandedPost = expandedId ? blogPosts.find(p => p.id === expandedId) : null
 
-  // Scroll animation observer for text sections
+  // High-performance scroll-based active section tracking (no IntersectionObserver)
   useEffect(() => {
     if (!expandedPost) return
+    const isMobile = window.innerWidth < 640
+    const scrollContainer = isMobile ? mobileScrollRef.current : desktopScrollRef.current
+    if (!scrollContainer) return
 
-    let observer = null
-    
-    const setupObserver = () => {
-      // Clean up previous observer
-      if (observer) observer.disconnect()
-      
-      // Determine which scroll container to use based on screen size
-      const isMobile = window.innerWidth < 640
-      const scrollContainer = isMobile ? mobileScrollRef.current : desktopScrollRef.current
-      
-      if (!scrollContainer) {
-        console.log('No scroll container found:', { isMobile, mobile: !!mobileScrollRef.current, desktop: !!desktopScrollRef.current })
-        return
+    let paraOffsets = []
+    let frame = null
+
+    const measure = () => {
+      const nodes = scrollContainer.querySelectorAll('.blog-text-section')
+      paraOffsets = Array.from(nodes).map(node => ({
+        top: node.offsetTop,
+        height: node.offsetHeight
+      }))
+    }
+
+    const updateActive = () => {
+      frame = null
+      if (!paraOffsets.length) return
+      const scrollTop = scrollContainer.scrollTop
+      const viewH = scrollContainer.clientHeight
+      const viewCenter = scrollTop + viewH * 0.35
+      let bestIdx = 0
+      let bestDist = Infinity
+      for (let i = 0; i < paraOffsets.length; i++) {
+        const { top, height } = paraOffsets[i]
+        const center = top + height / 2
+        const dist = Math.abs(center - viewCenter)
+        if (dist < bestDist) { bestDist = dist; bestIdx = i }
       }
-
-      observer = new IntersectionObserver(
-        (entries) => {
-          setVisibleSections(prev => {
-            const newVisibleSections = new Set(prev)
-            entries.forEach((entry) => {
-              const sectionId = entry.target.dataset.sectionId
-              if (entry.isIntersecting && entry.intersectionRatio > 0.15) {
-                newVisibleSections.add(sectionId)
-              } else {
-                newVisibleSections.delete(sectionId)
-              }
-            })
-            return newVisibleSections
-          })
-        },
-        {
-          root: scrollContainer,
-          rootMargin: '-10% 0px -60% 0px',
-          threshold: [0.1, 0.15, 0.3, 0.5]
-        }
-      )
-
-      // Small delay to ensure DOM is ready
-      setTimeout(() => {
-        const textSections = scrollContainer.querySelectorAll('.blog-text-section')
-        console.log('Found text sections:', textSections.length)
-        textSections.forEach((section) => observer.observe(section))
-      }, 200)
+      setActiveSectionIdx(prev => (prev === bestIdx ? prev : bestIdx))
     }
 
-    setupObserver()
-    
-    // Listen for window resize to reestablish observer
-    const handleResize = () => {
-      setTimeout(setupObserver, 100)
-    }
-    window.addEventListener('resize', handleResize)
+    const onScroll = () => { if (!frame) frame = requestAnimationFrame(updateActive) }
+    const onResize = () => { measure(); updateActive() }
+
+    measure()
+    updateActive()
+
+    scrollContainer.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onResize)
 
     return () => {
-      window.removeEventListener('resize', handleResize)
-      if (observer) observer.disconnect()
+      scrollContainer.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onResize)
+      if (frame) cancelAnimationFrame(frame)
     }
   }, [expandedPost])
 
@@ -286,19 +274,16 @@ The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools have
     return paragraphs.map((paragraph, index) => {
       const isLastParagraph = index === paragraphs.length - 1
       const isCallToAction = paragraph.toLowerCase().includes('conclusion') || paragraph.toLowerCase().includes('call to action')
-      return (
-        <p
-          key={index}
-          data-section-id={`section-${index}`}
-          className={`blog-text-section ${
-            visibleSections.has(`section-${index}`) ? 'text-active' : ''
-          } ${
-            isLastParagraph || isCallToAction ? 'conclusion-text' : ''
-          }`}
-        >
-          {paragraph}
-        </p>
-      )
+        const active = index === activeSectionIdx
+        return (
+          <p
+            key={index}
+            data-section-id={`section-${index}`}
+            className={`blog-text-section ${active ? 'text-active' : ''} ${isLastParagraph || isCallToAction ? 'conclusion-text' : ''}`}
+          >
+            {paragraph}
+          </p>
+        )
     })
   }
 
@@ -641,13 +626,15 @@ The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools have
         /* Scroll-based text animation effects */
         .blog-text-section {
           transform-origin: left center;
-          will-change: opacity, transform, font-weight, color;
-          transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+          /* Limit will-change to only what actually animates for performance */
+          will-change: opacity, transform, color;
+          /* Faster & leaner transitions */
+          transition: opacity .18s ease, transform .28s cubic-bezier(0.25, 0.46, 0.45, 0.94), color .18s ease;
           line-height: 1.7;
           margin-bottom: 1.5rem;
           /* Default faded state */
-          opacity: 0.4;
-          font-weight: 400;
+          opacity: 0.45;
+          font-weight: 500; /* keep a stable base weight to avoid reflow */
           color: rgba(255, 255, 255, 0.6);
           transform: translateY(4px) scale(0.99);
           text-shadow: none;
@@ -662,20 +649,21 @@ The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools have
         /* Active state - in viewport - using attribute selector for better specificity */
         .blog-text-section.text-active {
           opacity: 1 !important;
-          font-weight: 600 !important;
-          color: rgba(255, 255, 255, 0.95) !important;
+          /* Slight scale lift removed to reduce layout thrash; keep transform for GPU */
+          font-weight: 600 !important; /* one step difference only */
+          color: rgba(255, 255, 255, 0.97) !important;
           transform: translateY(0) scale(1) !important;
           text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
         
         /* Conclusion/Call-to-Action text styling */
         .blog-text-section.conclusion-text {
-          font-weight: 700 !important;
+          font-weight: 600 !important;
           color: rgba(255, 255, 255, 0.9) !important;
           margin-bottom: 2rem !important;
         }
         .blog-text-section.conclusion-text.text-active {
-          font-weight: 800 !important;
+          font-weight: 700 !important;
           color: rgba(255, 255, 255, 1) !important;
           text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
         }
@@ -683,20 +671,20 @@ The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools have
         /* Enhanced contrast for mobile */
         @media (max-width: 640px) {
           .blog-text-section {
-            opacity: 0.3 !important;
-            font-weight: 300 !important;
-            color: rgba(255, 255, 255, 0.5) !important;
-            transform: translateY(6px) scale(0.98) !important;
+            opacity: 0.34 !important;
+            font-weight: 500 !important;
+            color: rgba(255, 255, 255, 0.52) !important;
+            transform: translateY(6px) scale(0.985) !important;
           }
           .blog-text-section.text-active {
             opacity: 1 !important;
-            font-weight: 700 !important;
+            font-weight: 600 !important;
             color: rgba(255, 255, 255, 1) !important;
             transform: translateY(0) scale(1) !important;
             text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
           }
           .blog-text-section.conclusion-text.text-active {
-            font-weight: 800 !important;
+            font-weight: 700 !important;
             color: rgba(255, 255, 255, 1) !important;
             text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4) !important;
           }

@@ -290,8 +290,10 @@ const FeatureCarousel = ({ items = sampleItems, belowLeft = null }) => {
                   maxWidth: isActive ? undefined : 'var(--card-w)',
                   height: isActive ? 'var(--card-h)' : 'calc(var(--card-h) / 2)',
                   alignSelf: preview ? (i < index ? 'flex-start' : 'flex-end') : 'stretch',
-                  border: isActive ? '2px solid rgba(255,255,255,0.6)' : '1px solid rgba(255,255,255,0.15)',
-                  boxShadow: isActive ? '0 8px 24px rgba(0,0,0,0.35)' : 'none',
+                  // Removed white border per request
+                  border: 'none',
+                  // Removed drop shadow per request
+                  boxShadow: 'none',
                   transform: `${isActive ? 'scale(1.02)' : 'scale(0.96)'}${(preview && i > index && vw >= 640) ? ` translateY(${rightPreviewOffset}px)` : ''}`,
                   transition: 'transform 400ms, box-shadow 400ms, border-color 400ms, height 400ms, width 400ms',
                   objectFit: 'contain',

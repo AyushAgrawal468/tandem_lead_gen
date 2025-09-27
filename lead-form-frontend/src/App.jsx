@@ -8,6 +8,60 @@ import Waitlist from "./components/Waitlist";
 import Blog from "./components/Blog";
 import FAQ from "./components/FAQ";
 import Footer from "./components/Footer";
+// Simple section engagement tracker using IntersectionObserver + Clarity custom events
+function useSectionEngagement(sectionIds, minimumVisible = 0.5) {
+  useEffect(() => {
+    if (typeof window === 'undefined' || !(window).IntersectionObserver) return;
+    const clarityAvailable = () => typeof window !== 'undefined' && typeof (window).clarity === 'function';
+    const state = new Map(); // id -> {visible:boolean, enterTs:number, totalMs:number}
+    sectionIds.forEach(id => state.set(id, { visible: false, enterTs: 0, totalMs: 0 }));
+    const sendEvent = (name, data) => {
+      if (clarityAvailable()) {
+        try { (window).clarity('event', name, data); } catch (_) {}
+      }
+    };
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        const id = entry.target.id;
+        if (!state.has(id)) return;
+        const rec = state.get(id);
+        const visibleNow = entry.intersectionRatio >= minimumVisible;
+        const now = performance.now();
+        if (visibleNow && !rec.visible) {
+          rec.visible = true;
+          rec.enterTs = now;
+          sendEvent('section_enter', { id });
+        } else if (!visibleNow && rec.visible) {
+          rec.visible = false;
+          const delta = now - rec.enterTs;
+            rec.totalMs += delta;
+            sendEvent('section_exit', { id, sessionTimeMs: Math.round(delta), cumulativeTimeMs: Math.round(rec.totalMs) });
+        }
+      });
+    }, { threshold: [minimumVisible] });
+    sectionIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+    const onBeforeUnload = () => {
+      const now = performance.now();
+      state.forEach((rec, id) => {
+        if (rec.visible) {
+          const delta = now - rec.enterTs;
+          rec.totalMs += delta;
+          rec.visible = false;
+          sendEvent('section_exit', { id, sessionTimeMs: Math.round(delta), cumulativeTimeMs: Math.round(rec.totalMs), unload: true });
+        }
+        sendEvent('section_total', { id, totalTimeMs: Math.round(rec.totalMs) });
+      });
+    };
+    window.addEventListener('beforeunload', onBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', onBeforeUnload);
+      observer.disconnect();
+    };
+  }, [sectionIds.join('|'), minimumVisible]);
+}
 import CountdownTimer from "./components/CountdownTimer"; // ✅ import timer
 
 // Generate a fresh session id on every page load/refresh
@@ -57,6 +111,9 @@ function App() {
       clearInterval(interval);
     };
   }, []);
+
+  // Track engagement for key sections (ensure each has an id)
+  useSectionEngagement(['hero','features','waitlist','blogs','faq','footer']);
 
   // helper to post location with fresh sessionId
   const postLocation = (loc) => {

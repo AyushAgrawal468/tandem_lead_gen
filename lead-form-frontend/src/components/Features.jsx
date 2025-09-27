@@ -157,7 +157,19 @@ const Features = () => {
       {/* Mobile-only layout (do not affect desktop) */}
       <div className="block sm:hidden mobile-features-wrap" style={{ marginTop: '-360px' }}>
         {/* Heading */}
-        <div className="relative px-4 xxs:px-5 xs:px-6" style={{ marginBottom: '16px' }}>
+        <div className="relative px-4 xxs:px-5 xs:px-6 mobile-features-heading" style={{ marginBottom: '16px' }}>
+          {/* Extra top padding added to avoid overlap with mobile countdown timer */}
+          <style>{`
+            @media (max-width: 639.98px) {
+              /* Base extra spacing */
+              #features .mobile-features-heading { padding-top: 80px; }
+              /* Very short heights: reduce so content not pushed too far */
+              @media (max-height: 760px) { #features .mobile-features-heading { padding-top: 70px; } }
+              @media (max-height: 700px) { #features .mobile-features-heading { padding-top: 60px; } }
+              @media (max-height: 640px) { #features .mobile-features-heading { padding-top: 52px; } }
+              @media (max-height: 600px) { #features .mobile-features-heading { padding-top: 46px; } }
+            }
+          `}</style>
           <h2
             className="text-left font-bold text-white"
             style={{

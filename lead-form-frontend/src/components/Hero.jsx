@@ -45,8 +45,17 @@ const Hero = ({ timerData }) => {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [navDir, setNavDir] = useState('next')
   const [autoPlay, setAutoPlay] = useState(true)
+  // Hybrid track animation state (desktop only)
+  const [trackOffset, setTrackOffset] = useState(0) // -1,0,1 units of shift distance
+  const [trackTransition, setTrackTransition] = useState(true)
+  const animatingRef = React.useRef(false)
+  // Removed width lock system (was causing gap to appear only after animation)
+  const ANIM_DURATION = 450 // shortened for snappier manual navigation (must match CSS timing below)
+  const PRE_SHIFT = 0.55 // fraction of shift-distance to keep side slide partially visible
   const autoRef = React.useRef(null)
   const resumeRef = React.useRef(null)
+  // Queue for additional navigation clicks occurring during animation
+  const pendingNavRef = React.useRef(null)
 
   // Layout tuning
   const curveOverlap = 150
@@ -102,20 +111,50 @@ const Hero = ({ timerData }) => {
   useEffect(() => {
     if (!autoPlay) return
     autoRef.current = setInterval(() => {
+      const isMobile = typeof window !== 'undefined' ? window.innerWidth < 768 : true
+      if (isMobile) {
+        // Mobile keeps simple progressive flow
+        setNavDir('next')
+        setCurrentSlide(prev => (prev + 1) % heroSlides.length)
+        return
+      }
+      // Desktop: Option A immediate role swap with width lock
+      if (animatingRef.current) return
+      const current = currentSlide
+      // Width locking removed
       setNavDir('next')
-      setCurrentSlide((prev) => (prev + 1) % heroSlides.length)
+      setCurrentSlide(prev => (prev + 1) % heroSlides.length)
+      animatingRef.current = true
+      // Pre-position track to the opposite side then animate to 0 so all three slides stay visible
+      setTrackTransition(false)
+      setTrackOffset(PRE_SHIFT) // partial shift right so left stays partially visible
+      requestAnimationFrame(() => {
+        setTrackTransition(true)
+        setTrackOffset(0) // animate back to neutral (appears as left movement)
+        setTimeout(() => {
+          // No width locks to clear
+          animatingRef.current = false
+          // Process any queued nav
+          if (pendingNavRef.current) {
+            const queued = pendingNavRef.current
+            pendingNavRef.current = null
+            if (queued === 'next') nextSlide()
+            else if (queued === 'prev') prevSlide()
+          }
+        }, ANIM_DURATION)
+      })
     }, 5000)
     return () => { if (autoRef.current) clearInterval(autoRef.current) }
-  }, [autoPlay, heroSlides.length])
+  }, [autoPlay, heroSlides.length, currentSlide])
 
-  // Stop auto and start resume timer
-  const stopAuto = () => {
+  // Unified 2s resume delay for all interactions (desktop + mobile)
+  const RESUME_DELAY_MS = 2000
+  const pauseAutoplay = () => {
     if (autoRef.current) {
       clearInterval(autoRef.current)
       autoRef.current = null
     }
     setAutoPlay(false)
-    // Reset resume timer
     if (resumeRef.current) {
       clearTimeout(resumeRef.current)
       resumeRef.current = null
@@ -123,32 +162,112 @@ const Hero = ({ timerData }) => {
     resumeRef.current = setTimeout(() => {
       setAutoPlay(true)
       resumeRef.current = null
-    }, 10000)
+    }, RESUME_DELAY_MS)
   }
 
   const isSmall = () => (typeof window !== 'undefined' ? window.innerWidth < 768 : true)
 
+  const slideRefs = React.useRef([])
+
   const nextSlide = () => {
-    stopAuto()
-    setNavDir('next')
-    setCurrentSlide((prev) => (prev + 1) % heroSlides.length)
+    pauseAutoplay()
+    if (!isSmall()) {
+      if (animatingRef.current) {
+        // queue intent to advance again once current animation completes
+        pendingNavRef.current = 'next'
+        return
+      }
+      // Measure outgoing center width and lock it
+      const current = currentSlide
+      // Width locking removed
+      setNavDir('next')
+      // Immediate index update (Option A)
+      setCurrentSlide(prev => (prev + 1) % heroSlides.length)
+      animatingRef.current = true
+      setTrackTransition(false)
+      setTrackOffset(PRE_SHIFT) // partial pre-shift right keeps left visible
+      requestAnimationFrame(() => {
+        setTrackTransition(true)
+        setTrackOffset(0) // animate back (visual left move)
+        setTimeout(() => {
+          // No width locks to clear
+          animatingRef.current = false
+          if (pendingNavRef.current) {
+            const queued = pendingNavRef.current
+            pendingNavRef.current = null
+            if (queued === 'next') nextSlide()
+            else if (queued === 'prev') prevSlide()
+          }
+        }, ANIM_DURATION)
+      })
+    } else {
+      setNavDir('next')
+      setCurrentSlide((prev) => (prev + 1) % heroSlides.length)
+    }
   }
 
   const prevSlide = () => {
-    stopAuto()
-    // For xxs, xs, sm: force left-only flow by treating prev as next
-    if (isSmall()) {
+    pauseAutoplay()
+    if (!isSmall()) {
+      if (animatingRef.current) {
+        pendingNavRef.current = 'prev'
+        return
+      }
+      // Measure outgoing center width
+      const current = currentSlide
+      // Width locking removed
+      setNavDir('prev')
+      // Immediate index update to previous
+      setCurrentSlide(prev => (prev - 1 + heroSlides.length) % heroSlides.length)
+      animatingRef.current = true
+      setTrackTransition(false)
+      setTrackOffset(-PRE_SHIFT) // partial pre-shift left keeps right visible
+      requestAnimationFrame(() => {
+        setTrackTransition(true)
+        setTrackOffset(0)
+        setTimeout(() => {
+          // No width locks to clear
+          animatingRef.current = false
+          if (pendingNavRef.current) {
+            const queued = pendingNavRef.current
+            pendingNavRef.current = null
+            if (queued === 'next') nextSlide()
+            else if (queued === 'prev') prevSlide()
+          }
+        }, ANIM_DURATION)
+      })
+    } else {
+      // mobile still uses left-only flow
       setNavDir('next')
       setCurrentSlide((prev) => (prev + 1) % heroSlides.length)
-    } else {
-      setNavDir('prev')
-      setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length)
     }
   }
 
   const goToSlide = (index) => {
-    stopAuto()
-    setCurrentSlide(index)
+    pauseAutoplay()
+    if (!isSmall() && index !== currentSlide) {
+      if (animatingRef.current) return
+      // Determine direction for track animation
+      const direction = index > currentSlide ? 'next' : 'prev'
+      // Measure current center before swap
+      const current = currentSlide
+      // Width locking removed
+      setNavDir(direction)
+      setCurrentSlide(index) // immediate
+      animatingRef.current = true
+      setTrackTransition(false)
+  setTrackOffset(direction === 'next' ? PRE_SHIFT : -PRE_SHIFT) // partial pre-shift opposite
+      requestAnimationFrame(() => {
+        setTrackTransition(true)
+        setTrackOffset(0)
+        setTimeout(() => {
+          // No width locks to clear
+          animatingRef.current = false
+        }, ANIM_DURATION)
+      })
+    } else {
+      setCurrentSlide(index)
+    }
   }
 
   // Timer sizing and offsets (easy to tweak)
@@ -196,6 +315,7 @@ const Hero = ({ timerData }) => {
 
   return (
   <section
+    id="hero"
     className="relative overflow-hidden hero-section-responsive"
     style={{
       zIndex: 10,
@@ -217,9 +337,9 @@ const Hero = ({ timerData }) => {
       {/* Theater overlay consideration - content positioned to work with navbar curve */}
   <div
     className="relative w-full md:-mt-6 lg:mt-0"
-    onPointerDown={stopAuto}
-    onTouchStart={stopAuto}
-    onWheel={stopAuto}
+  onPointerDown={pauseAutoplay}
+  onTouchStart={pauseAutoplay}
+  onWheel={pauseAutoplay}
     style={{
       top: `-${heroShift}px`,
       // Use a shorter height for mobile, keep desktop as is
@@ -233,48 +353,46 @@ const Hero = ({ timerData }) => {
     }}
   >
         
-        {/* Sliding Images Container - Desktop/Tablets */}
+        {/* Sliding Images Container - Desktop/Tablets (Restored 3-up role-based system) */}
         <div 
           className="absolute hidden sm:block"
           style={{
-            // Match the navbar semicircle exact horizontal bounds
             left: '2px',
             right: 'calc(2px + var(--content-right-pad, 0px))',
             top: 0,
             bottom: 0,
-            // Define the inner visible screen offset once
             ['--screen-offset']: 'clamp(24px, 7vw, 180px)',
-            // Unify side preview width and center gap for consistent proportions across devices
-            ['--side-width']: 'clamp(75px, 21vw, 205px)', // decreased side image width by 15px
-            ['--center-gap']: 'clamp(17px, 4vw, 49px)', // decreased gap by 10px more
-            ['--side-margin']: '12px'
+            ['--side-width']: 'clamp(75px, 21vw, 205px)',
+            ['--center-gap']: 'clamp(17px, 4vw, 49px)',
+            ['--side-margin']: '12px',
+            ['--shift-distance']: 'calc(var(--side-width) + var(--center-gap) + var(--side-margin))'
           }}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
-          {/* Solid base background so side areas don't show any image through */}
+          <div className="absolute inset-0" style={{ background: 'transparent', zIndex: 0 }} />
+          {/* Track wrapper for hybrid movement */}
           <div
-            className="absolute inset-0"
-            style={{ background: 'transparent', zIndex: 0 }}
-          />
-          {/* Unified slide system (desktop/tablet): center slide moves into left slot; new slides enter from right slot */}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              overflow: 'hidden',
+              transform: `translateX(calc(var(--shift-distance) * ${trackOffset}))`,
+              transition: trackTransition ? 'transform 450ms cubic-bezier(0.22,1,0.36,1)' : 'none',
+              willChange: 'transform'
+            }}
+          >
           {heroSlides.map((slide, index) => {
             const total = heroSlides.length
             const leftIndex = (currentSlide - 1 + total) % total
             const rightIndex = (currentSlide + 1) % total
-            // Preload the next-right (for 'next' flow) or next-left (for 'prev' flow) so it is already in place
-            // when it transitions into visibility. This removes the "late load" pop-in effect.
             let preloadRightIndex = null
             let preloadLeftIndex = null
             if (total > 3) {
-              if (navDir === 'next') {
-                preloadRightIndex = (currentSlide + 2) % total
-              } else if (navDir === 'prev') {
-                preloadLeftIndex = (currentSlide - 2 + total) % total
-              }
+              if (navDir === 'next') preloadRightIndex = (currentSlide + 2) % total
+              else if (navDir === 'prev') preloadLeftIndex = (currentSlide - 2 + total) % total
             }
-
             let role
             if (index === currentSlide) role = 'center'
             else if (index === leftIndex) role = 'left'
@@ -283,22 +401,23 @@ const Hero = ({ timerData }) => {
             else if (preloadLeftIndex !== null && index === preloadLeftIndex) role = 'preload-left'
             else role = 'hidden'
 
-            // Shared base styles
             const baseStyle = {
               position: 'absolute',
               top: 'calc(var(--curve-h) / -2)',
               bottom: 0,
-              transition: 'left 900ms cubic-bezier(0.22,1,0.36,1), right 900ms cubic-bezier(0.22,1,0.36,1), width 900ms cubic-bezier(0.22,1,0.36,1), opacity 700ms ease, transform 900ms cubic-bezier(0.22,1,0.36,1)',
+              // Remove long opacity transition so images appear immediately
+              transition: 'opacity 40ms linear',
               overflow: 'hidden',
               borderRadius: '14px',
-              willChange: 'left, right, width, opacity, transform',
+              willChange: 'opacity',
               backfaceVisibility: 'hidden',
               WebkitBackfaceVisibility: 'hidden',
-              transformStyle: 'preserve-3d',
               contain: 'layout paint style'
             }
 
             let positionalStyle = {}
+            const animating = animatingRef.current && trackOffset !== 0
+            const direction = navDir
             if (role === 'center') {
               positionalStyle = {
                 left: 'calc(var(--side-width) + var(--center-gap) + var(--side-margin) - 15px)',
@@ -327,28 +446,28 @@ const Hero = ({ timerData }) => {
                 transform: 'scale(0.98) translateZ(0)'
               }
             } else if (role === 'preload-right') {
-              // Already placed in right slot but invisible; will fade in next cycle becoming 'right'
+              // position closer to viewport edge and make partially visible for immediate appearance
               positionalStyle = {
-                right: 'calc(var(--side-margin) - var(--content-right-pad, 0px))',
+                right: 'calc(-1 * var(--side-width) / 2)',
                 width: 'var(--side-width)',
                 left: 'auto',
-                opacity: 0,
+                opacity: 0.3,
                 zIndex: 5,
-                transform: 'scale(0.95) translateZ(0)'
+                transform: 'scale(0.98) translateZ(0)'
               }
             } else if (role === 'preload-left') {
+              // position closer to viewport edge
               positionalStyle = {
-                left: 'var(--side-margin)',
+                left: 'calc(-1 * var(--side-width) / 2)',
                 width: 'var(--side-width)',
                 right: 'auto',
-                opacity: 0,
+                opacity: 0.3,
                 zIndex: 5,
-                transform: 'scale(0.95) translateZ(0)'
+                transform: 'scale(0.98) translateZ(0)'
               }
             } else {
               positionalStyle = {
                 left: '50%',
-                // Keep width collapsed to avoid layout / overlapping; hidden slides will be reassigned later.
                 width: '0px',
                 opacity: 0,
                 zIndex: 1,
@@ -356,12 +475,11 @@ const Hero = ({ timerData }) => {
               }
             }
 
-            const isLoaded = slide.image ? loadedMap.get(slide.image) : true
-            const finalOpacity = positionalStyle.opacity
-            // If not yet loaded and it's about to be needed (right or preload-right), keep it transparent until ready.
-            const delayOpacity = !isLoaded && (role === 'right' || role === 'preload-right' || role === 'center')
+            // Always render full opacity for its assigned role; no delayed fade-in
+            // Apply width lock if exists for this original index
+            let lockedStyle = {}
             return (
-              <div key={slide.id} style={{ ...baseStyle, ...positionalStyle, opacity: delayOpacity ? 0 : finalOpacity }}>
+              <div ref={el => (slideRefs.current[index] = el)} key={slide.id} style={{ ...baseStyle, ...positionalStyle, ...lockedStyle }}>
                 <div 
                   className="absolute inset-0 bg-cover bg-center bg-no-repeat will-change-transform"
                   style={{ 
@@ -372,12 +490,11 @@ const Hero = ({ timerData }) => {
                     willChange: 'opacity, transform',
                     filter: 'brightness(1.1) contrast(1.05) saturate(1.1)'
                   }}
-                >
-                </div>
-                {/* Text removed as per request (plain image only) */}
+                />
               </div>
             )
           })}
+          </div>
         </div>
 
         {/* Sliding Images Container - Mobile-only (smooth sliding between images) */}
@@ -479,22 +596,25 @@ const Hero = ({ timerData }) => {
           />
         </div>
 
-        {/* Navigation Controls */}
-  <div className="absolute top-1/2 left-4 transform -translate-y-1/2 z-20 hidden sm:block">
-          <button 
+        {/* Navigation Controls (restored). Increased z-index so they're above the lower ellipse. */}
+        <div className="absolute top-1/2 left-4 transform -translate-y-1/2 z-60 hidden sm:block">
+          <button
             onClick={prevSlide}
-            className="p-3 bg-white/10 backdrop-blur-sm border border-white/30 rounded-full text-white hover:bg-white/20 transition-all duration-300 hover:scale-110"
+            aria-label="Previous slide"
+            className="p-3 bg-white/10 backdrop-blur-sm border border-white/30 rounded-full text-white hover:bg-white/20 transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-white/60"
+            style={{ boxShadow: '0 4px 14px rgba(0,0,0,0.35)' }}
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
         </div>
-
-  <div className="absolute top-1/2 right-4 transform -translate-y-1/2 z-20 hidden sm:block">
-          <button 
+        <div className="absolute top-1/2 right-4 transform -translate-y-1/2 z-60 hidden sm:block">
+          <button
             onClick={nextSlide}
-            className="p-3 bg-white/10 backdrop-blur-sm border border-white/30 rounded-full text-white hover:bg-white/20 transition-all duration-300 hover:scale-110"
+            aria-label="Next slide"
+            className="p-3 bg-white/10 backdrop-blur-sm border border-white/30 rounded-full text-white hover:bg-white/20 transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-white/60"
+            style={{ boxShadow: '0 4px 14px rgba(0,0,0,0.35)' }}
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -530,7 +650,10 @@ const Hero = ({ timerData }) => {
               width: 'calc(100% - 4px)',
               height: 'var(--bottom-curve-h)',
               borderRadius: '50% 50% 0px 0px',
-              background: 'rgba(17, 17, 17, 1)',
+              // Match Blog section card glass background (translucent + blur)
+              background: 'rgba(17,17,17,1)',
+              backdropFilter: 'blur(50px)',
+              WebkitBackdropFilter: 'blur(50px)',
               bottom: 'calc(var(--bottom-overlap) - var(--bottom-curve-h))',
               left: '2px',
             }}
