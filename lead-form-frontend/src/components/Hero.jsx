@@ -64,6 +64,13 @@ const Hero = ({ timerData }) => {
   const heroBottomExtend = 240
   const bottomCurveOverlap = 240
 
+  // Mobile hero target dimensions (request: 340 x 290)
+  const MOBILE_HERO_W = 340
+  const MOBILE_HERO_H = 290
+  // Maintain previous relative offsets: lower ellipse was at (containerHeight - 26) and timer at (ellipseTop + 36)
+  const MOBILE_LOWER_ELLIPSE_TOP = MOBILE_HERO_H - 26 // 264px
+  const MOBILE_TIMER_TOP = MOBILE_LOWER_ELLIPSE_TOP + 36 // 300px
+
   // Slides
   // Build slides from discovered images or provide a fallback single slide
   const heroSlides = (heroImages.length ? heroImages : [null]).map((img, idx) => ({
@@ -285,10 +292,17 @@ const Hero = ({ timerData }) => {
   const [vw, setVw] = useState(typeof window !== 'undefined' ? window.innerWidth : 0)
   const [vh, setVh] = useState(typeof window !== 'undefined' ? window.innerHeight : 0)
   useEffect(() => {
-    const onResize = () => { setVw(window.innerWidth); setVh(window.innerHeight) }
-    window.addEventListener('resize', onResize)
-    return () => window.removeEventListener('resize', onResize)
+    let frame
+    const onResize = () => {
+      if (frame) cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(() => { setVw(window.innerWidth); setVh(window.innerHeight) })
+    }
+    window.addEventListener('resize', onResize, { passive: true })
+    return () => { window.removeEventListener('resize', onResize); if (frame) cancelAnimationFrame(frame) }
   }, [])
+
+  // Track first image loaded to apply visual filter after paint (reduces initial paint cost)
+  const [firstImgReady, setFirstImgReady] = useState(false)
   const isTablet = vw >= 768 && vw < 1024
   // iPad Pro 11" portrait typically reports ~834x1194. Allow small ranges for robustness.
   const isIpadPro11Portrait = isTablet && vw >= 830 && vw <= 838 && vh >= 1180
@@ -319,7 +333,8 @@ const Hero = ({ timerData }) => {
     className="relative overflow-hidden hero-section-responsive"
     style={{
       zIndex: 10,
-      minHeight: 'calc(100vh - 80px)',
+      // Use full viewport minus navbar for desktop/tablet; allow mobile to size to content height to avoid extra gap
+      minHeight: typeof window !== 'undefined' && window.innerWidth < 768 ? '0px' : 'calc(100vh - 80px)',
       height: 'auto',
       backgroundColor: 'transparent',
       isolation: 'isolate'
@@ -342,8 +357,12 @@ const Hero = ({ timerData }) => {
   onWheel={pauseAutoplay}
     style={{
       top: `-${heroShift}px`,
-      // Use a shorter height for mobile, keep desktop as is
-      height: 'min(calc(100vh + ' + heroShift + 'px + var(--hero-bottom-extend) - 100px), var(--hero-max-h))',
+      // Reduce mobile height to eliminate large blank gap beneath mobile hero imagery.
+      // Original expression filled nearly the whole viewport (vh - ~80px). For mobile we only need
+      // enough space for slide stack (326px), lower curve, and timer. Fixed ~470px worked best in testing.
+      height: isSmall()
+        ? '470px'
+        : 'min(calc(100vh + ' + heroShift + 'px + var(--hero-bottom-extend) - 100px), var(--hero-max-h))',
   ['--curve-h']: 'clamp(100px, 45vw, 300px)',
   ['--bottom-overlap']: BOTTOM_OVERLAP_VAR,
   ['--hero-bottom-extend']: 'clamp(8px, 5vw, 80px)',
@@ -488,9 +507,14 @@ const Hero = ({ timerData }) => {
                     backfaceVisibility: 'hidden',
                     WebkitBackfaceVisibility: 'hidden',
                     willChange: 'opacity, transform',
-                    filter: 'brightness(1.1) contrast(1.05) saturate(1.1)'
+                    filter: firstImgReady ? 'brightness(1.08) contrast(1.04) saturate(1.05)' : 'none',
+                    transition: 'filter 600ms ease'
                   }}
-                />
+                >
+                  {index === 0 && slide.image && (
+                    <img src={slide.image} alt="" loading="eager" fetchPriority="high" decoding="async" style={{ width: 0, height: 0, opacity: 0, position: 'absolute' }} onLoad={() => setFirstImgReady(true)} />
+                  )}
+                </div>
               </div>
             )
           })}
@@ -504,8 +528,9 @@ const Hero = ({ timerData }) => {
             left: '50%',
             transform: 'translateX(-50%)',
             top: 0,
-            width: 'min(90vw, 360px)',
-            height: '326px',
+            width: `min(90vw, ${MOBILE_HERO_W}px)`,
+            // Fixed requested height; keep constant so decorative elements align predictably
+            height: `${MOBILE_HERO_H}px`,
             flexShrink: 0,
             backgroundColor: 'transparent'
           }}
@@ -583,7 +608,7 @@ const Hero = ({ timerData }) => {
         </div>
 
         {/* Mobile IMAX lower curve using Ellipse 6 */}
-        <div className="absolute block sm:hidden w-full pointer-events-none" style={{ top: '300px', left: 0, right: 0, zIndex: 44 }}>
+        <div className="absolute block sm:hidden w-full pointer-events-none" style={{ top: `${MOBILE_LOWER_ELLIPSE_TOP}px`, left: 0, right: 0, zIndex: 44 }}>
           <img
             src={Ellipse6}
             alt="imax lower curve"
@@ -671,7 +696,7 @@ const Hero = ({ timerData }) => {
           }}
         >
           {!timerData ? (
-            <div className="flex items-center justify-center w-full h-full">
+            <div className="flex items-center justify-center w-[200px] h-[100px]">
               <span className="animate-pulse text-white text-lg">Loading timer…</span>
             </div>
           ) : (
@@ -695,7 +720,7 @@ const Hero = ({ timerData }) => {
           style={{
             zIndex: 1001,
             right: '12px',
-            top: 'calc(300px + 36px)'
+            top: `${MOBILE_TIMER_TOP}px`
           }}
         >
           {!timerData ? (

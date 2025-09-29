@@ -29,6 +29,22 @@ const Navbar = () => {
     const isMobile = window.innerWidth < 640 // Tailwind sm breakpoint
     // Always center Features section (all viewports) instead of default top alignment
     if (sectionId === 'features') {
+      // Desktop-only: add some top padding the first time user opens Features via navbar
+      const isDesktopMdUp = window.innerWidth >= 768; // Tailwind md breakpoint
+      if (isDesktopMdUp) {
+        if (target) {
+          // Increase padding (was 100px). Using a data guard so we only set once unless we want to upgrade.
+          const desiredPad = 160; // px
+            // If never applied or previously smaller, set / upgrade it
+          const currentApplied = parseInt(target.dataset.extraPadValue || '0', 10);
+          if (currentApplied < desiredPad) {
+            target.style.paddingTop = desiredPad + 'px';
+            target.dataset.extraPadApplied = 'true';
+            target.dataset.extraPadValue = String(desiredPad);
+          }
+        }
+      }
+      // Recompute rect after potential padding change
       const rect = target.getBoundingClientRect()
       const absoluteY = window.pageYOffset + rect.top
       // Center the midpoint of the section vertically first

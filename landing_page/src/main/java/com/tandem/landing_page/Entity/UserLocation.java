@@ -1,6 +1,8 @@
 package com.tandem.landing_page.Entity;
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "user_loc")
 public class UserLocation {
@@ -13,6 +15,13 @@ public class UserLocation {
     private Double lat;
     private Double lon;
     private Double accuracy;
+    @Column(name="created_at")
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    protected  void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
 
     // Getters and Setters
 
@@ -62,6 +71,14 @@ public class UserLocation {
 
     public void setAccuracy(Double accuracy) {
         this.accuracy = accuracy;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }
 

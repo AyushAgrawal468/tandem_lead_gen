@@ -114,62 +114,23 @@ const Features = () => {
   }, [mobileImages.join('|')])
 
   return (
-  <section id="features" className="pt-2 xs:pt-4 pb-8 xs:pb-12 sm:pb-32 md:pb-40 lg:pb-48" style={{ zIndex: 50, position: 'relative', marginTop: 'var(--features-mt, -45px)', scrollMarginTop: '40px' }}>
-      {/* xxs-only: push section down by 50px (from -45px to +5px) */}
+  <section id="features" className="pt-2 xs:pt-4 pb-8 xs:pb-12 sm:pb-32 md:pb-40 lg:pb-48" style={{ zIndex: 50, position: 'relative', scrollMarginTop: '40px' }}>
+      {/* Simplified mobile spacing: remove negative pull & complex media overrides for consistent timer clearance */}
       <style>{`
-        @media (min-width: 320px) and (max-width: 399.98px) {
-          #features { --features-mt: 120px; }
-        }
-        @media (min-width: 380px) and (max-width: 639.98px) {
-          #features { --features-mt: -30px; }
-        }
-        @media (min-width: 400px) and (max-width: 639.98px) {
-          #features { margin-top: -105px !important; }
-        }
-        /* Height-based overrides to reduce upward pull on short screens (mobile only) */
-        
-        @media (max-width: 639.98px) and (max-height: 740px) {
-          #features .mobile-features-wrap { margin-top: -330px !important; }
-        }
-        @media (max-width: 639.98px) and (max-height: 700px) {
-          #features .mobile-features-wrap { margin-top: -310px !important; }
-        }
-        @media (max-width: 639.98px) and (max-height: 660px) {
-          #features .mobile-features-wrap { margin-top: -295px !important; }
-        }
-        @media (max-width: 639.98px) and (max-height: 620px) {
-          #features .mobile-features-wrap { margin-top: -280px !important; }
-        }
-        /* Tall-screen adjustments (e.g., iPhone 14 Pro Max ~932px height) */
-        @media (max-width: 639.98px) and (min-height: 800px) {
-          #features .mobile-features-wrap { margin-top: -350px !important; }
-        }
-        @media (max-width: 639.98px) and (min-height: 860px) {
-          #features .mobile-features-wrap { margin-top: -340px !important; }
-        }
-        @media (max-width: 639.98px) and (min-height: 900px) {
-          #features .mobile-features-wrap { margin-top: -330px !important; }
-        }
-        @media (max-width: 639.98px) and (min-height: 940px) {
-          #features .mobile-features-wrap { margin-top: -320px !important; }
+        @media (max-width: 639.98px) {
+          /* Maintain exactly 15px visual gap below the mobile countdown timer by pulling section upward.
+             Timer top is calc(300px + 36px); hero mobile image stack is 326px tall; previous natural gap was large.
+             We now apply a negative margin to #features while keeping internal padding modest (8px) so content doesn't collide. */
+          #features { margin-top: -10px !important; padding-top: 8px !important; }
+          /* Wrapper inside inherits no extra positive margin so the net offset holds. */
+          #features .mobile-features-wrap { margin-top: 0 !important; padding-top: 0 !important; }
+          #features .mobile-features-heading { padding-top: 8px !important; }
         }
       `}</style>
       {/* Mobile-only layout (do not affect desktop) */}
-      <div className="block sm:hidden mobile-features-wrap" style={{ marginTop: '-360px' }}>
+  <div className="block sm:hidden mobile-features-wrap" style={{ marginTop: 0 }}>
         {/* Heading */}
         <div className="relative px-4 xxs:px-5 xs:px-6 mobile-features-heading" style={{ marginBottom: '16px' }}>
-          {/* Extra top padding added to avoid overlap with mobile countdown timer */}
-          <style>{`
-            @media (max-width: 639.98px) {
-              /* Base extra spacing */
-              #features .mobile-features-heading { padding-top: 80px; }
-              /* Very short heights: reduce so content not pushed too far */
-              @media (max-height: 760px) { #features .mobile-features-heading { padding-top: 70px; } }
-              @media (max-height: 700px) { #features .mobile-features-heading { padding-top: 60px; } }
-              @media (max-height: 640px) { #features .mobile-features-heading { padding-top: 52px; } }
-              @media (max-height: 600px) { #features .mobile-features-heading { padding-top: 46px; } }
-            }
-          `}</style>
           <h2
             className="text-left font-bold text-white"
             style={{

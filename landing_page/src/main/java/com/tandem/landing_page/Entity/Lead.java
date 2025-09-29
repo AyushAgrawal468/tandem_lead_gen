@@ -6,6 +6,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name="lead")
 public class Lead {
@@ -31,7 +33,13 @@ public class Lead {
 
     private String sessionId;
     private String locationFetched;
+    @Column(name="created_at")
+    private LocalDateTime createdAt;
 
+    @PrePersist
+    protected  void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
     public Lead() {
     }
 
@@ -90,5 +98,9 @@ public class Lead {
 
     public void setLocationFetched(String locationFetched) {
         this.locationFetched = locationFetched;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 }

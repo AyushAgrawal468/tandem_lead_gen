@@ -8,14 +8,17 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anek+Latin:wght@400;700&display=swap" rel="stylesheet">
-    <!-- Microsoft Clarity -->
+    <!-- Microsoft Clarity (project: tib7l18ffb) -->
     <script>
       (function(c,l,a,r,i,t,y){
-          c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-          t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/REPLACE_CLARITY_ID";
+          if (c[a] && c[a].initialized) return; // avoid duplicate during Vite HMR
+          c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)}; c[a].initialized=true;
+          t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
           y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-      })(window, document, "clarity", "script");
+      })(window, document, "clarity", "script", "tib7l18ffb");
     </script>
+    <!-- Performance hints -->
+    <link rel="preconnect" href="https://www.clarity.ms" crossorigin>
     <title>tandem</title>
   </head>
   <body>

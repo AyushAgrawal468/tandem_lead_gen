@@ -61,21 +61,25 @@ const FeatureCarousel = ({ items = sampleItems, belowLeft = null }) => {
   // We want to show 1 main + 1.5 cards each side ≈ total of 4 cards in view
   // Precisely center the active card using the measured viewport width
   // Animate the slider value for smooth movement
+  // Smooth animation loop (single rAF). Previous implementation recreated the loop on every
+  // sliderValue change which could spawn overlapping rAF handlers in StrictMode and trigger
+  // deep nested state updates (Maximum update depth exceeded). We keep one loop and just update
+  // the target via a ref so only one setState occurs per frame.
+  const sliderTargetRef = useRef(sliderValue)
+  useEffect(() => { sliderTargetRef.current = sliderValue }, [sliderValue])
   useEffect(() => {
-    let frame;
+    let frame
     const animate = () => {
-      setAnimatedValue((prev) => {
-        const diff = sliderValue - prev;
-        // If close enough, snap to target
-        if (Math.abs(diff) < 0.001) return sliderValue;
-        // Move a fraction towards the target
-        return prev + diff * 0.15;
-      });
-      frame = requestAnimationFrame(animate);
-    };
-    animate();
-    return () => cancelAnimationFrame(frame);
-  }, [sliderValue]);
+      setAnimatedValue(prev => {
+        const diff = sliderTargetRef.current - prev
+        if (Math.abs(diff) < 0.001) return sliderTargetRef.current
+        return prev + diff * 0.15
+      })
+      frame = requestAnimationFrame(animate)
+    }
+    frame = requestAnimationFrame(animate)
+    return () => cancelAnimationFrame(frame)
+  }, [])
 
   // Preload images to get aspect ratios and compute deterministic widths
   const [ratios, setRatios] = useState(items.map(() => 1))

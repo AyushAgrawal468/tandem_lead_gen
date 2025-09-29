@@ -338,13 +338,19 @@ button:focus-visible {
   justify-content: center;
 }
 
+/* Removed previous mobile 70vh override which caused inconsistent top gaps across devices due to dynamic viewport unit differences. */
 @media (max-width: 768px) {
   .hero-section-responsive {
-    height: 70dvh;
-    height: 70svh;
-    height: calc(var(--vh) * 70);
-    min-height: calc(var(--vh) * 70);
+    height: auto; /* let inline style on Hero container define exact height */
+    min-height: 0;
   }
+}
+
+/* Performance: generic lazy section helper so browser can skip rendering until scrolled into view */
+.cv-lazy {
+  content-visibility: auto;
+  contain-intrinsic-size: 600px; /* fallback intrinsic block size; overridden inline per section */
+  contain: layout style paint;
 }
 
 /* ================= WAITLIST BUTTON (placed last to win cascade) ================= */
