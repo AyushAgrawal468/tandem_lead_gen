@@ -8,6 +8,9 @@ const Blog = () => {
   const closeTimeoutRef = useRef(null)
   const mobileScrollRef = useRef(null)
   const desktopScrollRef = useRef(null)
+  // Swipe refs for mobile & tablet (<= md breakpoint). We intentionally do NOT enable swipe on large desktop.
+  const mobileSectionRef = useRef(null)
+  const tabletSectionRef = useRef(null)
     const [activeSectionIdx, setActiveSectionIdx] = useState(0)
   
   const blogPosts = [
@@ -213,6 +216,77 @@ The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools have
     if (expandedId) handleCloseOverlay()
   }
 
+  // ================= Swipe Navigation (Mobile + Tablet Only) =================
+  useEffect(() => {
+    if (expandedId) return // disable swipe when overlay open so scroll works naturally
+    // Determine viewport width once per mount & resize for enabling tablet swipe (<1024px)
+    let enabled = false
+    const updateEnabled = () => { enabled = typeof window !== 'undefined' && window.innerWidth < 1024 }
+    updateEnabled()
+
+    let startX = 0, startY = 0, isDown = false, lockedAxis = null, deltaX = 0
+    const THRESHOLD = 40
+
+    const onPointerDown = (e) => {
+      if (!enabled) return
+      isDown = true
+      const t = 'touches' in e ? e.touches[0] : e
+      startX = t.clientX; startY = t.clientY; deltaX = 0; lockedAxis = null
+    }
+    const onPointerMove = (e) => {
+      if (!isDown || !enabled) return
+      const t = 'touches' in e ? e.touches[0] : e
+      const dx = t.clientX - startX
+      const dy = t.clientY - startY
+      if (!lockedAxis) {
+        if (Math.abs(dx) > Math.abs(dy) + 6) lockedAxis = 'x'
+        else if (Math.abs(dy) > Math.abs(dx) + 6) lockedAxis = 'y'
+      }
+      if (lockedAxis === 'x') {
+        if ('preventDefault' in e) try { e.preventDefault() } catch {}
+        deltaX = dx
+      }
+    }
+    const onPointerUp = () => {
+      if (!isDown || !enabled) return
+      isDown = false
+      if (lockedAxis === 'x') {
+        if (deltaX < -THRESHOLD) nextSlide()
+        else if (deltaX > THRESHOLD) prevSlide()
+      }
+    }
+
+    const addListeners = (el) => {
+      if (!el) return
+      el.addEventListener('touchstart', onPointerDown, { passive: false })
+      el.addEventListener('touchmove', onPointerMove, { passive: false })
+      el.addEventListener('touchend', onPointerUp)
+      el.addEventListener('pointerdown', onPointerDown)
+      el.addEventListener('pointermove', onPointerMove)
+      window.addEventListener('pointerup', onPointerUp)
+    }
+    const removeListeners = (el) => {
+      if (!el) return
+      el.removeEventListener('touchstart', onPointerDown)
+      el.removeEventListener('touchmove', onPointerMove)
+      el.removeEventListener('touchend', onPointerUp)
+      el.removeEventListener('pointerdown', onPointerDown)
+      el.removeEventListener('pointermove', onPointerMove)
+      window.removeEventListener('pointerup', onPointerUp)
+    }
+
+    const mobEl = mobileSectionRef.current
+    const tabEl = tabletSectionRef.current
+    addListeners(mobEl)
+    addListeners(tabEl)
+    window.addEventListener('resize', updateEnabled)
+    return () => {
+      removeListeners(mobEl)
+      removeListeners(tabEl)
+      window.removeEventListener('resize', updateEnabled)
+    }
+  }, [expandedId, nextSlide, prevSlide])
+
   const visiblePosts = blogPosts.slice(currentIndex, currentIndex + 2)
   const mobilePost = blogPosts[currentIndex % blogPosts.length]
   const expandedPost = expandedId ? blogPosts.find(p => p.id === expandedId) : null
@@ -240,6 +314,7 @@ The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools have
       if (!paraOffsets.length) return
       const scrollTop = scrollContainer.scrollTop
       const viewH = scrollContainer.clientHeight
+      const scrollHeight = scrollContainer.scrollHeight
       const viewCenter = scrollTop + viewH * 0.35
       let bestIdx = 0
       let bestDist = Infinity
@@ -249,6 +324,9 @@ The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools have
         const dist = Math.abs(center - viewCenter)
         if (dist < bestDist) { bestDist = dist; bestIdx = i }
       }
+      // If user is near the absolute bottom, always force last paragraph active so conclusion highlights
+      const nearBottom = scrollTop + viewH >= scrollHeight - 48 // 48px threshold
+      if (nearBottom) bestIdx = paraOffsets.length - 1
       setActiveSectionIdx(prev => (prev === bestIdx ? prev : bestIdx))
     }
 
@@ -300,7 +378,7 @@ The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools have
   return (
     <>
       {/* Mobile-only layout */}
-  <section id="blogs" className="block sm:hidden py-10 xxs:py-12 xs:py-14 px-4 xxs:px-5 xs:px-6 relative">
+  <section ref={mobileSectionRef} id="blogs" className="block sm:hidden py-10 xxs:py-12 xs:py-14 px-4 xxs:px-5 xs:px-6 relative">
         <h2 className="text-[34px] xxs:text-[38px] xs:text-[42px] font-bold text-texthigh mb-5">Blogs</h2>
         <div
           className="rounded-2xl p-6"
@@ -422,7 +500,7 @@ The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools have
       </section>
 
       {/* Desktop & tablet layout — unchanged, visible from sm and up */}
-  <section id="blogs" className="hidden sm:block py-20 px-6 md:px-20 lg:px-40 relative">
+  <section ref={tabletSectionRef} id="blogs" className="hidden sm:block py-20 px-6 md:px-20 lg:px-40 relative">
         <div className="w-full">
           <div className="flex justify-between items-stretch">
             {/* Left side - Blogs heading and navigation buttons */}

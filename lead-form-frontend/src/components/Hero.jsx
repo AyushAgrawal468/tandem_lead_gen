@@ -50,8 +50,14 @@ const Hero = ({ timerData }) => {
   const [trackTransition, setTrackTransition] = useState(true)
   const animatingRef = React.useRef(false)
   // Removed width lock system (was causing gap to appear only after animation)
-  const ANIM_DURATION = 450 // shortened for snappier manual navigation (must match CSS timing below)
-  const PRE_SHIFT = 0.55 // fraction of shift-distance to keep side slide partially visible
+  // Desktop/tablet animation tuning: slower & full slide travel (shift-distance * 1)
+  // Further slow desktop/tablet slide animation only (mobile uses its own transition timing below)
+  // Was 700ms -> 1100ms earlier; now 1600ms for a more leisurely cinematic travel.
+  // Desktop/tablet animation duration set per request (1200ms). Mobile timings unchanged.
+  const ANIM_DURATION = 1200 // ms (desktop/tablet track animation)
+  // Increase pre-shift beyond full width to exaggerate perceived travel
+  const PRE_SHIFT = 1.3 // >1 causes extra overscroll then settle for stronger motion cue
+  const SHIFT_MULTIPLIER = 1.15 // amplify track translation distance slightly
   const autoRef = React.useRef(null)
   const resumeRef = React.useRef(null)
   // Queue for additional navigation clicks occurring during animation
@@ -186,18 +192,17 @@ const Hero = ({ timerData }) => {
       }
       // Measure outgoing center width and lock it
       const current = currentSlide
-      // Width locking removed
       setNavDir('next')
-      // Immediate index update (Option A)
+      // Immediate logical swap so roles update (right slide becomes 'center')
       setCurrentSlide(prev => (prev + 1) % heroSlides.length)
       animatingRef.current = true
+      // Start fully offset to the right, then slide to 0 for visible entry motion
       setTrackTransition(false)
-      setTrackOffset(PRE_SHIFT) // partial pre-shift right keeps left visible
+      setTrackOffset(PRE_SHIFT)
       requestAnimationFrame(() => {
         setTrackTransition(true)
-        setTrackOffset(0) // animate back (visual left move)
+        setTrackOffset(0)
         setTimeout(() => {
-          // No width locks to clear
           animatingRef.current = false
           if (pendingNavRef.current) {
             const queued = pendingNavRef.current
@@ -222,18 +227,15 @@ const Hero = ({ timerData }) => {
       }
       // Measure outgoing center width
       const current = currentSlide
-      // Width locking removed
       setNavDir('prev')
-      // Immediate index update to previous
       setCurrentSlide(prev => (prev - 1 + heroSlides.length) % heroSlides.length)
       animatingRef.current = true
       setTrackTransition(false)
-      setTrackOffset(-PRE_SHIFT) // partial pre-shift left keeps right visible
+      setTrackOffset(-PRE_SHIFT)
       requestAnimationFrame(() => {
         setTrackTransition(true)
         setTrackOffset(0)
         setTimeout(() => {
-          // No width locks to clear
           animatingRef.current = false
           if (pendingNavRef.current) {
             const queued = pendingNavRef.current
@@ -244,9 +246,9 @@ const Hero = ({ timerData }) => {
         }, ANIM_DURATION)
       })
     } else {
-      // mobile still uses left-only flow
-      setNavDir('next')
-      setCurrentSlide((prev) => (prev + 1) % heroSlides.length)
+      // mobile now supports bidirectional flow
+      setNavDir('prev')
+      setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length)
     }
   }
 
@@ -258,19 +260,15 @@ const Hero = ({ timerData }) => {
       const direction = index > currentSlide ? 'next' : 'prev'
       // Measure current center before swap
       const current = currentSlide
-      // Width locking removed
       setNavDir(direction)
-      setCurrentSlide(index) // immediate
+      setCurrentSlide(index)
       animatingRef.current = true
       setTrackTransition(false)
-  setTrackOffset(direction === 'next' ? PRE_SHIFT : -PRE_SHIFT) // partial pre-shift opposite
+      setTrackOffset(direction === 'next' ? PRE_SHIFT : -PRE_SHIFT)
       requestAnimationFrame(() => {
         setTrackTransition(true)
         setTrackOffset(0)
-        setTimeout(() => {
-          // No width locks to clear
-          animatingRef.current = false
-        }, ANIM_DURATION)
+        setTimeout(() => { animatingRef.current = false }, ANIM_DURATION)
       })
     } else {
       setCurrentSlide(index)
@@ -384,7 +382,9 @@ const Hero = ({ timerData }) => {
             ['--side-width']: 'clamp(75px, 21vw, 205px)',
             ['--center-gap']: 'clamp(17px, 4vw, 49px)',
             ['--side-margin']: '12px',
-            ['--shift-distance']: 'calc(var(--side-width) + var(--center-gap) + var(--side-margin))'
+            ['--shift-distance']: 'calc(var(--side-width) + var(--center-gap) + var(--side-margin))',
+            perspective: '1600px',
+            perspectiveOrigin: '50% 50%'
           }}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
@@ -397,8 +397,8 @@ const Hero = ({ timerData }) => {
               position: 'absolute',
               inset: 0,
               overflow: 'hidden',
-              transform: `translateX(calc(var(--shift-distance) * ${trackOffset}))`,
-              transition: trackTransition ? 'transform 450ms cubic-bezier(0.22,1,0.36,1)' : 'none',
+              transform: `translateX(calc(var(--shift-distance) * ${trackOffset} * ${SHIFT_MULTIPLIER}))`,
+              transition: trackTransition ? `transform ${ANIM_DURATION}ms cubic-bezier(0.22,1,0.36,1)` : 'none',
               willChange: 'transform'
             }}
           >
@@ -424,14 +424,15 @@ const Hero = ({ timerData }) => {
               position: 'absolute',
               top: 'calc(var(--curve-h) / -2)',
               bottom: 0,
-              // Remove long opacity transition so images appear immediately
-              transition: 'opacity 40ms linear',
+              // Add transform transition so role-based 3D scale/rotation eases, still keep quick opacity changes
+              transition: `opacity 120ms linear, transform ${ANIM_DURATION}ms cubic-bezier(0.22,1,0.36,1)`,
               overflow: 'hidden',
               borderRadius: '14px',
               willChange: 'opacity',
               backfaceVisibility: 'hidden',
               WebkitBackfaceVisibility: 'hidden',
-              contain: 'layout paint style'
+              contain: 'layout paint style',
+              transformStyle: 'preserve-3d'
             }
 
             let positionalStyle = {}
@@ -444,7 +445,7 @@ const Hero = ({ timerData }) => {
                 width: 'auto',
                 opacity: 1,
                 zIndex: 12,
-                transform: 'scale(1) translateZ(0)'
+                transform: 'scale(1.05) translateZ(0)'
               }
             } else if (role === 'left') {
               positionalStyle = {
@@ -453,7 +454,7 @@ const Hero = ({ timerData }) => {
                 right: 'auto',
                 opacity: 1,
                 zIndex: 10,
-                transform: 'scale(0.98) translateZ(0)'
+                transform: 'scale(0.9) rotateY(18deg) translateZ(0)'
               }
             } else if (role === 'right') {
               positionalStyle = {
@@ -462,7 +463,7 @@ const Hero = ({ timerData }) => {
                 left: 'auto',
                 opacity: 1,
                 zIndex: 10,
-                transform: 'scale(0.98) translateZ(0)'
+                transform: 'scale(0.9) rotateY(-18deg) translateZ(0)'
               }
             } else if (role === 'preload-right') {
               // position closer to viewport edge and make partially visible for immediate appearance
@@ -472,7 +473,7 @@ const Hero = ({ timerData }) => {
                 left: 'auto',
                 opacity: 0.3,
                 zIndex: 5,
-                transform: 'scale(0.98) translateZ(0)'
+                transform: 'scale(0.85) rotateY(-28deg) translateZ(0)'
               }
             } else if (role === 'preload-left') {
               // position closer to viewport edge
@@ -482,7 +483,7 @@ const Hero = ({ timerData }) => {
                 right: 'auto',
                 opacity: 0.3,
                 zIndex: 5,
-                transform: 'scale(0.98) translateZ(0)'
+                transform: 'scale(0.85) rotateY(28deg) translateZ(0)'
               }
             } else {
               positionalStyle = {
@@ -490,7 +491,7 @@ const Hero = ({ timerData }) => {
                 width: '0px',
                 opacity: 0,
                 zIndex: 1,
-                transform: 'scale(0.9) translateZ(0)'
+                transform: 'scale(0.8) translateZ(0)'
               }
             }
 
@@ -549,9 +550,12 @@ const Hero = ({ timerData }) => {
               // Force left-only flow on mobile stack
               let position
               if (isSmall()) {
-                if (delta === 0) position = 'center'
-                else if (delta === 1) position = 'right'
-                else position = 'left'
+                const prevIndex = (currentSlide - 1 + total) % total
+                const nextIndex = (currentSlide + 1) % total
+                if (index === currentSlide) position = 'center'
+                else if (index === prevIndex) position = 'left'
+                else if (index === nextIndex) position = 'right'
+                else position = navDir === 'next' ? 'right' : 'left'
               } else {
                 position = delta === 0
                   ? 'center'
@@ -578,7 +582,9 @@ const Hero = ({ timerData }) => {
                   className="absolute inset-0 will-change-transform"
                   style={{
                     transform: baseTransforms[position],
-                    transition: 'transform 900ms cubic-bezier(0.22, 1, 0.36, 1), opacity 700ms ease',
+                    // Slow mobile slide transform & opacity to match new desktop pacing (was 900ms / 700ms)
+                    // Slightly faster than earlier 1200ms to reduce lag feel; opacity trimmed too
+                    transition: 'transform 950ms cubic-bezier(0.22, 1, 0.36, 1), opacity 650ms ease',
                     // On mobile, hide non-center slides completely to avoid any faded preview
                     opacity: isSmall() ? (position === 'center' ? 1 : 0) : (position === 'center' ? 1 : 1),
                     zIndex: z,

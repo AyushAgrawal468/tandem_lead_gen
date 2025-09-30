@@ -10,7 +10,9 @@ import feature6 from '../assets/features/feature6.png'
 const Features = () => {
   // Mobile carousel state (one SVG per slide)
   const mobileImages = [feature1, feature2, feature3, feature4, feature5, feature6]
+  // internal index can temporarily go to -1 (clone of last) or length (clone of first) for seamless loop
   const [mobileIndex, setMobileIndex] = React.useState(0)
+  const [instantJump, setInstantJump] = React.useState(false) // disable transition during clone reset
   const touchStartXRef = React.useRef(0)
   const touchStartYRef = React.useRef(0)
   const touchActiveRef = React.useRef(false)
@@ -23,8 +25,8 @@ const Features = () => {
   const [dragDx, setDragDx] = React.useState(0)
   const [isDragging, setIsDragging] = React.useState(false)
 
-  const nextMobile = () => setMobileIndex((i) => (i + 1) % mobileImages.length)
-  const prevMobile = () => setMobileIndex((i) => (i - 1 + mobileImages.length) % mobileImages.length)
+  const nextMobile = () => setMobileIndex((i) => i + 1) // allow reaching length (clone)
+  const prevMobile = () => setMobileIndex((i) => i - 1) // allow reaching -1 (clone)
 
   // Single native touch handler on the frame (avoid duplicate processing)
   React.useEffect(() => {
@@ -61,8 +63,8 @@ const Features = () => {
       const t = e.changedTouches ? e.changedTouches[0] : e
       const dx = t.clientX - startX
       const threshold = 35
-      if (dx < -threshold) setMobileIndex((i) => (i + 1) % mobileImages.length)
-      else if (dx > threshold) setMobileIndex((i) => (i - 1 + mobileImages.length) % mobileImages.length)
+  if (dx < -threshold) setMobileIndex((i) => i + 1)
+  else if (dx > threshold) setMobileIndex((i) => i - 1)
       isDown = false
       horizontalLocked = false
       setIsDragging(false)
@@ -141,7 +143,7 @@ const Features = () => {
               color: '#FFF'
             }}
           >
-            Why be on
+            Why
             <br />
             Tandem?
           </h2>
@@ -158,12 +160,12 @@ const Features = () => {
                 lineHeight: '100%'
               }}
             >
-              {String(mobileIndex + 1).padStart(2, '0')}
+              {String(((mobileIndex % mobileImages.length) + mobileImages.length) % mobileImages.length + 1).padStart(2, '0')}
             </span>
           </div>
         </div>
 
-        {/* Mobile viewport: whole frames slide out/in like desktop */}
+        {/* Mobile viewport: infinite loop with clones */}
         <div
           ref={frameRef}
           className="overflow-hidden"
@@ -173,46 +175,73 @@ const Features = () => {
             touchAction: 'pan-y'
           }}
         >
-          <div
-            className="h-full flex will-change-transform"
-            style={{
-              transform: `translateX(${-(mobileIndex * (frameW || 360)) + (isDragging ? dragDx : 0)}px)`,
-              transition: isDragging ? 'none' : 'transform 400ms ease',
-              position: 'relative',
-              zIndex: 1
-            }}
-          >
-            {mobileImages.map((src, i) => {
-              const r = ratios[i] || 1
-              const exactW = Math.min(frameW, Math.max(1, Math.round(r * (frameH || 394))))
-              return (
+          {(() => {
+            const extended = [mobileImages[mobileImages.length - 1], ...mobileImages, mobileImages[0]]
+            const baseTranslateIndex = mobileIndex + 1 // account for leading clone
+            return (
               <div
-                key={i}
-                className="h-full flex items-center justify-center"
-                style={{ width: frameW, minWidth: frameW }}
+                className="h-full flex will-change-transform"
+                onTransitionEnd={() => {
+                  if (mobileIndex === mobileImages.length) {
+                    // Reached clone after last -> jump to first real
+                    setInstantJump(true)
+                    requestAnimationFrame(() => {
+                      setMobileIndex(0)
+                      requestAnimationFrame(() => setInstantJump(false))
+                    })
+                  } else if (mobileIndex === -1) {
+                    // Reached clone before first -> jump to last real
+                    setInstantJump(true)
+                    requestAnimationFrame(() => {
+                      setMobileIndex(mobileImages.length - 1)
+                      requestAnimationFrame(() => setInstantJump(false))
+                    })
+                  }
+                }}
+                style={{
+                  transform: `translateX(${-(baseTranslateIndex * (frameW || 360)) + (isDragging ? dragDx : 0)}px)`,
+                  transition: (isDragging || instantJump) ? 'none' : 'transform 400ms ease',
+                  position: 'relative',
+                  zIndex: 1
+                }}
               >
-                {/* Framed container that moves fully on/off screen */}
-                <div
-                  className="overflow-hidden"
-                  style={{
-                    background: '#23243a',
-                    border: '1px solid rgba(255,255,255,0.15)',
-                    borderRadius: '16px',
-                    width: `${exactW}px`,
-                    height: `${frameH}px`,
-                    boxShadow: '0 8px 24px rgba(0,0,0,0.35)'
-                  }}
-                >
-                  <img
-                    src={src}
-                    alt={`Feature ${i + 1}`}
-                    style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center center', background: '#23243a', pointerEvents: 'none' }}
-                    draggable={false}
-                  />
-                </div>
+                {extended.map((src, i) => {
+                  let realIdx
+                  if (i === 0) realIdx = mobileImages.length - 1
+                  else if (i === extended.length - 1) realIdx = 0
+                  else realIdx = i - 1
+                  const r = ratios[realIdx] || 1
+                  const exactW = Math.min(frameW, Math.max(1, Math.round(r * (frameH || 394))))
+                  return (
+                    <div
+                      key={`ext-${i}-${realIdx}`}
+                      className="h-full flex items-center justify-center"
+                      style={{ width: frameW, minWidth: frameW }}
+                    >
+                      <div
+                        className="overflow-hidden"
+                        style={{
+                          background: '#23243a',
+                          border: '1px solid rgba(255,255,255,0.15)',
+                          borderRadius: '16px',
+                          width: `${exactW}px`,
+                          height: `${frameH}px`,
+                          boxShadow: '0 8px 24px rgba(0,0,0,0.35)'
+                        }}
+                      >
+                        <img
+                          src={src}
+                          alt={`Feature ${realIdx + 1}`}
+                          style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center center', background: '#23243a', pointerEvents: 'none' }}
+                          draggable={false}
+                        />
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
-            )})}
-          </div>
+            )
+          })()}
         </div>
 
         {/* Slider under card */}
@@ -222,7 +251,7 @@ const Features = () => {
             min={0}
             max={mobileImages.length - 1}
             step={1}
-            value={mobileIndex}
+            value={((mobileIndex % mobileImages.length) + mobileImages.length) % mobileImages.length}
             className="w-full"
             style={{
               WebkitAppearance: 'none',
@@ -276,7 +305,7 @@ const Features = () => {
                       marginLeft: '10px'
                     }}
                   >
-                    Why be on
+                    Why
                     <br />
                     Tandem?
                   </h2>
@@ -293,7 +322,7 @@ const Features = () => {
                       marginLeft: '-16px'
                     }}
                   >
-                    Why be on
+                    Why
                     <br />
                     Tandem?
                   </h2>
@@ -309,7 +338,7 @@ const Features = () => {
                       color: 'rgba(255, 255, 255, 1)'
                     }}
                   >
-                    Why be on
+                    Why
                     <br />
                     Tandem?
                   </h2>

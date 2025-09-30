@@ -125,15 +125,16 @@ const CountdownTimer = ({
       />
       <style>{`
         @media (max-width: 640px) {
-          .countdown-timer { width: 140px !important; }
+          /* Constrain width and add extra bottom padding so progress path doesn't overlap label */
+          .countdown-timer { width: 140px !important; padding: 14px 14px 22px 14px !important; }
           .countdown-timer .countdown-days { font-size: 44px !important; }
-          .countdown-timer .countdown-label { font-size: 14px !important; }
+          .countdown-timer .countdown-label { font-size: 14px !important; margin-top: 2px; }
         }
       `}</style>
       {/* Content */}
       <div
         className="flex flex-col items-center leading-none select-none"
-        style={{ gap: 2, zIndex: 1, position: 'relative' }}
+        style={{ gap: 2, zIndex: 2, position: 'relative' }}
       >
         <div
           className="countdown-days"
@@ -165,7 +166,7 @@ const CountdownTimer = ({
         viewBox={`0 0 ${W} ${H}`}
         className="absolute inset-0"
         aria-hidden="true"
-        style={{ zIndex: 1 }}
+        style={{ zIndex: 1, pointerEvents: 'none' }}
       >
         {/* Track (faint) */}
         <path

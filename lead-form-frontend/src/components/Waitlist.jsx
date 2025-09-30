@@ -16,6 +16,8 @@ const Waitlist = () => {
   // Show the first available SVG; otherwise use the fallback photo
   const [displayedSrc, setDisplayedSrc] = useState(null);
   const [showConsole, setShowConsole] = useState(false);
+  // Duration (ms) for success banner visibility
+  const SUCCESS_BANNER_MS = 4500;
   const [showBenefits, setShowBenefits] = useState(false);
 
   // Rewards data for carousel
@@ -130,11 +132,17 @@ const Waitlist = () => {
     } else if (!alphaSpace.test(formData.name.trim())) {
       newErrors.name = 'Name must contain only alphabets and spaces';
     }
-    // Mobile: required, 10 digits, numeric
-    if (!cleanedMobile) {
+    // Mobile validation:
+    // 1. Empty -> required message
+    // 2. Any non-digit characters OR not exactly 10 digits -> generic invalid message
+    const rawMobile = (formData.mobile || '').trim();
+    if (!rawMobile) {
       newErrors.mobile = 'Mobile number is required';
-    } else if (cleanedMobile.length !== 10) {
-      newErrors.mobile = 'Mobile number must be exactly 10 digits';
+    } else {
+      const nonDigit = /[^0-9]/.test(rawMobile);
+      if (nonDigit || cleanedMobile.length !== 10) {
+        newErrors.mobile = 'Enter a valid Mobile number';
+      }
     }
     // Email: required, valid format
     if (!formData.email) {
@@ -194,8 +202,8 @@ const Waitlist = () => {
       }
       const data = await res.json();
       console.log("✅ Lead saved:", data);
-      setShowConsole(true);
-      setTimeout(() => setShowConsole(false), 3500);
+  setShowConsole(true);
+  setTimeout(() => setShowConsole(false), SUCCESS_BANNER_MS);
   setFormData({ name: '', mobile: '', email: '' });
       setErrors({});
       setBackendError('');
@@ -334,7 +342,7 @@ const Waitlist = () => {
 
           {/* Signup card */}
           <div className="mt-6" style={{ border: '1.5px solid rgba(255,255,255,0.18)', borderRadius: '12px', background: 'rgba(255,255,255,0.04)', boxShadow: '0 2px 8px rgba(193,245,70,0.08)', padding: '20px' }}>
-            <form onSubmit={handleSubmit} className="space-y-5" autoComplete="on">
+            <form onSubmit={handleSubmit} className="space-y-5" autoComplete="on" noValidate>
               <h3
                 style={{
                   color: '#FFF',
@@ -565,7 +573,7 @@ const Waitlist = () => {
             </div>
 
             <div style={{ border: '1.5px solid rgba(255,255,255,0.18)', borderRadius: '12px', background: 'rgba(255,255,255,0.04)', boxShadow: '0 2px 8px rgba(193,245,70,0.08)', padding: '32px 24px', maxWidth: '480px', margin: '0 auto' }}>
-              <form onSubmit={handleSubmit} className="space-y-6" autoComplete="on">
+              <form onSubmit={handleSubmit} className="space-y-6" autoComplete="on" noValidate>
                 {/* Signup heading */}
                 <h2 style={{
                   color: '#FFF',

@@ -26,7 +26,7 @@ export default {
             },
             screens: {
                 xxs: "320px",  // Galaxy S8+
-                xs: "440px",   // wide phones
+                xs: "375px",   // wide phones
                 sm: "640px",   
                 md: "768px",
                 lg: "1024px",
