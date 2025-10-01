@@ -119,12 +119,10 @@ const Features = () => {
   <section id="features" className="pt-2 xs:pt-4 pb-8 xs:pb-12 md:pb-40 lg:pb-48" style={{ zIndex: 50, position: 'relative', scrollMarginTop: '40px' }}>
       {/* Simplified mobile spacing: remove negative pull & complex media overrides for consistent timer clearance */}
       <style>{`
-        @media (max-width: 639.98px) {
-          /* Maintain exactly 15px visual gap below the mobile countdown timer by pulling section upward.
-             Timer top is calc(300px + 36px); hero mobile image stack is 326px tall; previous natural gap was large.
-             We now apply a negative margin to #features while keeping internal padding modest (8px) so content doesn't collide. */
-          #features { margin-top: -10px !important; padding-top: 8px !important; }
-          /* Wrapper inside inherits no extra positive margin so the net offset holds. */
+      @media (max-width: 767.98px) {
+       /* Adjusted to produce a ~9px net visual gap under hero on all mobile widths (<768px).
+         BaseGap≈20px (natural flow) -19 (margin) + 8 (padding) ≈ 9px. */
+       #features { margin-top: -19px !important; padding-top: 8px !important; }
           #features .mobile-features-wrap { margin-top: 0 !important; padding-top: 0 !important; }
           #features .mobile-features-heading { padding-top: 8px !important; }
         }

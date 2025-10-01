@@ -70,12 +70,13 @@ const Hero = ({ timerData }) => {
   const heroBottomExtend = 240
   const bottomCurveOverlap = 240
 
-  // Mobile hero target dimensions (request: 340 x 290)
-  const MOBILE_HERO_W = 340
-  const MOBILE_HERO_H = 290
-  // Maintain previous relative offsets: lower ellipse was at (containerHeight - 26) and timer at (ellipseTop + 36)
-  const MOBILE_LOWER_ELLIPSE_TOP = MOBILE_HERO_H - 26 // 264px
-  const MOBILE_TIMER_TOP = MOBILE_LOWER_ELLIPSE_TOP + 36 // 300px
+  // Mobile hero target dimensions UPDATED (fixed 375 x 326 per request)
+  const MOBILE_HERO_W = 375
+  const MOBILE_HERO_H = 326
+  // Maintain previous relative offsets: lower ellipse was at (containerHeight - 26) and timer originally at (ellipseTop + 36)
+  // Adjusted per request: move timer 8px upward => 36 - 8 = 28
+  const MOBILE_LOWER_ELLIPSE_TOP = MOBILE_HERO_H - 26 // 300px when H=326
+  const MOBILE_TIMER_TOP = MOBILE_LOWER_ELLIPSE_TOP + 23 // 323px (moved 5px further up from 328px)
 
   // Slides
   // Build slides from discovered images or provide a fallback single slide
@@ -530,8 +531,8 @@ const Hero = ({ timerData }) => {
             left: '50%',
             transform: 'translateX(-50%)',
             top: 0,
-            width: `min(90vw, ${MOBILE_HERO_W}px)`,
-            // Fixed requested height; keep constant so decorative elements align predictably
+            // Fixed width & height for all mobile (<768px)
+            width: `${MOBILE_HERO_W}px`,
             height: `${MOBILE_HERO_H}px`,
             flexShrink: 0,
             backgroundColor: 'transparent'
