@@ -339,7 +339,8 @@ const Hero = ({ timerData }) => {
     }}
   >
       {/* Mobile IMAX top curve using provided Ellipse 5 */}
-      <div className="absolute block sm:hidden w-full pointer-events-none" style={{ top: '-14px', left: 0, right: 0, zIndex: 44 }}>
+  {/* Extend mobile view up to <768px (treat Tailwind sm like mobile) */}
+  <div className="absolute block md:hidden w-full pointer-events-none" style={{ top: '-14px', left: 0, right: 0, zIndex: 44 }}>
         <img
           src={Ellipse5}
           alt="imax top curve"
@@ -372,7 +373,7 @@ const Hero = ({ timerData }) => {
         
         {/* Sliding Images Container - Desktop/Tablets (Restored 3-up role-based system) */}
         <div 
-          className="absolute hidden sm:block"
+          className="absolute hidden md:block"
           style={{
             left: '2px',
             right: 'calc(2px + var(--content-right-pad, 0px))',
@@ -524,7 +525,7 @@ const Hero = ({ timerData }) => {
 
         {/* Sliding Images Container - Mobile-only (smooth sliding between images) */}
         <div
-          className="absolute block sm:hidden"
+          className="absolute block md:hidden"
           style={{
             left: '50%',
             transform: 'translateX(-50%)',
@@ -614,7 +615,7 @@ const Hero = ({ timerData }) => {
         </div>
 
         {/* Mobile IMAX lower curve using Ellipse 6 */}
-        <div className="absolute block sm:hidden w-full pointer-events-none" style={{ top: `${MOBILE_LOWER_ELLIPSE_TOP}px`, left: 0, right: 0, zIndex: 44 }}>
+  <div className="absolute block md:hidden w-full pointer-events-none" style={{ top: `${MOBILE_LOWER_ELLIPSE_TOP}px`, left: 0, right: 0, zIndex: 44 }}>
           <img
             src={Ellipse6}
             alt="imax lower curve"
@@ -628,7 +629,7 @@ const Hero = ({ timerData }) => {
         </div>
 
         {/* Navigation Controls (restored). Increased z-index so they're above the lower ellipse. */}
-        <div className="absolute top-1/2 left-4 transform -translate-y-1/2 z-60 hidden sm:block">
+  <div className="absolute top-1/2 left-4 transform -translate-y-1/2 z-60 hidden md:block">
           <button
             onClick={prevSlide}
             aria-label="Previous slide"
@@ -640,7 +641,7 @@ const Hero = ({ timerData }) => {
             </svg>
           </button>
         </div>
-        <div className="absolute top-1/2 right-4 transform -translate-y-1/2 z-60 hidden sm:block">
+  <div className="absolute top-1/2 right-4 transform -translate-y-1/2 z-60 hidden md:block">
           <button
             onClick={nextSlide}
             aria-label="Next slide"
@@ -654,7 +655,7 @@ const Hero = ({ timerData }) => {
         </div>
 
         {/* Slide Indicators - desktop/tablet only (hidden on mobile) */}
-  <div className="absolute bottom-6 sm:bottom-8 left-1/2 transform -translate-x-1/2 z-20 hidden sm:block">
+  <div className="absolute bottom-6 md:bottom-8 left-1/2 transform -translate-x-1/2 z-20 hidden md:block">
           <div className="flex space-x-3">
             {heroSlides.map((_, index) => (
               <button
@@ -674,7 +675,7 @@ const Hero = ({ timerData }) => {
         {/* Mobile: no bottom semicircle to avoid overlap with features */}
         
         {/* Desktop/Tablet: preserve original responsive curve */}
-        <div className="absolute w-full pointer-events-none hidden sm:block" style={{ zIndex: 45, height: '0px', bottom: '0px' }}>
+  <div className="absolute w-full pointer-events-none hidden md:block" style={{ zIndex: 45, height: '0px', bottom: '0px' }}>
           <div
             className="absolute"
             style={{
@@ -694,7 +695,7 @@ const Hero = ({ timerData }) => {
         {/* Global timer above the bottom semicircle, anchored to the inner right edge */}
         {/* Desktop/Tablet timer only (removed mobile timer) */}
         <div
-          className="absolute pointer-events-auto hidden sm:block"
+          className="absolute pointer-events-auto hidden md:block"
           style={{
             zIndex: 1000,
             right: TIMER_RIGHT_INSET,
@@ -722,7 +723,7 @@ const Hero = ({ timerData }) => {
 
         {/* Mobile timer: moved further down and slightly reduced to avoid overlap with Features heading */}
         <div
-          className="absolute pointer-events-none block sm:hidden"
+          className="absolute pointer-events-none block md:hidden"
           style={{
             zIndex: 1001,
             right: '12px',

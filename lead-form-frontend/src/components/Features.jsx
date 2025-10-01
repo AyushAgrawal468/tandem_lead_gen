@@ -116,7 +116,7 @@ const Features = () => {
   }, [mobileImages.join('|')])
 
   return (
-  <section id="features" className="pt-2 xs:pt-4 pb-8 xs:pb-12 sm:pb-32 md:pb-40 lg:pb-48" style={{ zIndex: 50, position: 'relative', scrollMarginTop: '40px' }}>
+  <section id="features" className="pt-2 xs:pt-4 pb-8 xs:pb-12 md:pb-40 lg:pb-48" style={{ zIndex: 50, position: 'relative', scrollMarginTop: '40px' }}>
       {/* Simplified mobile spacing: remove negative pull & complex media overrides for consistent timer clearance */}
       <style>{`
         @media (max-width: 639.98px) {
@@ -130,7 +130,7 @@ const Features = () => {
         }
       `}</style>
       {/* Mobile-only layout (do not affect desktop) */}
-  <div className="block sm:hidden mobile-features-wrap" style={{ marginTop: 0 }}>
+  <div className="block md:hidden mobile-features-wrap" style={{ marginTop: 0 }}>
         {/* Heading */}
         <div className="relative px-4 xxs:px-5 xs:px-6 mobile-features-heading" style={{ marginBottom: '16px' }}>
           <h2
@@ -286,29 +286,14 @@ const Features = () => {
       </div>
 
       {/* Desktop & tablet (unchanged) */}
-      <div className="hidden sm:block pt-32">
+  <div className="hidden md:block pt-32">
         {/* Full-bleed container spanning the full viewport width */}
         <div className="relative" style={{ width: '100vw', marginLeft: 'calc(50% - 50vw)', marginRight: 'calc(50% - 50vw)' }}>
           {/* Carousel with heading slotted just under the left previews */}
           <FeatureCarousel
               belowLeft={(
                 <>
-                  {/* sm-only (640-767px): keep desktop size */}
-                  <h2 
-                    className="hidden sm:block md:hidden text-left font-bold text-white"
-                    style={{
-                      fontFamily: '"Anek Latin", sans-serif',
-                      fontSize: '60px',
-                      fontWeight: 700,
-                      lineHeight: '120%',
-                      color: 'rgba(255, 255, 255, 1)',
-                      marginLeft: '10px'
-                    }}
-                  >
-                    Why
-                    <br />
-                    Tandem?
-                  </h2>
+                  {/* Removed sm-only heading; mobile layout now covers up to <768px */}
 
                   {/* md-only (768-1023px): smaller to avoid overlap */}
                   <h2 
