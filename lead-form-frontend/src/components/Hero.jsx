@@ -3,12 +3,12 @@ import Ellipse5 from '../assets/Ellipse 5.svg'
 import Ellipse6 from '../assets/Ellipse 6.svg'
 import CountdownTimer from './CountdownTimer'
 
-// Dynamically import up to 5 hero images from assets/hero-images
+// Dynamically import up to 4 hero images from assets/hero-images
 // Users should place their images there; we sort by filename for stable order.
 const heroImageModules = import.meta.glob('../assets/hero-images/*.{jpg,jpeg,png,webp}', { eager: true })
 const heroImageEntries = Object.entries(heroImageModules)
   .sort((a, b) => a[0].localeCompare(b[0]))
-  .slice(0, 5)
+  .slice(0, 4)
 const heroImages = heroImageEntries.map(([_, mod]) => mod.default || mod)
 
 const Hero = ({ timerData }) => {
@@ -70,13 +70,16 @@ const Hero = ({ timerData }) => {
   const heroBottomExtend = 240
   const bottomCurveOverlap = 240
 
-  // Mobile hero target dimensions UPDATED (fixed 375 x 326 per request)
+  // Mobile hero target dimensions UPDATED (responsive height now 440px per new request)
+  // Width stays fixed at 375px for layout consistency; height may be revised later to auto-fit image.
   const MOBILE_HERO_W = 375
-  const MOBILE_HERO_H = 326
+  const MOBILE_HERO_H = 440
   // Maintain previous relative offsets: lower ellipse was at (containerHeight - 26) and timer originally at (ellipseTop + 36)
   // Adjusted per request: move timer 8px upward => 36 - 8 = 28
-  const MOBILE_LOWER_ELLIPSE_TOP = MOBILE_HERO_H - 26 // 300px when H=326
-  const MOBILE_TIMER_TOP = MOBILE_LOWER_ELLIPSE_TOP + 23 // 323px (moved 5px further up from 328px)
+  const MOBILE_LOWER_ELLIPSE_TOP = MOBILE_HERO_H - 26 // 414px when H=440
+  // Reposition timer so it remains inside 440px container (avoid clipping due to overflow-hidden parent)
+  // Previously sat just below lower ellipse (+23). Now place ~60px above ellipse bottom zone.
+  const MOBILE_TIMER_TOP = MOBILE_LOWER_ELLIPSE_TOP - 60 // 354px (timer height ~80 => bottom ~434 within 440)
 
   // Slides
   // Build slides from discovered images or provide a fallback single slide
@@ -284,7 +287,6 @@ const Hero = ({ timerData }) => {
   const TIMER_SW = 6
   const TIMER_DISPLAY_W = 'clamp(150px, 24vw, 200px)'
   const TIMER_DISPLAY_H = 'clamp(80px, 12vw, 100px)'
-  const TIMER_RIGHT_INSET = 'calc(2px + var(--content-right-pad, 0px) + 8px)'
   const TIMER_BOTTOM_INSET = 'calc(var(--bottom-overlap) - 72px)'
 
   // Normalize bottom ellipse in md only (e.g., iPad Mini/Air/Pro portrait)
@@ -310,21 +312,36 @@ const Hero = ({ timerData }) => {
 
   let BOTTOM_CURVE_H_VAR
   let BOTTOM_OVERLAP_VAR
-  if (isIpadPro11Portrait) {
-    // Tighter clamps on iPad Pro 11" so it matches other tablets visually
-    BOTTOM_CURVE_H_VAR = 'clamp(180px, 17vh, 240px)'
-    BOTTOM_OVERLAP_VAR = 'clamp(60px, 8vh, 120px)'
-  } else if (isIpadPro129Portrait) {
-    // Treat 12.9" as tablet with slightly reduced vh scaling to align with others
-    BOTTOM_CURVE_H_VAR = 'clamp(180px, 20vh, 280px)'
-    BOTTOM_OVERLAP_VAR = 'clamp(90px, 12vh, 160px)'
-  } else if (isTablet) {
-    BOTTOM_CURVE_H_VAR = 'clamp(180px, 22vh, 280px)'
-    BOTTOM_OVERLAP_VAR = 'clamp(60px, 10vh, 140px)'
+  
+  // Standardize lower ellipse for all desktop/tablet views (md and above)
+  // Separate tablet (md) and desktop (lg+) to fix tablet viewport height issues
+  if (vw >= 1024) {
+    // Desktop (lg and above) - use vh-based scaling
+    BOTTOM_CURVE_H_VAR = 'clamp(180px, 20vh, 260px)'
+    BOTTOM_OVERLAP_VAR = 'clamp(80px, 10vh, 140px)'
+  } else if (vw >= 768) {
+    // Tablet (md only) - use fixed values to prevent height squeeze/stretch
+    BOTTOM_CURVE_H_VAR = 'clamp(180px, 15vw, 220px)'
+    BOTTOM_OVERLAP_VAR = 'clamp(80px, 8vw, 120px)'
   } else {
+    // Mobile devices (preserve original responsive behavior)
     BOTTOM_CURVE_H_VAR = 'clamp(40px, 24vw, 200px)'
     BOTTOM_OVERLAP_VAR = 'clamp(6px, 8vw, 96px)'
   }
+
+  // Consistent lower ellipse positioning for all desktop/tablet views (md and above)
+  // Moved upwards by increasing the positive offset from +20px to +40px
+  const bottomCurveBottom = vw >= 768
+    ? 'calc(var(--bottom-overlap) - var(--bottom-curve-h) + 40px)'
+    : 'calc(var(--bottom-overlap) - var(--bottom-curve-h))'
+
+  // Adjust desktop timer upward by 15px only for md+ (>=768px)
+  const adjustedTimerBottom = vw >= 768
+    ? 'calc(var(--bottom-overlap) - 72px + 45px)'
+    : TIMER_BOTTOM_INSET
+
+  // Desktop edge overshoot so side slides touch exact viewport edges without shrinking center gap
+  const edgeOvershoot = vw >= 768 ? 24 : 0
 
   return (
   <section
@@ -332,8 +349,16 @@ const Hero = ({ timerData }) => {
     className="relative overflow-hidden hero-section-responsive"
     style={{
       zIndex: 10,
-      // Use full viewport minus navbar for desktop/tablet; allow mobile to size to content height to avoid extra gap
-      minHeight: typeof window !== 'undefined' && window.innerWidth < 768 ? '0px' : 'calc(100vh - 80px)',
+      // Set minHeight: mobile=0px, tablet(md)=440px, desktop=proportional width-based
+      minHeight: typeof window !== 'undefined' 
+        ? (window.innerWidth < 768 
+          ? '0px'  // Mobile (xxs, xs, sm)
+          : (window.innerWidth < 1024 
+            ? '440px'  // Tablet (md only)
+            : '50vw'  // Desktop (lg+) - proportional to screen width
+          )
+        ) 
+        : '50vw',
       height: 'auto',
       backgroundColor: 'transparent',
       isolation: 'isolate'
@@ -349,6 +374,18 @@ const Hero = ({ timerData }) => {
           style={{ height: 'auto', transform: 'scaleX(1.012)', transformOrigin: 'center top' }}
         />
       </div>
+      {/* Global subtle dark tint over hero imagery (applies to both mobile & desktop slides) */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'rgba(0,0,0,0.28)',
+          zIndex: 14,
+          mixBlendMode: 'normal'
+        }}
+      />
       {/* Theater overlay consideration - content positioned to work with navbar curve */}
   <div
     className="relative w-full md:-mt-6 lg:mt-0"
@@ -360,10 +397,13 @@ const Hero = ({ timerData }) => {
       // Reduce mobile height to eliminate large blank gap beneath mobile hero imagery.
       // Original expression filled nearly the whole viewport (vh - ~80px). For mobile we only need
       // enough space for slide stack (326px), lower curve, and timer. Fixed ~470px worked best in testing.
+      // Set specific heights: mobile=440px, tablet(md)=440px, desktop=proportional width-based
       height: isSmall()
-        ? '470px'
-        : 'min(calc(100vh + ' + heroShift + 'px + var(--hero-bottom-extend) - 100px), var(--hero-max-h))',
-  ['--curve-h']: 'clamp(100px, 45vw, 300px)',
+        ? '440px'  // Mobile (xxs, xs, sm)
+        : (vw >= 768 && vw < 1024)
+          ? '440px'  // Tablet (md only)
+          : '47vw',  // Desktop (lg+) - proportional to screen width
+  ['--curve-h']: 'clamp(100px, 2vw, 300px)',
   ['--bottom-overlap']: BOTTOM_OVERLAP_VAR,
   ['--hero-bottom-extend']: 'clamp(8px, 5vw, 80px)',
   ['--hero-max-h']: 'clamp(220px, 100vh, 100vh)',
@@ -376,14 +416,14 @@ const Hero = ({ timerData }) => {
         <div 
           className="absolute hidden md:block"
           style={{
-            left: '2px',
-            right: 'calc(2px + var(--content-right-pad, 0px))',
+            left: '0',
+            right: '0',
             top: 0,
             bottom: 0,
             ['--screen-offset']: 'clamp(24px, 7vw, 180px)',
             ['--side-width']: 'clamp(75px, 21vw, 205px)',
-            ['--center-gap']: 'clamp(17px, 4vw, 49px)',
-            ['--side-margin']: '12px',
+            ['--center-gap']: '3vw',
+            ['--side-margin']: '3vw',
             ['--shift-distance']: 'calc(var(--side-width) + var(--center-gap) + var(--side-margin))',
             perspective: '1600px',
             perspectiveOrigin: '50% 50%'
@@ -442,8 +482,8 @@ const Hero = ({ timerData }) => {
             const direction = navDir
             if (role === 'center') {
               positionalStyle = {
-                left: 'calc(var(--side-width) + var(--center-gap) + var(--side-margin) - 15px)',
-                right: 'calc(var(--side-width) + var(--center-gap) + var(--side-margin) - var(--content-right-pad, 0px) - 15px)',
+                left: 'calc(var(--side-width) + var(--side-margin))',
+                right: 'calc(var(--side-width) + var(--center-gap))',
                 width: 'auto',
                 opacity: 1,
                 zIndex: 12,
@@ -451,21 +491,23 @@ const Hero = ({ timerData }) => {
               }
             } else if (role === 'left') {
               positionalStyle = {
-                left: 'var(--side-margin)',
-                width: 'var(--side-width)',
+                left: edgeOvershoot ? `-${edgeOvershoot}px` : 0,
+                width: edgeOvershoot ? `calc(var(--side-width) + ${edgeOvershoot}px)` : 'var(--side-width)',
                 right: 'auto',
                 opacity: 1,
                 zIndex: 10,
-                transform: 'scale(0.9) rotateY(18deg) translateZ(0)'
+                transform: 'scale(0.9) rotateY(18deg) translateZ(0)',
+                overflow: 'hidden'
               }
             } else if (role === 'right') {
               positionalStyle = {
-                right: 'calc(var(--side-margin) - var(--content-right-pad, 0px))',
-                width: 'var(--side-width)',
+                right: edgeOvershoot ? `-${edgeOvershoot}px` : 0,
+                width: edgeOvershoot ? `calc(var(--side-width) + ${edgeOvershoot}px)` : 'var(--side-width)',
                 left: 'auto',
                 opacity: 1,
                 zIndex: 10,
-                transform: 'scale(0.9) rotateY(-18deg) translateZ(0)'
+                transform: 'scale(0.9) rotateY(-18deg) translateZ(0)',
+                overflow: 'hidden'
               }
             } else if (role === 'preload-right') {
               // position closer to viewport edge and make partially visible for immediate appearance
@@ -528,11 +570,11 @@ const Hero = ({ timerData }) => {
         <div
           className="absolute block md:hidden"
           style={{
-            left: '50%',
-            transform: 'translateX(-50%)',
+            left: 0,
+            right: 0,
             top: 0,
-            // Fixed width & height for all mobile (<768px)
-            width: `${MOBILE_HERO_W}px`,
+            // Full-bleed width on mobile; retain fixed height
+            width: '100%',
             height: `${MOBILE_HERO_H}px`,
             flexShrink: 0,
             backgroundColor: 'transparent'
@@ -676,7 +718,7 @@ const Hero = ({ timerData }) => {
         {/* Mobile: no bottom semicircle to avoid overlap with features */}
         
         {/* Desktop/Tablet: preserve original responsive curve */}
-  <div className="absolute w-full pointer-events-none hidden md:block" style={{ zIndex: 45, height: '0px', bottom: '0px' }}>
+        <div className="absolute w-full pointer-events-none hidden md:block" style={{ zIndex: 45, height: '0px', bottom: '0px' }}>
           <div
             className="absolute"
             style={{
@@ -687,7 +729,7 @@ const Hero = ({ timerData }) => {
               background: 'rgba(17,17,17,1)',
               backdropFilter: 'blur(50px)',
               WebkitBackdropFilter: 'blur(50px)',
-              bottom: 'calc(var(--bottom-overlap) - var(--bottom-curve-h))',
+              bottom: bottomCurveBottom,
               left: '2px',
             }}
           />
@@ -699,8 +741,8 @@ const Hero = ({ timerData }) => {
           className="absolute pointer-events-auto hidden md:block"
           style={{
             zIndex: 1000,
-            right: TIMER_RIGHT_INSET,
-            bottom: TIMER_BOTTOM_INSET,
+            right: '32px',
+            bottom: adjustedTimerBottom,
           }}
         >
           {!timerData ? (
@@ -727,7 +769,7 @@ const Hero = ({ timerData }) => {
           className="absolute pointer-events-none block md:hidden"
           style={{
             zIndex: 1001,
-            right: '12px',
+            right: '3px',
             top: `${MOBILE_TIMER_TOP}px`
           }}
         >
@@ -744,8 +786,6 @@ const Hero = ({ timerData }) => {
               height={TIMER_H - 20}
               radius={TIMER_R}
               strokeWidth={TIMER_SW}
-              displayWidth={TIMER_DISPLAY_W}
-              displayHeight={TIMER_DISPLAY_H}
             />
           )}
         </div>

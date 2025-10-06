@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { createPortal } from 'react-dom'
 
 const Footer = () => {
   const [showTerms, setShowTerms] = useState(false);
@@ -9,100 +10,126 @@ const Footer = () => {
       style={{ backgroundColor: '#121212', flexShrink: 0 }}
     >
       {/* Terms and Conditions Popup */}
-      {showTerms && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100vw',
-          height: '100vh',
-          background: 'rgba(0,0,0,0.7)',
-          zIndex: 9999,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}>
-          <div style={{
-            background: 'rgba(255,255,255,0.10)',
-            color: '#fff',
-            borderRadius: '16px',
-            padding: '32px',
-            maxWidth: '480px',
-            boxShadow: '0 2px 24px rgba(0,0,0,0.25)',
-            textAlign: 'left',
-            position: 'relative',
-            backdropFilter: 'blur(50px)',
-            WebkitBackdropFilter: 'blur(50px)'
-          }}>
-            <h3 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '16px' }}>Terms and Conditions</h3>
-            <p style={{ fontSize: '1.1rem', marginBottom: '24px' }}>
-              Sample Terms: By using Tandem, you agree to abide by our community guidelines, respect other users, and not misuse the platform. Tandem reserves the right to update these terms at any time. For full details, please contact support.
-            </p>
-            <button
-              onClick={() => setShowTerms(false)}
-              style={{
-                background: '#00FFC8',
-                color: '#23243a',
-                border: 'none',
-                borderRadius: '8px',
-                padding: '8px 16px',
-                fontWeight: 700,
-                cursor: 'pointer',
-                fontFamily: '"Anek Latin", sans-serif',
-                fontSize: '1rem',
-                transition: 'background 0.3s, color 0.3s'
-              }}
-            >Close</button>
+      {showTerms && typeof document !== 'undefined' && createPortal(
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Terms & Conditions"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.55)',
+            zIndex: 10000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '24px'
+          }}
+          onClick={(e) => { if (e.target === e.currentTarget) setShowTerms(false) }}
+        >
+          <div
+            className="border border-gray-700 rounded-lg w-full max-w-xl overflow-y-auto"
+            style={{
+              background: 'rgba(255, 255, 255, 0.10)',
+              backdropFilter: 'blur(50px)',
+              WebkitBackdropFilter: 'blur(50px)',
+              color: '#ffffff',
+              padding: '28px 30px 32px',
+              maxHeight: 'min(700px, 90vh)',
+              boxShadow: '0 4px 32px rgba(0,0,0,0.4)'
+            }}
+          >
+            <h3 className="text-texthigh font-semibold text-[26px] leading-tight mb-5">Terms & Conditions</h3>
+            <div className="text-textmid text-[15px] leading-relaxed space-y-4">
+              <p><strong className="text-texthigh">Intro.</strong> These sample terms outline placeholder conditions for use of the Tandem platform. Replace this entire text with your finalized legal copy later.</p>
+              <p><strong className="text-texthigh">Acceptance.</strong> By accessing or using the service you agree to the forthcoming official Terms, policies, and any supplemental guidelines.</p>
+              <p><strong className="text-texthigh">Sample Use Guidelines:</strong><br/>
+                • Do not engage in harmful, harassing, or fraudulent behavior.<br/>
+                • Respect local laws and intellectual property rights.<br/>
+                • Only upload content you have rights to share.<br/>
+                • Report misuse through official support channels.
+              </p>
+              <p><strong className="text-texthigh">Modifications.</strong> Tandem may publish updated versions. Continued use after updates indicates acceptance.</p>
+              <p><strong className="text-texthigh">Liability Placeholder.</strong> Insert limitation of liability, warranty disclaimer, and governing law sections here.</p>
+              <p className="italic text-textmid/80">(All of the above is placeholder instructional content—replace with real legal language.)</p>
+            </div>
+            <div className="mt-8 flex items-center justify-end gap-3">
+              <button
+                onClick={() => setShowTerms(false)}
+                className="px-5 py-2.5 rounded-md font-semibold text-[14px] tracking-wide shadow-sm transition-colors"
+                style={{
+                  background: '#4DBBFF',
+                  color: '#0B1A24',
+                  border: '1px solid rgba(255,255,255,0.15)'
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = '#6AC6FF' }}
+                onMouseLeave={e => { e.currentTarget.style.background = '#4DBBFF' }}
+              >Close</button>
+            </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
       {/* Privacy Policy Popup */}
-      {showPrivacy && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100vw',
-          height: '100vh',
-          background: 'rgba(0,0,0,0.7)',
-          zIndex: 9999,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}>
-          <div style={{
-            background: 'rgba(255,255,255,0.10)',
-            color: '#fff',
-            borderRadius: '16px',
-            padding: '32px',
-            maxWidth: '480px',
-            boxShadow: '0 2px 24px rgba(0,0,0,0.25)',
-            textAlign: 'left',
-            position: 'relative',
-            backdropFilter: 'blur(50px)',
-            WebkitBackdropFilter: 'blur(50px)'
-          }}>
-            <h3 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '16px' }}>Privacy Policy</h3>
-            <p style={{ fontSize: '1.1rem', marginBottom: '24px' }}>
-              Sample Privacy: Tandem values your privacy. We collect only essential information to improve your experience. Your data is never sold or shared with third parties. For more details, please review our full privacy policy or contact support.
-            </p>
-            <button
-              onClick={() => setShowPrivacy(false)}
-              style={{
-                background: '#00FFC8',
-                color: '#23243a',
-                border: 'none',
-                borderRadius: '8px',
-                padding: '8px 16px',
-                fontWeight: 700,
-                cursor: 'pointer',
-                fontFamily: '"Anek Latin", sans-serif',
-                fontSize: '1rem',
-                transition: 'background 0.3s, color 0.3s'
-              }}
-            >Close</button>
+      {showPrivacy && typeof document !== 'undefined' && createPortal(
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Privacy Policy"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.55)',
+            zIndex: 10000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '24px'
+          }}
+          onClick={(e) => { if (e.target === e.currentTarget) setShowPrivacy(false) }}
+        >
+          <div
+            className="border border-gray-700 rounded-lg w-full max-w-xl overflow-y-auto"
+            style={{
+              background: 'rgba(255, 255, 255, 0.10)',
+              backdropFilter: 'blur(50px)',
+              WebkitBackdropFilter: 'blur(50px)',
+              color: '#ffffff',
+              padding: '28px 30px 32px',
+              maxHeight: 'min(700px, 90vh)',
+              boxShadow: '0 4px 32px rgba(0,0,0,0.4)'
+            }}
+          >
+            <h3 className="text-texthigh font-semibold text-[26px] leading-tight mb-5">Privacy Policy</h3>
+            <div className="text-textmid text-[15px] leading-relaxed space-y-4">
+              <p><strong className="text-texthigh">Overview.</strong> This placeholder Privacy Policy explains (in sample form) how user data might be described. Replace with your formal policy text.</p>
+              <p><strong className="text-texthigh">Data We May Describe Collecting:</strong><br/>
+                • Basic account identifiers (email, display name).<br/>
+                • Session + usage metrics for improving features.<br/>
+                • Optional location context for activity relevance.<br/>
+                • Event participation + engagement signals.
+              </p>
+              <p><strong className="text-texthigh">Not Sold.</strong> Placeholder: We do not sell personal data; we use it only to power core collaborative planning features.</p>
+              <p><strong className="text-texthigh">Retention.</strong> Insert real retention periods & deletion flow instructions here.</p>
+              <p><strong className="text-texthigh">Security.</strong> Mention encryption, access controls, incident response, and compliance frameworks once finalized.</p>
+              <p className="italic text-textmid/80">(All content above is placeholder — substitute with your finalized privacy language.)</p>
+            </div>
+            <div className="mt-8 flex items-center justify-end gap-3">
+              <button
+                onClick={() => setShowPrivacy(false)}
+                className="px-5 py-2.5 rounded-md font-semibold text-[14px] tracking-wide shadow-sm transition-colors"
+                style={{
+                  background: '#4DBBFF',
+                  color: '#0B1A24',
+                  border: '1px solid rgba(255,255,255,0.15)'
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = '#6AC6FF' }}
+                onMouseLeave={e => { e.currentTarget.style.background = '#4DBBFF' }}
+              >Close</button>
+            </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
       <div className="w-full p-0 sm:h-[98px]">
         {/* Mobile layout (<640px) */}
@@ -146,7 +173,7 @@ const Footer = () => {
         </div>
 
         {/* Desktop & tablet layout (>=640px) — unchanged */}
-        <div className="hidden sm:flex h-full flex-row justify-between items-center w-full px-0">
+  <div className="hidden sm:flex h-full flex-row justify-between items-center w-full px-0 md:px-8">
           <div className="mb-0 flex-shrink-0">
             <p
               className="text-white text-[18px] leading-[27px] font-normal whitespace-nowrap"

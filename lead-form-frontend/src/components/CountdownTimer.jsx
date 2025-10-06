@@ -77,7 +77,7 @@ const CountdownTimer = ({
   }
 
   // SVG progress path config
-  const W = width;
+  const W = (displayWidth && typeof window !== 'undefined' && window.innerWidth <= 640) ? 140 : width;
   const H = height;
   const R = radius;
   const SW = strokeWidth;
@@ -127,8 +127,8 @@ const CountdownTimer = ({
         @media (max-width: 640px) {
           /* Constrain width and add extra bottom padding so progress path doesn't overlap label */
           .countdown-timer { width: 140px !important; padding: 14px 14px 22px 14px !important; }
-          .countdown-timer .countdown-days { font-size: 44px !important; }
-          .countdown-timer .countdown-label { font-size: 14px !important; margin-top: 2px; }
+          .countdown-timer .countdown-days { font-size: 38px !important; padding-top: 7px; }
+          .countdown-timer .countdown-label { font-size: 14px !important; margin-top: 1px; padding-bottom: 3px; }
         }
       `}</style>
       {/* Content */}
@@ -163,7 +163,7 @@ const CountdownTimer = ({
       <svg
         width="100%"
         height="100%"
-        viewBox={`0 0 ${W} ${H}`}
+        viewBox={`0 0 ${(displayWidth && typeof window !== 'undefined' && window.innerWidth <= 640) ? 140 : W} ${H}`}
         className="absolute inset-0"
         aria-hidden="true"
         style={{ zIndex: 1, pointerEvents: 'none' }}

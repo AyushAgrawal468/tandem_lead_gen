@@ -19,10 +19,9 @@ public class Lead {
     @Pattern(regexp = "^[A-Za-z ]+$", message = "Name must contain only alphabets and spaces")
     private String name;
 
-    // Validates mobile number to be 10 digits
+    // Validates mobile number to be 10 digits or with +91 country code
     @NotBlank(message = "Mobile number is required")
-    @Size(min = 10, max = 10, message = "Mobile number must be exactly 10 digits")
-    @Pattern(regexp = "^[0-9]{10}$", message = "Mobile number must be numeric and 10 digits")
+    @Pattern(regexp = "^(\\+91[0-9]{10}|[0-9]{10})$", message = "Mobile number must be 10 digits or start with +91 followed by 10 digits")
     private String mobile;
 
     //Email validation

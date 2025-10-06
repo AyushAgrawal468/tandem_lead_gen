@@ -115,28 +115,44 @@ const Features = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mobileImages.join('|')])
 
+  // Dynamically adjust mobile frame height so the entire image fits (no vertical cropping) on mobile only (<768px).
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (window.innerWidth >= 768) return // do not affect md+ views
+    const total = mobileImages.length
+    if (!total || !frameW) return
+    const safeIndex = ((mobileIndex % total) + total) % total
+    const r = ratios[safeIndex] || 1 // width/height ratio
+    // height = width / ratio; add small padding compensation (0) to keep exact fit
+    let targetH = Math.round(frameW / r)
+    // Guardrails: prevent overly small or extreme heights
+    targetH = Math.max(200, Math.min(700, targetH))
+    setFrameH(targetH)
+  }, [mobileIndex, ratios, frameW, mobileImages.length])
+
   return (
   <section id="features" className="pt-2 xs:pt-4 pb-8 xs:pb-12 md:pb-40 lg:pb-48" style={{ zIndex: 50, position: 'relative', scrollMarginTop: '40px' }}>
       {/* Simplified mobile spacing: remove negative pull & complex media overrides for consistent timer clearance */}
       <style>{`
       @media (max-width: 767.98px) {
-       /* Adjusted to produce a ~9px net visual gap under hero on all mobile widths (<768px).
-         BaseGap≈20px (natural flow) -19 (margin) + 8 (padding) ≈ 9px. */
-       #features { margin-top: -19px !important; padding-top: 8px !important; }
-          #features .mobile-features-wrap { margin-top: 0 !important; padding-top: 0 !important; }
-          #features .mobile-features-heading { padding-top: 8px !important; }
-        }
+        /* New requirement: provide a consistent 24px vertical gap below the Hero section.
+           Remove previous negative margin hack and enforce padding-top:24px only on mobile. */
+  #features { margin-top: 0 !important; padding-top: 40px !important; }
+        #features .mobile-features-wrap { margin-top: 0 !important; padding-top: 0 !important; }
+        #features .mobile-features-heading { padding-top: 0 !important; }
+      }
       `}</style>
       {/* Mobile-only layout (do not affect desktop) */}
   <div className="block md:hidden mobile-features-wrap" style={{ marginTop: 0 }}>
         {/* Heading */}
-        <div className="relative px-4 xxs:px-5 xs:px-6 mobile-features-heading" style={{ marginBottom: '16px' }}>
+  <div className="relative px-4 mobile-features-heading" style={{ marginBottom: '16px' }}>
           <h2
             className="text-left font-bold text-white"
             style={{
               fontFamily: '"Anek Latin", sans-serif',
               fontSize: '32px',
-              marginLeft: '24px',
+              // Removed extra left margin to keep uniform 16px (px-4) padding on both sides
+              marginLeft: 0,
               lineHeight: '120%',
               color: '#FFF'
             }}
@@ -146,13 +162,14 @@ const Features = () => {
             Tandem?
           </h2>
           {/* Top-right slide number (dynamic) - disable pointer events so it won't block swipes */}
-          <div style={{ position: 'absolute', right: '50px', top: '10px', pointerEvents: 'none' }}>
+          <div style={{ position: 'absolute', right: '22px', top: '10px', pointerEvents: 'none' }}>
             <span
               style={{
                 WebkitTextStrokeWidth: '1px',
                 WebkitTextStrokeColor: '#FFFFFF',
                 color: 'transparent',
-                fontFamily: '"Anek Latin", sans-serif',
+                // Match desktop carousel numbering font
+                fontFamily: '"JUST Sans Outline ExBold", "Anek Latin", sans-serif',
                 fontSize: '60px',
                 fontWeight: 700,
                 lineHeight: '100%'
@@ -164,15 +181,18 @@ const Features = () => {
         </div>
 
         {/* Mobile viewport: infinite loop with clones */}
-        <div
-          ref={frameRef}
-          className="overflow-hidden"
-          style={{
-            width: '100%',
-            height: 'min(90vw, 394px)',
-            touchAction: 'pan-y'
-          }}
-        >
+        {/* Maintain consistent 16px side gap for viewport */}
+        <div className="px-4">
+          <div
+            ref={frameRef}
+            className="overflow-hidden"
+            style={{
+              width: '100%',
+              // Dynamic height computed from current image aspect ratio so full image is visible.
+              height: `${frameH}px`,
+              touchAction: 'pan-y'
+            }}
+          >
           {(() => {
             const extended = [mobileImages[mobileImages.length - 1], ...mobileImages, mobileImages[0]]
             const baseTranslateIndex = mobileIndex + 1 // account for leading clone
@@ -222,7 +242,8 @@ const Features = () => {
                           background: '#23243a',
                           border: '1px solid rgba(255,255,255,0.15)',
                           borderRadius: '16px',
-                          width: `${exactW}px`,
+                          // Span full width of the mobile container so only the outer px-4 (16px) padding shows as side gap.
+                          width: '100%',
                           height: `${frameH}px`,
                           boxShadow: '0 8px 24px rgba(0,0,0,0.35)'
                         }}
@@ -230,7 +251,7 @@ const Features = () => {
                         <img
                           src={src}
                           alt={`Feature ${realIdx + 1}`}
-                          style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center center', background: '#23243a', pointerEvents: 'none' }}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center center', background: '#23243a', pointerEvents: 'none' }}
                           draggable={false}
                         />
                       </div>
@@ -240,10 +261,11 @@ const Features = () => {
               </div>
             )
           })()}
+          </div>
         </div>
 
         {/* Slider under card */}
-        <div className="px-4 xxs:px-5 xs:px-6" style={{ marginTop: '18px', paddingBottom: '36px' }}>
+  <div className="px-4" style={{ marginTop: '18px', paddingBottom: '36px' }}>
           <input
             type="range"
             min={0}
@@ -284,7 +306,7 @@ const Features = () => {
       </div>
 
       {/* Desktop & tablet (unchanged) */}
-  <div className="hidden md:block pt-32">
+  <div className="hidden md:block pt-32 md:pt-16 lg:pt-32">
         {/* Full-bleed container spanning the full viewport width */}
         <div className="relative" style={{ width: '100vw', marginLeft: 'calc(50% - 50vw)', marginRight: 'calc(50% - 50vw)' }}>
           {/* Carousel with heading slotted just under the left previews */}

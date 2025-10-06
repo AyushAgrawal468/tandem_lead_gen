@@ -229,7 +229,8 @@ const FeatureCarousel = ({ items = sampleItems, belowLeft = null }) => {
             WebkitTextStrokeWidth: '1px',
             WebkitTextStrokeColor: '#FFF',
             color: 'transparent', // no fill, only stroke
-            fontFamily: 'Anek Latin, sans-serif',
+            // Updated font to JUST Sans Outline ExBold as requested (fallbacks preserved)
+            fontFamily: '"JUST Sans Outline ExBold", "Anek Latin", sans-serif',
             fontSize: '100px', // decreased from 128px
             fontStyle: 'normal',
             fontWeight: 700,

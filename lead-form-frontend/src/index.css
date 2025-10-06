@@ -1,3 +1,12 @@
+/* Font face: JUST Sans Outline ExBold (OTF placed in public/fonts) */
+@font-face {
+  font-family: 'JUST Sans Outline ExBold';
+  src: url('/fonts/JustSans-OutlineExBold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Deep ocean green to black gradient for countdown */
 .countdown-bg {
   background: linear-gradient(90deg, #01916d 0%, #01775e 20%, #015c4b 35%, #014d40 50%, #01332c 60%, #000 75%, #000 100%);
@@ -380,7 +389,15 @@ button.waitlist-join-btn:focus-visible,
 button.waitlist-join-btn:active,
 button.waitlist-join-btn.is-pressed,
 button.waitlist-join-btn:focus {
-  background: linear-gradient(90deg, #01916d 0%, #01775e 20%, #015c4b 35%, #014d40 50%, #01332c 60%, #000 75%, #000 100%) !important;
-  color: #fff !important;
+  background: #D3D3D3 !important;
+  color: #171616 !important;
+}
+
+/* Ensure touch interactions work on mobile/tablet */
+@media (max-width: 1023.98px) {
+  button.waitlist-join-btn.is-pressed {
+    background: #D3D3D3 !important;
+    color: #171616 !important;
+  }
 }
 

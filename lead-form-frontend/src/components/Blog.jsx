@@ -26,14 +26,11 @@ In 2024, the World Health Organization (WHO) recognized loneliness as a global p
 
 1. The Data Speaks
 • Surge in Single-Person Households: Approximately 30% of U.S. households consist of individuals living alone, with similar trends observed in Europe and India's major cities.
-
 • Mental Health Toll: Chronic loneliness is linked to a 29% increased risk of coronary heart disease and a 32% increased risk of stroke. Additionally, it correlates with a 25% higher risk of dementia.
 
 2. Root Causes
 • Digital Overload: The prevalence of endless scrolling on social media platforms has replaced meaningful in-person interactions.
-
 • Urban Disconnection: Despite bustling city environments, real-world social connections have diminished.
-
 • Fragmented Planning: Coordinating meetups across multiple platforms like WhatsApp, Instagram, and various calendars often leads to confusion and cancellations.
 
 3. Why It Matters
@@ -52,14 +49,13 @@ Combating loneliness requires more than sporadic events; it necessitates a platf
       title: "Why Endless Group Chats Are Making Us Lonelier",
 
       excerpt: `Introduction
-Group chats, while intended to foster connection, have become overwhelming threads filled with unanswered questions, conflicting schedules, and decision paralysis.`,
+Group chats, while intended to foster connection, have become overwhelming threads filled with unanswered questions, conflicting schedules, and decision paralysis`,
 
       content: `Introduction
 Group chats, while intended to foster connection, have become overwhelming threads filled with unanswered questions, conflicting schedules, and decision paralysis.
 
 1. The Group-Chat Quagmire
 •23-Message Average: Studies indicate it takes an average of 23 messages to finalize dinner plans, leading to frustration and disengagement.
-
 •Decision Fatigue: Navigating through hundreds of unread messages often results in plan cancellations or avoidance.
 
 2. The Paradox of Choice
@@ -88,7 +84,6 @@ Psychological research confirms that shared experiences create stronger bonds th
 
 1. Neurochemistry of Connection
 •Oxytocin Release: Shared laughter and novel experiences boost oxytocin levels, strengthening social bonds .
-
 •Memory Encoding: Co-planning and anticipation enhance the memorability of events.
 
 2. The Role of Intention
@@ -99,7 +94,6 @@ Tandem's features like "streaks," "super-likes," and "memory wall" activate dopa
 
 4. Behavioral Nudges That Work
 •Timed Swipes (3 minutes): Creates a sense of urgency, reducing procrastination.
-
 •Group Feedback: Real-time likes guide users toward shared preferences.
 
 Conclusion & Call to Action:
@@ -119,28 +113,21 @@ Swipe-based interfaces revolutionized dating apps; Tandem applies this intuitive
 
 1. From Dating Apps to Social Planning
 Tandem repurposes the familiar swipe gestures for activity planning:
-
 •Up: Super-like ("Must do this!")
-
 •Right: Like
-
 •Left: Dislike
-
 •Down: Super-dislike
 
 2. Personalization Meets Spontaneity
 •AI-Driven Recommendations: Learns from user preferences to suggest enjoyable events.
-
 •Randomness for Discovery: Introduces serendipity, keeping social experiences fresh.
 
 3. Group-First vs. Activity-First
 •Group-First: Assemble friends first, then choose an activity together.
-
 •Activity-First: Select an activity, then invite friends to join.
 
 4. Built-In Coordination
 •Map & Calendar Sync: One-tap RSVPs, map links, and calendar reminders.
-
 •Group Chat Integration: Centralizes discussions, eliminating the need to switch between apps.
 
 Conclusion & Call to Action:
@@ -159,19 +146,15 @@ The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools have
 
 1. The FOMO Loop
 •Scroll: Viewing friends' stories.
-
 •Regret: Feeling left out.
-
 •Procrastination: Delayed responses in group chats leading to missed opportunities.
 
 2. The JOMO Antidote
 •Instant Plans: Three-minute synchronization ensures quick decisions.
-
 •Visual Countdown: Tracks group progress, encouraging participation.
 
 3. Memory Wall: Relive Your Best Moments
 •Automatic Collages: Compiles photos and videos from events.
-
 •Shareable Highlights: Provides social proof, encouraging more sign-ups.
 
 4. The Habit Loop
@@ -180,6 +163,47 @@ The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools have
       readMore: "Read more"
     }
   ]
+
+  // Fixed height for mobile blog card based on first card's natural height
+  const mobileCardRef = useRef(null)
+  const [mobileCardHeight, setMobileCardHeight] = useState(null)
+
+  useEffect(() => {
+    // Measure only on mobile (<640px) and lock height to first card's size
+    const measure = () => {
+      if (typeof window === 'undefined') return
+      if (window.innerWidth < 640) {
+        if (mobileCardRef.current) {
+          // Temporarily reset to auto to get natural height of first card
+            const el = mobileCardRef.current
+            const prevExplicitHeight = el.style.height
+            el.style.height = 'auto'
+            const h = el.offsetHeight
+            // Restore previously locked height (if any) to avoid visual jump after measurement
+            if (mobileCardHeight !== null) {
+              el.style.height = prevExplicitHeight
+            }
+            if (h && mobileCardHeight === null) {
+              setMobileCardHeight(h)
+              // Lock the measured height
+              el.style.height = h + 'px'
+            }
+        }
+      } else if (mobileCardHeight !== null) {
+        setMobileCardHeight(null)
+        if (mobileCardRef.current) mobileCardRef.current.style.height = 'auto'
+      }
+    }
+    // Initial measure after paint
+    const raf = requestAnimationFrame(measure)
+    window.addEventListener('resize', measure)
+    return () => {
+      cancelAnimationFrame(raf)
+      window.removeEventListener('resize', measure)
+    }
+    // We intentionally exclude mobileCardHeight from deps to avoid re-measuring after lock
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const handleCloseOverlay = () => {
     if (!expandedId) return
@@ -378,14 +402,18 @@ The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools have
   return (
     <>
       {/* Mobile-only layout */}
-  <section ref={mobileSectionRef} id="blogs" className="block sm:hidden py-10 xxs:py-12 xs:py-14 px-4 xxs:px-5 xs:px-6 relative">
-        <h2 className="text-[34px] xxs:text-[38px] xs:text-[42px] font-bold text-texthigh mb-5">Blogs</h2>
+  <section ref={mobileSectionRef} id="blogs" className="block sm:hidden py-10 xxs:py-12 xs:py-14 px-4 xxs:px-4 xs:px-4 relative">
+        <h2 className="text-[32px] xxs:text-[32px] xs:text-[32px] font-bold text-texthigh mb-5">Blogs</h2>
         <div
+          ref={mobileCardRef}
           className="rounded-2xl p-6"
           style={{
             background: 'rgba(255, 255, 255, 0.10)',
             backdropFilter: 'blur(50px)',
-            WebkitBackdropFilter: 'blur(50px)'
+            WebkitBackdropFilter: 'blur(50px)',
+            // Lock height once measured; otherwise natural height
+            height: mobileCardHeight ? mobileCardHeight + 'px' : 'auto',
+            transition: 'height .25s ease'
           }}
         >
           <div className="mb-6" style={{ width: '32px', height: '49px' }}>
@@ -431,8 +459,9 @@ The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools have
             onClick={prevSlide}
             className="relative flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-white active:ring-2 active:ring-white active:outline-none"
             style={{
-              width: '48px',
-              height: '48px',
+              // Match desktop button diameter so arrow head visual size matches
+              width: '56px',
+              height: '56px',
               flexShrink: 0,
               aspectRatio: '1/1',
               backgroundColor: 'rgba(60, 60, 60, 1)',
@@ -443,7 +472,8 @@ The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools have
               border: 'none'
             }}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 48 48" fill="none">
+            {/* Enlarged icon to match desktop arrow head proportion */}
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 48 48" fill="none">
               <path d="M31.0605 37.9386C31.1998 38.078 31.3104 38.2434 31.3858 38.4255C31.4612 38.6076 31.5001 38.8028 31.5001 38.9999C31.5001 39.197 31.4612 39.3921 31.3858 39.5742C31.3104 39.7563 31.1998 39.9217 31.0605 40.0611C30.9211 40.2005 30.7557 40.311 30.5736 40.3865C30.3915 40.4619 30.1963 40.5007 29.9992 40.5007C29.8021 40.5007 29.607 40.4619 29.4249 40.3865C29.2428 40.311 29.0773 40.2005 28.938 40.0611L13.938 25.0611C13.7985 24.9218 13.6879 24.7564 13.6124 24.5743C13.5369 24.3922 13.498 24.197 13.498 23.9999C13.498 23.8027 13.5369 23.6075 13.6124 23.4255C13.6879 23.2434 13.7985 23.0779 13.938 22.9386L28.938 7.9386C29.2194 7.65714 29.6012 7.49902 29.9992 7.49902C30.3973 7.49902 30.779 7.65714 31.0605 7.9386C31.3419 8.22007 31.5001 8.60181 31.5001 8.99985C31.5001 9.3979 31.3419 9.77964 31.0605 10.0611L17.1199 23.9999L31.0605 37.9386Z" fill="white"/>
             </svg>
           </button>
@@ -451,8 +481,9 @@ The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools have
             onClick={nextSlide}
             className="relative flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-white active:ring-2 active:ring-white active:outline-none"
             style={{
-              width: '48px',
-              height: '48px',
+              // Match desktop button diameter so arrow head visual size matches
+              width: '56px',
+              height: '56px',
               flexShrink: 0,
               aspectRatio: '1/1',
               backgroundColor: 'rgba(60, 60, 60, 1)',
@@ -463,14 +494,15 @@ The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools have
               border: 'none'
             }}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 48 48" fill="none">
+            {/* Enlarged icon to match desktop arrow head proportion */}
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 48 48" fill="none">
               <path d="M16.9395 10.0614C16.8002 9.92203 16.6896 9.75657 16.6142 9.57449C16.5388 9.39239 16.4999 9.19723 16.4999 9.00014C16.4999 8.80305 16.5388 8.60789 16.6142 8.42579C16.6896 8.24371 16.8002 8.07826 16.9395 7.93889C17.0789 7.79952 17.2443 7.68897 17.4264 7.61355C17.6085 7.53813 17.8037 7.4993 18.0008 7.4993C18.1979 7.4993 18.393 7.53813 18.5751 7.61355C18.7572 7.68897 18.9227 7.79952 19.062 7.93889L34.062 22.9389C34.2015 23.0782 34.3121 23.2436 34.3876 23.4257C34.4631 23.6078 34.502 23.803 34.502 24.0001C34.502 24.1973 34.4631 24.3925 34.3876 24.5746C34.3121 24.7566 34.2015 24.9221 34.062 25.0614L19.062 40.0614C18.7806 40.3429 18.3988 40.501 18.0008 40.501C17.6027 40.501 17.221 40.3429 16.9395 40.0614C16.6581 39.7799 16.4999 39.3982 16.4999 39.0001C16.4999 38.6021 16.6581 38.2204 16.9395 37.9389L30.8801 24.0001L16.9395 10.0614Z" fill="white"/>
             </svg>
           </button>
         </div>
         {/* Mobile overlay within blogs section */}
         {expandedPost && (
-          <div className={`absolute inset-0 z-50 px-4 xxs:px-5 xs:px-6 py-4 xxs:py-5 xs:py-6 blog-overlay ${isExiting ? 'is-exiting' : ''}`} style={{ background: 'rgba(0,0,0,0.0)' }}>
+          <div className={`absolute inset-0 z-50 px-4 xxs:px-4 xs:px-4 py-4 xxs:py-5 xs:py-6 blog-overlay ${isExiting ? 'is-exiting' : ''}`} style={{ background: 'rgba(0,0,0,0.0)' }}>
             <div
               className="relative h-full w-full rounded-2xl p-6 blog-overlay-card flex flex-col"
               style={{

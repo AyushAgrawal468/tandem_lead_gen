@@ -119,7 +119,7 @@ const Navbar = () => {
           }
         `}
       >
-  <div className="flex items-center pl-0 pr-4 xxs:pr-5 xs:pr-6 sm:pr-8 py-3 xxs:py-3.5 md:py-4 w-full">
+  <div className="flex items-center pl-0 pr-0 md:pr-8 py-3 xxs:py-3.5 md:py-4 w-full">
           {/* Logo - Left aligned (nudged a bit more right) */}
           <div className="flex items-center flex-shrink-0 ml-1 xs:ml-2 sm:ml-2">
             <div
@@ -235,7 +235,7 @@ const Navbar = () => {
           </div>
 
           {/* Mobile hamburger (hidden on desktop) */}
-          <div className="ml-auto pr-[14px] xxs:pr-[14px] xs:pr-[14px] sm:hidden">
+          <div className="ml-auto pr-[16px] xxs:pr-[16px] xs:pr-[16px] sm:hidden">
             <button
               aria-expanded={isMenuOpen}
               type="button"

@@ -114,7 +114,7 @@ function App() {
   useEffect(() => {
     let isMounted = true;
     const FIXED_START_TIME = 1759104000000; // Sep 29, 2025 00:00:00 UTC (ms)
-    const COUNTDOWN_DURATION_MS = 20 * 24 * 60 * 60 * 1000; // 20 days
+    const COUNTDOWN_DURATION_MS = 9 * 24 * 60 * 60 * 1000; // 20 days
     const END_TIME = FIXED_START_TIME + COUNTDOWN_DURATION_MS;
 
     const computeCountdown = () => {

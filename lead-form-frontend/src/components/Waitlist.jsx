@@ -125,25 +125,25 @@ const Waitlist = () => {
   const validate = () => {
     const newErrors = {};
     const alphaSpace = /^[A-Za-z ]+$/;
-    const cleanedMobile = (formData.mobile || '').replace(/\D/g, '');
+    
     // Name: required + alphabets and spaces only
     if (!formData.name.trim()) {
       newErrors.name = 'Name is required';
     } else if (!alphaSpace.test(formData.name.trim())) {
       newErrors.name = 'Name must contain only alphabets and spaces';
     }
-    // Mobile validation:
-    // 1. Empty -> required message
-    // 2. Any non-digit characters OR not exactly 10 digits -> generic invalid message
+    
+    // Mobile validation: 10 digits or +91 followed by 10 digits
     const rawMobile = (formData.mobile || '').trim();
     if (!rawMobile) {
       newErrors.mobile = 'Mobile number is required';
     } else {
-      const nonDigit = /[^0-9]/.test(rawMobile);
-      if (nonDigit || cleanedMobile.length !== 10) {
-        newErrors.mobile = 'Enter a valid Mobile number';
+      const mobilePattern = /^(\+91[0-9]{10}|[0-9]{10})$/;
+      if (!mobilePattern.test(rawMobile)) {
+        newErrors.mobile = 'Mobile number must be 10 digits or start with +91 followed by 10 digits';
       }
     }
+    
     // Email: required, valid format
     if (!formData.email) {
       newErrors.email = 'Email is required';
@@ -225,7 +225,7 @@ const Waitlist = () => {
     }
     const payload = { 
       ...formData, 
-      mobile: (formData.mobile || '').replace(/\D/g, '').slice(-10),
+      mobile: formData.mobile.trim(), // Keep the mobile number as entered (with or without +91)
       sessionId: getSessionId() 
     };
     await submitLead(payload);
@@ -240,7 +240,7 @@ const Waitlist = () => {
     }
     const payload = { 
       ...formData, 
-      mobile: (formData.mobile || '').replace(/\D/g, '').slice(-10),
+      mobile: formData.mobile.trim(), // Keep the mobile number as entered (with or without +91)
       sessionId: getSessionId() 
     };
     await submitLead(payload);
@@ -269,8 +269,8 @@ const Waitlist = () => {
 
       {/* Mobile-only layout: stacked rewards + form */}
   <section
-        id="waitlist"
-        className="block md:hidden py-10 xxs:py-12 xs:py-14 px-4 xxs:px-5 xs:px-6"
+    id="waitlist"
+    className="block md:hidden py-10 xxs:py-12 xs:py-14 px-4"
         style={{
           scrollMarginTop: '-13vh',
           borderRadius: '0px',
@@ -302,34 +302,20 @@ const Waitlist = () => {
             onTouchCancel={handleRewardsTouchCancel}
           >
             {rewards.slice(carouselPage * 2, carouselPage * 2 + 2).map((reward) => (
-              <div key={reward.title} className="flex items-start p-5" style={{
-                background: 'rgba(255,255,255,0.07)',
-                border: '1px solid rgba(255,255,255,0.18)',
-                borderRadius: '12px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                height: '121px',
-                minHeight: '121px',
-                maxHeight: '121px',
-                boxSizing: 'border-box',
-                overflow: 'hidden'
-              }}>
-                <div style={{
-                  width: '64px',
-                  height: '64px',
-                  minWidth: '64px',
-                  minHeight: '64px',
-                  maxWidth: '64px',
-                  maxHeight: '64px',
-                  flex: '0 0 64px',
-                  flexShrink: 0,
-                  background: '#D9D9D9',
-                  borderRadius: '8px',
-                  marginRight: '24px'
-                }} />
-                <div>
-                  <div style={{ color: 'rgba(146, 95, 255, 1)', fontWeight: 700, fontSize: '1rem', lineHeight: '1.25', marginBottom: '2px' }}>{reward.title}</div>
-                  <div style={{ color: '#fff', fontSize: '0.95rem', lineHeight: '1.35' }}>{reward.description}</div>
-                </div>
+              <div
+                key={reward.title}
+                className="p-5"
+                style={{
+                  background: 'rgba(255,255,255,0.07)',
+                  border: '1px solid rgba(255,255,255,0.18)',
+                  borderRadius: '12px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                  boxSizing: 'border-box',
+                  paddingRight: '60px',
+                }}
+              >
+                <div style={{ color: 'rgba(146, 95, 255, 1)', fontWeight: 700, fontSize: '1rem', lineHeight: '1.3', marginBottom: '4px' }}>{reward.title}</div>
+                <div style={{ color: '#fff', fontSize: '0.95rem', lineHeight: '1.4', fontWeight: 400 }}>{reward.description}</div>
               </div>
             ))}
             {/* Dots */}
@@ -408,8 +394,8 @@ const Waitlist = () => {
               
               <button
                 type="submit"
-                className="w-full font-semibold waitlist-join-btn"
-                style={{ display: 'flex', padding: '10px 16px', justifyContent: 'center', alignItems: 'center', gap: '10px', borderRadius: '24px', borderBottom: '2px solid #C1F546' }}
+                className="w-full font-bold waitlist-join-btn flex justify-center items-center text-black hover:bg-gray-50 hover:scale-105 transition-all duration-300 ease-in-out cursor-pointer shadow-lg hover:shadow-xl bg-white relative overflow-hidden whitespace-nowrap disabled:opacity-60 disabled:cursor-not-allowed"
+                style={{ padding: '10px 16px', borderRadius: '24px' }}
                 disabled={submitting}
                 onTouchStart={(e) => e.currentTarget.classList.add('is-pressed')}
                 onTouchEnd={(e) => e.currentTarget.classList.remove('is-pressed')}
@@ -418,7 +404,14 @@ const Waitlist = () => {
                 onMouseUp={(e) => e.currentTarget.classList.remove('is-pressed')}
                 onMouseLeave={(e) => e.currentTarget.classList.remove('is-pressed')}
               >
-                Join now
+                <span className="font-bold tracking-[0]" style={{ fontSize: '16px', lineHeight: 1.6 }}>Join now</span>
+                <div
+                  className="absolute bottom-0 left-0 right-0 h-[3px]"
+                  style={{
+                    background: 'linear-gradient(90deg, rgba(193, 245, 70, 1) 0%, rgba(0, 255, 200, 1) 50%, rgba(131, 73, 255, 1) 100%)',
+                    borderRadius: '0 0 24px 24px'
+                  }}
+                ></div>
               </button>
             </form>
           </div>
@@ -492,60 +485,47 @@ const Waitlist = () => {
                   justifyContent: 'center',
                   gap: '32px',
                   width: '100%',
-                  maxWidth: '800px',
+                  // Match outer width of signup box (480px) for aligned left/right edges
+                  maxWidth: '480px',
                   minHeight: '120px',
                   transition: 'all 0.5s',
                 }}>
                   {rewards.slice(carouselPage * 2, carouselPage * 2 + 2).map((reward) => (
-                    <div key={reward.title} style={{
-                      display: 'flex',
-                      flexDirection: 'row',
-                      alignItems: 'flex-start',
-                      background: 'rgba(255,255,255,0.07)',
-                      borderRadius: '12px',
-                      border: '1px solid rgba(255,255,255,0.18)',
-                      padding: '24px 32px',
-                      width: '328px',
-                      height: '121px',
-                      minWidth: '328px',
-                      maxWidth: '328px',
-                      minHeight: '121px',
-                      maxHeight: '121px',
-                      boxSizing: 'border-box',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                      overflow: 'hidden'
-                    }}>
+                    <div
+                      key={reward.title}
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'flex-start',
+                        background: 'rgba(255,255,255,0.07)',
+                        borderRadius: '12px',
+                        border: '1px solid rgba(255,255,255,0.18)',
+                        // Horizontal padding aligned to signup box (24px)
+                        padding: '24px 24px',
+                        // Each card occupies half of container minus gap for perfect edge alignment
+                        width: 'calc((100% - 32px)/2)',
+                        minWidth: 'calc((100% - 32px)/2)',
+                        maxWidth: 'calc((100% - 32px)/2)',
+                        boxSizing: 'border-box',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+                      }}
+                    >
                       <div style={{
-                        width: '64px',
-                        height: '64px',
-                        minWidth: '64px',
-                        minHeight: '64px',
-                        maxWidth: '64px',
-                        maxHeight: '64px',
-                        flex: '0 0 64px',
-                        flexShrink: 0,
-                        background: '#D9D9D9',
-                        borderRadius: '8px',
-                        marginRight: '24px',
-                      }} />
-                      <div>
-                        <div style={{
-                          color: '#8349FF',
-                          fontWeight: 700,
-                          fontSize: '1rem',
-                          lineHeight: '1.25',
-                          marginBottom: '2px',
-                        }}>
-                          {reward.title}
-                        </div>
-                        <div style={{
-                          color: '#fff',
-                          fontSize: '0.95rem',
-                          lineHeight: '1.35',
-                          fontWeight: 400,
-                        }}>
-                          {reward.description}
-                        </div>
+                        color: '#8349FF',
+                        fontWeight: 700,
+                        fontSize: '1rem',
+                        lineHeight: '1.3',
+                        marginBottom: '6px'
+                      }}>
+                        {reward.title}
+                      </div>
+                      <div style={{
+                        color: '#fff',
+                        fontSize: '0.95rem',
+                        lineHeight: '1.4',
+                        fontWeight: 400
+                      }}>
+                        {reward.description}
                       </div>
                     </div>
                   ))}
@@ -703,17 +683,11 @@ const Waitlist = () => {
 
                 <button
                   type="submit"
-                  className="w-full font-semibold waitlist-join-btn"
+                  className="w-full font-bold waitlist-join-btn flex justify-center items-center text-black hover:bg-gray-50 hover:scale-105 transition-all duration-300 ease-in-out cursor-pointer shadow-lg hover:shadow-xl bg-white relative overflow-hidden whitespace-nowrap disabled:opacity-60 disabled:cursor-not-allowed"
                   style={{
-                    display: 'flex',
                     padding: '8px 16px',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    gap: '10px',
-                    flex: '1 0 0',
                     borderRadius: '24px',
-                    borderBottom: '2px solid #C1F546',
-                    transition: 'background 0.3s, color 0.3s'
+                    flex: '1 0 0'
                   }}
                   disabled={submitting}
                   onTouchStart={(e) => e.currentTarget.classList.add('is-pressed')}
@@ -723,7 +697,14 @@ const Waitlist = () => {
                   onMouseUp={(e) => e.currentTarget.classList.remove('is-pressed')}
                   onMouseLeave={(e) => e.currentTarget.classList.remove('is-pressed')}
                 >
-                  Join now
+                  <span className="font-bold tracking-[0]" style={{ fontSize: '16px', lineHeight: 1.6 }}>Join now</span>
+                  <div
+                    className="absolute bottom-0 left-0 right-0 h-[3px]"
+                    style={{
+                      background: 'linear-gradient(90deg, rgba(193, 245, 70, 1) 0%, rgba(0, 255, 200, 1) 50%, rgba(131, 73, 255, 1) 100%)',
+                      borderRadius: '0 0 24px 24px'
+                    }}
+                  ></div>
                 </button>
               </form>
             </div>
