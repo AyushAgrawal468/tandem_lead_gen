@@ -114,7 +114,14 @@ const FeatureCarousel = ({ items = sampleItems, belowLeft = null }) => {
   // Active widths: on md use image width at full height; on lg+ keep fixed cardW
   const activeWidths = useMemo(() => {
     if (!items.length) return []
-    return items.map((_, i) => isMd ? Math.min(cardW, Math.max(1, ratios[i] * cardH)) : cardW)
+    return items.map((_, i) => {
+      if (isMd) {
+        // For md view, use a more stable calculation to prevent flickering
+        const computedWidth = Math.min(cardW, Math.max(cardW * 0.8, ratios[i] * cardH))
+        return computedWidth
+      }
+      return cardW
+    })
   }, [items.length, ratios, cardW, cardH, isMd])
 
   // Compute center of current view analytically to avoid layout-based jumps
@@ -291,7 +298,7 @@ const FeatureCarousel = ({ items = sampleItems, belowLeft = null }) => {
                 className="shrink-0 rounded-2xl"
                 style={{
                   boxSizing: 'border-box',
-                  width: isActive ? (isMd ? `${activeWidths[i] ?? cardW}px` : 'var(--card-w)') : 'auto',
+                  width: isActive ? (isMd ? `${Math.round(activeWidths[i] ?? cardW)}px` : 'var(--card-w)') : 'auto',
                   maxWidth: isActive ? undefined : 'var(--card-w)',
                   height: isActive ? 'var(--card-h)' : 'calc(var(--card-h) / 2)',
                   alignSelf: preview ? (i < index ? 'flex-start' : 'flex-end') : 'stretch',
@@ -300,7 +307,7 @@ const FeatureCarousel = ({ items = sampleItems, belowLeft = null }) => {
                   // Removed drop shadow per request
                   boxShadow: 'none',
                   transform: `${isActive ? 'scale(1.02)' : 'scale(0.96)'}${(preview && i > index && vw >= 640) ? ` translateY(${rightPreviewOffset}px)` : ''}`,
-                  transition: 'transform 400ms, box-shadow 400ms, border-color 400ms, height 400ms, width 400ms',
+                  transition: isMd ? 'transform 300ms ease-out, height 300ms ease-out, width 300ms ease-out' : 'transform 400ms, box-shadow 400ms, border-color 400ms, height 400ms, width 400ms',
                   objectFit: 'contain',
                   objectPosition: 'center center',
                   display: 'block',
@@ -361,7 +368,7 @@ const FeatureCarousel = ({ items = sampleItems, belowLeft = null }) => {
           background: #FFF;
           border-radius: 8px;
           box-shadow: none;
-          margin-top: -6px; /* align with track */
+          margin-top: -2px; /* center thumb on 4px track: (16px - 4px) / 2 = 6px */
           cursor: pointer;
         }
         input[type="range"]::-moz-range-thumb {

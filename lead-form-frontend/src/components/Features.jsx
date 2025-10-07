@@ -131,7 +131,7 @@ const Features = () => {
   }, [mobileIndex, ratios, frameW, mobileImages.length])
 
   return (
-  <section id="features" className="pt-2 xs:pt-4 pb-8 xs:pb-12 md:pb-40 lg:pb-48" style={{ zIndex: 50, position: 'relative', scrollMarginTop: '40px' }}>
+  <section id="features" className="pt-2 xs:pt-4 md:pt-2 lg:pt-4 pb-8 xs:pb-12 md:pb-40 lg:pb-48" style={{ zIndex: 50, position: 'relative', scrollMarginTop: '40px' }}>
       {/* Simplified mobile spacing: remove negative pull & complex media overrides for consistent timer clearance */}
       <style>{`
       @media (max-width: 767.98px) {
@@ -306,7 +306,7 @@ const Features = () => {
       </div>
 
       {/* Desktop & tablet (unchanged) */}
-  <div className="hidden md:block pt-32 md:pt-16 lg:pt-32">
+  <div className="hidden md:block pt-32 md:pt-8 lg:pt-32">
         {/* Full-bleed container spanning the full viewport width */}
         <div className="relative" style={{ width: '100vw', marginLeft: 'calc(50% - 50vw)', marginRight: 'calc(50% - 50vw)' }}>
           {/* Carousel with heading slotted just under the left previews */}

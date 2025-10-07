@@ -76,10 +76,11 @@ const CountdownTimer = ({
     progress = Math.min(100, Math.max(0, (remainingMs / totalDurationMs) * 100));
   }
 
-  // SVG progress path config
-  const W = (displayWidth && typeof window !== 'undefined' && window.innerWidth <= 640) ? 140 : width;
-  const H = height;
-  const R = radius;
+  // SVG progress path config - maintain consistent proportions
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 640;
+  const W = isMobile ? 140 : width;
+  const H = isMobile ? (height * 140 / width) : height; // Maintain aspect ratio on mobile
+  const R = isMobile ? (radius * 140 / width) : radius; // Scale radius proportionally
   const SW = strokeWidth;
   const pathRef = useRef(null);
   const [pathLen, setPathLen] = useState(1);
@@ -125,10 +126,14 @@ const CountdownTimer = ({
       />
       <style>{`
         @media (max-width: 640px) {
-          /* Constrain width and add extra bottom padding so progress path doesn't overlap label */
-          .countdown-timer { width: 140px !important; padding: 14px 14px 22px 14px !important; }
-          .countdown-timer .countdown-days { font-size: 38px !important; padding-top: 7px; }
-          .countdown-timer .countdown-label { font-size: 14px !important; margin-top: 1px; padding-bottom: 3px; }
+          /* Keep responsive sizing but maintain uniform progress bar positioning */
+          .countdown-timer { 
+            width: 140px !important; 
+            /* Use same proportional padding as desktop to maintain SVG alignment */
+            padding: ${strokeWidth * 2}px !important; 
+          }
+          .countdown-timer .countdown-days { font-size: 38px !important; padding-top: 0px; }
+          .countdown-timer .countdown-label { font-size: 13px !important; margin-top: -2.5px; }
         }
       `}</style>
       {/* Content */}
@@ -163,7 +168,7 @@ const CountdownTimer = ({
       <svg
         width="100%"
         height="100%"
-        viewBox={`0 0 ${(displayWidth && typeof window !== 'undefined' && window.innerWidth <= 640) ? 140 : W} ${H}`}
+        viewBox={`0 0 ${W} ${H}`}
         className="absolute inset-0"
         aria-hidden="true"
         style={{ zIndex: 1, pointerEvents: 'none' }}

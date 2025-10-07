@@ -125,25 +125,28 @@ const Waitlist = () => {
   const validate = () => {
     const newErrors = {};
     const alphaSpace = /^[A-Za-z ]+$/;
-    
+    // Cleaned digits only version for canonical length checking
+    const cleanedMobile = (formData.mobile || '').replace(/\D/g, '');
     // Name: required + alphabets and spaces only
     if (!formData.name.trim()) {
       newErrors.name = 'Name is required';
     } else if (!alphaSpace.test(formData.name.trim())) {
       newErrors.name = 'Name must contain only alphabets and spaces';
     }
-    
-    // Mobile validation: 10 digits or +91 followed by 10 digits
+    // Mobile validation now supports either:
+    //  - 10 digits (e.g. 9876543210)
+    //  - +91 followed by 10 digits (e.g. +919876543210)
+    //  We allow spaces or dashes which are ignored for validation purposes.
     const rawMobile = (formData.mobile || '').trim();
     if (!rawMobile) {
       newErrors.mobile = 'Mobile number is required';
     } else {
-      const mobilePattern = /^(\+91[0-9]{10}|[0-9]{10})$/;
-      if (!mobilePattern.test(rawMobile)) {
-        newErrors.mobile = 'Mobile number must be 10 digits or start with +91 followed by 10 digits';
+      const normalized = rawMobile.replace(/[\s-]/g, ''); // keep + if present, drop spaces/dashes
+      const pattern = /^(\+91)?[0-9]{10}$/;
+      if (!pattern.test(normalized)) {
+        newErrors.mobile = 'Enter a valid Mobile number';
       }
     }
-    
     // Email: required, valid format
     if (!formData.email) {
       newErrors.email = 'Email is required';
@@ -225,7 +228,7 @@ const Waitlist = () => {
     }
     const payload = { 
       ...formData, 
-      mobile: formData.mobile.trim(), // Keep the mobile number as entered (with or without +91)
+      mobile: (formData.mobile || '').replace(/\D/g, '').slice(-10),
       sessionId: getSessionId() 
     };
     await submitLead(payload);
@@ -240,7 +243,7 @@ const Waitlist = () => {
     }
     const payload = { 
       ...formData, 
-      mobile: formData.mobile.trim(), // Keep the mobile number as entered (with or without +91)
+      mobile: (formData.mobile || '').replace(/\D/g, '').slice(-10),
       sessionId: getSessionId() 
     };
     await submitLead(payload);

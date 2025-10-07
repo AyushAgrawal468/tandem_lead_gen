@@ -9,6 +9,21 @@ const Footer = () => {
       className="w-full border-t border-gray-800"
       style={{ backgroundColor: '#121212', flexShrink: 0 }}
     >
+      {/* Mobile & md only: remove orange tap/click highlight & prevent color shift on legal buttons */}
+      <style>{`
+        @media (max-width: 1023.98px) {
+          #footer button.legal-link { 
+            -webkit-tap-highlight-color: transparent; 
+            outline: none; 
+          }
+          #footer button.legal-link:focus,
+          #footer button.legal-link:active,
+          #footer button.legal-link:hover {
+            color: #ffffff !important; /* keep white */
+            text-decoration: none; 
+          }
+        }
+      `}</style>
       {/* Terms and Conditions Popup */}
       {showTerms && typeof document !== 'undefined' && createPortal(
         <div
@@ -136,10 +151,10 @@ const Footer = () => {
         <div className="block sm:hidden w-full px-4 py-4">
           <div className="flex flex-col space-y-3">
             <div className="flex items-center space-x-6">
-              <button onClick={() => setShowTerms(true)} className="text-white text-[14px] leading-[21px]" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+              <button onClick={() => setShowTerms(true)} className="text-white text-[14px] leading-[21px] legal-link" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
                 Terms and Conditions
               </button>
-              <button onClick={() => setShowPrivacy(true)} className="text-white text-[14px] leading-[21px]" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+              <button onClick={() => setShowPrivacy(true)} className="text-white text-[14px] leading-[21px] legal-link" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
                 Privacy policy
               </button>
             </div>
@@ -173,7 +188,7 @@ const Footer = () => {
         </div>
 
         {/* Desktop & tablet layout (>=640px) — unchanged */}
-  <div className="hidden sm:flex h-full flex-row justify-between items-center w-full px-0 md:px-8">
+  <div className="hidden sm:flex h-full flex-row justify-between items-center w-full px-4 md:px-4 lg:px-8">
           <div className="mb-0 flex-shrink-0">
             <p
               className="text-white text-[18px] leading-[27px] font-normal whitespace-nowrap"
@@ -183,10 +198,10 @@ const Footer = () => {
             </p>
           </div>
 
-          <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-8 flex-shrink-0" style={{paddingRight: 0, marginRight: 0}}>
-            <div className="flex space-x-6">
-              <button onClick={() => setShowTerms(true)} className="text-white transition-colors" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 'inherit', padding: 0 }}>Terms and Conditions</button>
-              <button onClick={() => setShowPrivacy(true)} className="text-white transition-colors" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 'inherit', padding: 0 }}>Privacy policy</button>
+          <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 lg:space-x-8 flex-shrink-0" style={{paddingRight: 0, marginRight: 0}}>
+            <div className="flex space-x-3 md:space-x-4 lg:space-x-6">
+              <button onClick={() => setShowTerms(true)} className="text-white transition-colors legal-link" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 'inherit', padding: 0 }}>Terms and Conditions</button>
+              <button onClick={() => setShowPrivacy(true)} className="text-white transition-colors legal-link" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 'inherit', padding: 0 }}>Privacy policy</button>
               <a href="#" className="text-white transition-colors" onClick={e => e.preventDefault()}>
                 Social Links
               </a>

@@ -722,7 +722,7 @@ const Hero = ({ timerData }) => {
           <div
             className="absolute"
             style={{
-              width: 'calc(100% - 4px)',
+              width: vw >= 768 && vw < 1024 ? 'calc(100% + 8px)' : 'calc(100% - 4px)',
               height: 'var(--bottom-curve-h)',
               borderRadius: '50% 50% 0px 0px',
               // Match Blog section card glass background (translucent + blur)
@@ -730,7 +730,9 @@ const Hero = ({ timerData }) => {
               backdropFilter: 'blur(50px)',
               WebkitBackdropFilter: 'blur(50px)',
               bottom: bottomCurveBottom,
-              left: '2px',
+              left: vw >= 768 && vw < 1024 ? '-4px' : '2px',
+              transform: vw >= 768 && vw < 1024 ? 'scaleX(1.012)' : 'none',
+              transformOrigin: vw >= 768 && vw < 1024 ? 'center bottom' : 'initial',
             }}
           />
         </div>

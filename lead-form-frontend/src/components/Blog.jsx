@@ -18,8 +18,7 @@ const Blog = () => {
       id: 1,
       title: "The Loneliness Pandemic— How the World Became Isolated",
 
-      excerpt: `Introduction
-In 2024, the World Health Organization (WHO) recognized loneliness as a global public health concern.`,
+      excerpt: `In 2024, the World Health Organization (WHO) recognized loneliness as a global public health concern, highlighting its significant impact on individuals across all age groups.`,
 
       content: `Introduction
 In 2024, the World Health Organization (WHO) recognized loneliness as a global public health concern, highlighting its significant impact on individuals across all age groups.
@@ -48,8 +47,7 @@ Combating loneliness requires more than sporadic events; it necessitates a platf
       id: 2,
       title: "Why Endless Group Chats Are Making Us Lonelier",
 
-      excerpt: `Introduction
-Group chats, while intended to foster connection, have become overwhelming threads filled with unanswered questions, conflicting schedules, and decision paralysis`,
+      excerpt: `Group chats, while intended to foster connection, have become overwhelming threads filled with unanswered questions, conflicting schedules, and decision paralysis.`,
 
       content: `Introduction
 Group chats, while intended to foster connection, have become overwhelming threads filled with unanswered questions, conflicting schedules, and decision paralysis.
@@ -76,8 +74,7 @@ Transform group-chat chaos into instant consensus. Sign up for the Tandem waitli
       id: 3,
       title: " The Science of Shared Experiences—and Why They Matter",
 
-      excerpt: `Introduction
-                Psychological research confirms that shared experiences create stronger bonds than solitary achievements.`,
+      excerpt: `Psychological research confirms that shared experiences create stronger bonds than solitary achievements. Planning outings together enhances relationships and well-being.`,
 
       content: `Introduction
 Psychological research confirms that shared experiences create stronger bonds than solitary achievements. Planning outings together enhances relationships and well-being.
@@ -105,8 +102,7 @@ For deeper, more fulfilling connections, start with collaborative planning. Join
       id: 4,
       title: "Swipe Right on Real Life—How Tandem Bridges the Digital Gap",
 
-      excerpt: `Introduction
-Swipe-based interfaces revolutionized dating apps; Tandem applies this intuitive design to simplify planning.`,
+      excerpt: `Swipe-based interfaces revolutionized dating apps; Tandem applies this intuitive design to simplify planning real-life meetups with friends.`,
 
       content: `Introduction
 Swipe-based interfaces revolutionized dating apps; Tandem applies this intuitive design to simplify planning real-life meetups with friends.
@@ -138,8 +134,7 @@ Don't limit swiping to dating—use it to enhance real-world fun with friends. S
     {
       id: 5,
       title: `From “Maybe Later” to “See You Tonight”—Winning the Battle Against FOMO`,
-      excerpt: `Introduction
-The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools haven't evolved to address it.
+      excerpt: `The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools haven't evolved to address it. Tandem transforms FOMO into JOMO (Joy of Missing Out) on the right things.
 `,
       content: `Introduction
 The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools haven't evolved to address it. Tandem transforms FOMO into JOMO (Joy of Missing Out) on the right things.
@@ -164,46 +159,8 @@ The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools have
     }
   ]
 
-  // Fixed height for mobile blog card based on first card's natural height
+  // Fixed height for mobile blog card - no dynamic measurement needed
   const mobileCardRef = useRef(null)
-  const [mobileCardHeight, setMobileCardHeight] = useState(null)
-
-  useEffect(() => {
-    // Measure only on mobile (<640px) and lock height to first card's size
-    const measure = () => {
-      if (typeof window === 'undefined') return
-      if (window.innerWidth < 640) {
-        if (mobileCardRef.current) {
-          // Temporarily reset to auto to get natural height of first card
-            const el = mobileCardRef.current
-            const prevExplicitHeight = el.style.height
-            el.style.height = 'auto'
-            const h = el.offsetHeight
-            // Restore previously locked height (if any) to avoid visual jump after measurement
-            if (mobileCardHeight !== null) {
-              el.style.height = prevExplicitHeight
-            }
-            if (h && mobileCardHeight === null) {
-              setMobileCardHeight(h)
-              // Lock the measured height
-              el.style.height = h + 'px'
-            }
-        }
-      } else if (mobileCardHeight !== null) {
-        setMobileCardHeight(null)
-        if (mobileCardRef.current) mobileCardRef.current.style.height = 'auto'
-      }
-    }
-    // Initial measure after paint
-    const raf = requestAnimationFrame(measure)
-    window.addEventListener('resize', measure)
-    return () => {
-      cancelAnimationFrame(raf)
-      window.removeEventListener('resize', measure)
-    }
-    // We intentionally exclude mobileCardHeight from deps to avoid re-measuring after lock
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
   const handleCloseOverlay = () => {
     if (!expandedId) return
@@ -231,12 +188,12 @@ The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools have
   }
 
   const nextSlide = () => {
-    setCurrentIndex((prev) => (prev + 1) % Math.max(1, blogPosts.length - 1));
+    setCurrentIndex((prev) => (prev + 1) % blogPosts.length);
     if (expandedId) handleCloseOverlay()
   }
 
   const prevSlide = () => {
-    setCurrentIndex((prev) => (prev - 1 + Math.max(1, blogPosts.length - 1)) % Math.max(1, blogPosts.length - 1));
+    setCurrentIndex((prev) => (prev - 1 + blogPosts.length) % blogPosts.length);
     if (expandedId) handleCloseOverlay()
   }
 
@@ -311,7 +268,15 @@ The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools have
     }
   }, [expandedId, nextSlide, prevSlide])
 
-  const visiblePosts = blogPosts.slice(currentIndex, currentIndex + 2)
+  const visiblePosts = (() => {
+    // For desktop/tablet: always show 2 cards, with infinite loop
+    const posts = []
+    for (let i = 0; i < 2; i++) {
+      const index = (currentIndex + i) % blogPosts.length
+      posts.push(blogPosts[index])
+    }
+    return posts
+  })()
   const mobilePost = blogPosts[currentIndex % blogPosts.length]
   const expandedPost = expandedId ? blogPosts.find(p => p.id === expandedId) : null
 
@@ -406,14 +371,11 @@ The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools have
         <h2 className="text-[32px] xxs:text-[32px] xs:text-[32px] font-bold text-texthigh mb-5">Blogs</h2>
         <div
           ref={mobileCardRef}
-          className="rounded-2xl p-6"
+          className="rounded-2xl p-6 mobile-blog-card"
           style={{
             background: 'rgba(255, 255, 255, 0.10)',
             backdropFilter: 'blur(50px)',
-            WebkitBackdropFilter: 'blur(50px)',
-            // Lock height once measured; otherwise natural height
-            height: mobileCardHeight ? mobileCardHeight + 'px' : 'auto',
-            transition: 'height .25s ease'
+            WebkitBackdropFilter: 'blur(50px)'
           }}
         >
           <div className="mb-6" style={{ width: '32px', height: '49px' }}>
@@ -435,7 +397,7 @@ The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools have
           </p>
 
           <button
-            className="font-bold hover:opacity-80 transition-opacity cursor-pointer"
+            className="font-bold hover:opacity-80 transition-opacity cursor-pointer text-left"
             style={{
               color: '#00FFC8',
               fontFamily: '"Anek Latin", sans-serif',
@@ -445,7 +407,8 @@ The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools have
               background: 'none',
               border: 'none',
               padding: 0,
-              outline: 'none'
+              outline: 'none',
+              textAlign: 'left'
             }}
             onClick={() => openOverlay(mobilePost.id)}
           >
@@ -640,7 +603,7 @@ The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools have
                     </p>
 
                     <button
-                      className="font-bold hover:opacity-80 transition-opacity cursor-pointer"
+                      className="font-bold hover:opacity-80 transition-opacity cursor-pointer text-left"
                       style={{
                         color: '#00FFC8',
                         fontFamily: '"Anek Latin", sans-serif',
@@ -650,7 +613,8 @@ The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools have
                         background: 'none',
                         border: 'none',
                         padding: 0,
-                        outline: 'none'
+                        outline: 'none',
+                        textAlign: 'left'
                       }}
                       onClick={() => openOverlay(post.id)}
                     >
@@ -797,6 +761,36 @@ The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools have
             font-weight: 700 !important;
             color: rgba(255, 255, 255, 1) !important;
             text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4) !important;
+          }
+        }
+        
+        /* Fixed height for mobile blog cards to ensure consistency across all phones */
+        @media (max-width: 639px) {
+          .mobile-blog-card {
+            height: 320px !important;
+            display: flex;
+            flex-direction: column;
+          }
+          .mobile-blog-card > div:first-child {
+            flex-shrink: 0;
+          }
+          .mobile-blog-card h3 {
+            flex-shrink: 0;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+          }
+          .mobile-blog-card p {
+            flex: 1;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            -webkit-box-orient: vertical;
+          }
+          .mobile-blog-card button {
+            flex-shrink: 0;
+            margin-top: auto;
           }
         }
         
