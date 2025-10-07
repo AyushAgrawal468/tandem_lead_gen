@@ -19,7 +19,7 @@ const Blog = () => {
       title: "The Loneliness Pandemic— How the World Became Isolated",
 
       excerpt: `Introduction
-In 2024, the World Health Organization (WHO) recognized loneliness as a global public health concern, highlighting its significant impact on individuals across all age groups.`,
+In 2024, the World Health Organization (WHO) recognized loneliness as a global public health concern.`,
 
       content: `Introduction
 In 2024, the World Health Organization (WHO) recognized loneliness as a global public health concern, highlighting its significant impact on individuals across all age groups.
@@ -77,7 +77,7 @@ Transform group-chat chaos into instant consensus. Sign up for the Tandem waitli
       title: " The Science of Shared Experiences—and Why They Matter",
 
       excerpt: `Introduction
-                Psychological research confirms that shared experiences create stronger bonds than solitary achievements. Planning outings together enhances relationships and well-being.`,
+                Psychological research confirms that shared experiences create stronger bonds than solitary achievements.`,
 
       content: `Introduction
 Psychological research confirms that shared experiences create stronger bonds than solitary achievements. Planning outings together enhances relationships and well-being.
@@ -106,7 +106,7 @@ For deeper, more fulfilling connections, start with collaborative planning. Join
       title: "Swipe Right on Real Life—How Tandem Bridges the Digital Gap",
 
       excerpt: `Introduction
-Swipe-based interfaces revolutionized dating apps; Tandem applies this intuitive design to simplify planning real-life meetups with friends.`,
+Swipe-based interfaces revolutionized dating apps; Tandem applies this intuitive design to simplify planning.`,
 
       content: `Introduction
 Swipe-based interfaces revolutionized dating apps; Tandem applies this intuitive design to simplify planning real-life meetups with friends.
@@ -139,7 +139,7 @@ Don't limit swiping to dating—use it to enhance real-world fun with friends. S
       id: 5,
       title: `From “Maybe Later” to “See You Tonight”—Winning the Battle Against FOMO`,
       excerpt: `Introduction
-The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools haven't evolved to address it. Tandem transforms FOMO into JOMO (Joy of Missing Out) on the right things.
+The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools haven't evolved to address it.
 `,
       content: `Introduction
 The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools haven't evolved to address it. Tandem transforms FOMO into JOMO (Joy of Missing Out) on the right things.
