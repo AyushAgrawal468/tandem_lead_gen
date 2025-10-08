@@ -188,7 +188,7 @@ const Footer = () => {
         </div>
 
         {/* Desktop & tablet layout (>=640px) — unchanged */}
-  <div className="hidden sm:flex h-full flex-row justify-between items-center w-full px-4 md:px-4 lg:px-8">
+  <div className="hidden sm:flex h-full flex-row justify-between items-center w-full px-4 md:px-4 md:pr-10 lg:px-8 md:gap-x-6 lg:gap-x-0">
           <div className="mb-0 flex-shrink-0">
             <p
               className="text-white text-[18px] leading-[27px] font-normal whitespace-nowrap"
@@ -199,7 +199,7 @@ const Footer = () => {
           </div>
 
           <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 lg:space-x-8 flex-shrink-0" style={{paddingRight: 0, marginRight: 0}}>
-            <div className="flex space-x-3 md:space-x-4 lg:space-x-6">
+            <div className="flex space-x-3 md:space-x-3 lg:space-x-6">
               <button onClick={() => setShowTerms(true)} className="text-white transition-colors legal-link" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 'inherit', padding: 0 }}>Terms and Conditions</button>
               <button onClick={() => setShowPrivacy(true)} className="text-white transition-colors legal-link" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 'inherit', padding: 0 }}>Privacy policy</button>
               <a href="#" className="text-white transition-colors" onClick={e => e.preventDefault()}>
@@ -207,7 +207,7 @@ const Footer = () => {
               </a>
             </div>
 
-            <div className="flex space-x-4">
+            <div className="flex space-x-4 md:space-x-3 lg:space-x-4">
               {/* First Logo (provided SVG) */}
               <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="w-6 h-6 flex items-center justify-center" style={{width: '24px', height: '24px', aspectRatio: '1/1'}}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="25" viewBox="0 0 24 25" fill="none" style={{display: 'block'}}>

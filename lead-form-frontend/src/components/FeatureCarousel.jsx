@@ -35,6 +35,8 @@ const useMeasure = (ref) => {
 const clamp = (n, min, max) => Math.max(min, Math.min(max, n))
 
 const FeatureCarousel = ({ items = sampleItems, belowLeft = null }) => {
+  // Root wrapper ref (used for scoping keyboard navigation on desktop only)
+  const rootRef = useRef(null)
   const [index, setIndex] = useState(0)
   const [sliderValue, setSliderValue] = useState(0)
   const [animatedValue, setAnimatedValue] = useState(0)
@@ -51,6 +53,7 @@ const FeatureCarousel = ({ items = sampleItems, belowLeft = null }) => {
   const cardH = clampNum(220, 33, 678)
   const previewH = cardH / 2
   const isMd = vw >= 768 && vw < 1024
+  const isDesktop = vw >= 1024
   // Ensure extra breathing room under the active card on desktop/tablet
   const bottomPad = vw >= 640 ? Math.min(120, Math.max(64, vw * 0.08)) : 12
   // Offset right-side preview cards downward on desktop/tablet
@@ -206,6 +209,28 @@ const FeatureCarousel = ({ items = sampleItems, belowLeft = null }) => {
     }
   }, [cardW, items.length, index, gap, previewWidths, activeWidths])
 
+  // Desktop-only keyboard navigation (Left / Right arrows)
+  useEffect(() => {
+    if (!isDesktop) return
+    const onKey = (e) => {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return
+      // Only respond if focus is on body or within the carousel region
+      const activeEl = document.activeElement
+      if (activeEl && rootRef.current && activeEl !== document.body && !rootRef.current.contains(activeEl)) {
+        return
+      }
+      if (e.key === 'ArrowRight') {
+        setIndex(i => (i + 1) % items.length)
+        e.preventDefault()
+      } else if (e.key === 'ArrowLeft') {
+        setIndex(i => (i - 1 + items.length) % items.length)
+        e.preventDefault()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [isDesktop, items.length])
+
   // Slider bar (range input) mapping 0..items-1
   useEffect(() => {
     setSliderValue(index);
@@ -218,7 +243,22 @@ const FeatureCarousel = ({ items = sampleItems, belowLeft = null }) => {
   }, [items.length]);
 
   return (
-    <div className="w-full" style={{ position: 'relative' }}>
+    <div
+      ref={rootRef}
+      className="w-full feature-carousel-root"
+      style={{ position: 'relative', outline: 'none' }}
+      role={isDesktop ? 'region' : undefined}
+      aria-label={isDesktop ? 'Feature carousel (use left and right arrow keys to change slide)' : undefined}
+      tabIndex={isDesktop ? 0 : undefined}
+      data-desktop={isDesktop ? 'true' : 'false'}
+    >
+      {isDesktop && (
+        <style>{`
+          @media (min-width: 1024px) {
+            .feature-carousel-root:focus { outline: none !important; box-shadow: none !important; }
+          }
+        `}</style>
+      )}
       {/* Slide Numbering Top-Right */}
       <div
         className="fc-slide-number"

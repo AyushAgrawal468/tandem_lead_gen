@@ -107,9 +107,9 @@ We’re here to help! You can reach us through in-app support, email, or via our
   }
 
   return (
-  <section id="faq" className="py-16 xxs:py-[72px] xs:py-20 px-4 xxs:px-4 xs:px-4 sm:px-4 md:px-8" style={{ background: '#232323' }}>
+  <section id="faq" className="pt-8 pb-16 xxs:pt-8 xxs:pb-[72px] xs:pt-8 xs:pb-20 sm:pt-8 sm:pb-20 md:py-16 px-4 xxs:px-4 xs:px-4 sm:px-4 md:px-8" style={{ background: '#232323' }}>
       <div className="max-w-4xl mx-auto">
-        <h2 className="text-[34px] xxs:text-[38px] xs:text-[42px] md:text-5xl font-bold text-texthigh text-center mb-12">FAQ</h2>
+        <h2 className="text-[34px] xxs:text-[38px] xs:text-[42px] md:text-5xl font-bold text-texthigh text-center mb-8 md:mb-12">FAQ</h2>
 
         <div className="space-y-4">
           {faqs.map((faq, index) => (

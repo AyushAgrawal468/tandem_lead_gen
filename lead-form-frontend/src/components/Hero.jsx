@@ -8,7 +8,7 @@ import CountdownTimer from './CountdownTimer'
 const heroImageModules = import.meta.glob('../assets/hero-images/*.{jpg,jpeg,png,webp}', { eager: true })
 const heroImageEntries = Object.entries(heroImageModules)
   .sort((a, b) => a[0].localeCompare(b[0]))
-  .slice(0, 4)
+  .slice(0, 6)
 const heroImages = heroImageEntries.map(([_, mod]) => mod.default || mod)
 
 const Hero = ({ timerData }) => {
@@ -45,6 +45,9 @@ const Hero = ({ timerData }) => {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [navDir, setNavDir] = useState('next')
   const [autoPlay, setAutoPlay] = useState(true)
+  // Headline display index (delayed slightly so text updates just after image change)
+  const [headlineSlide, setHeadlineSlide] = useState(0)
+  const headlineDelayRef = React.useRef(null)
   // Hybrid track animation state (desktop only)
   const [trackOffset, setTrackOffset] = useState(0) // -1,0,1 units of shift distance
   const [trackTransition, setTrackTransition] = useState(true)
@@ -89,6 +92,26 @@ const Hero = ({ timerData }) => {
     position: 'center',
     alt: img ? `Hero slide ${idx + 1}` : 'Add images to assets/hero-images'
   }))
+
+    // Per-slide headline texts (sample copy). If fewer images are present, texts loop.
+    const heroTexts = [
+      'Swipe on fun things to do, match with friends, \nand make it happen — that’s Tandem.',
+      'Discover passions together. Tandem turns shared experiences into deeper bonds making every moment you create matter.',
+      'Adventure with your tribe. Swipe, connect, and explore the world together with Tandem’s seamless planning.',
+      'Match. Play. Win. Tandem finds your perfect doubles partner for games that build friendships beyond the court.',
+      'From chat chaos to concert vibes, Tandem turns plans into stories you’ll tell forever. Swipe, join, and spark the moment.',
+      `Skip the small talk, dive right in. Tandem matches you with your game night crew for real fun, real fast.`
+    ]
+    const activeHeadline = heroTexts[headlineSlide % heroTexts.length]
+
+  // Delay headline update by 20ms after currentSlide changes for smoother perceived sync
+  useEffect(() => {
+    if (headlineDelayRef.current) clearTimeout(headlineDelayRef.current)
+    headlineDelayRef.current = setTimeout(() => {
+      setHeadlineSlide(currentSlide)
+    }, 10)
+    return () => { if (headlineDelayRef.current) clearTimeout(headlineDelayRef.current) }
+  }, [currentSlide])
 
   // Preload & decode images to avoid late paint when slides shift.
   const [loadedMap, setLoadedMap] = useState(() => new Map())
@@ -432,6 +455,30 @@ const Hero = ({ timerData }) => {
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
+          {/* Desktop/Tablet headline overlay */}
+          <div
+            className="pointer-events-none select-none hidden md:block md:-translate-y-8 lg:translate-y-0"
+            style={{
+              position: 'absolute',
+              top: 0,
+              bottom: 0,
+              left: 'calc(var(--side-width) + var(--side-margin))',
+              right: 'calc(var(--side-width) + var(--center-gap))',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '0 5px',
+              zIndex: 50
+            }}
+          >
+            <h1
+              key={currentSlide}
+              className="font-heading-b font-bold leading-tight tracking-tight text-white transition-opacity duration-700 text-[26px] lg:text-[48px] whitespace-pre-line text-center"
+              style={{ color: 'rgba(255,255,255,1)', textShadow: '0 4px 28px rgba(0,0,0,0.65), 0 0 2px rgba(0,0,0,0.6)', width: '100%' }}
+            >
+              {activeHeadline}
+            </h1>
+          </div>
           <div className="absolute inset-0" style={{ background: 'transparent', zIndex: 0 }} />
           {/* Track wrapper for hybrid movement */}
           <div
@@ -560,6 +607,17 @@ const Hero = ({ timerData }) => {
                     <img src={slide.image} alt="" loading="eager" fetchPriority="high" decoding="async" style={{ width: 0, height: 0, opacity: 0, position: 'absolute' }} onLoad={() => setFirstImgReady(true)} />
                   )}
                 </div>
+                {/* Per-slide tint overlay for readability (stronger on center) */}
+                <div
+                  aria-hidden="true"
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    background: role === 'center'
+                      ? 'linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55))'
+                      : 'linear-gradient(rgba(0,0,0,0.38), rgba(0,0,0,0.38))',
+                    transition: 'background 450ms ease'
+                  }}
+                />
               </div>
             )
           })}
@@ -583,6 +641,29 @@ const Hero = ({ timerData }) => {
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
+          {/* Mobile headline overlay */}
+          <div
+            className="pointer-events-none select-none md:hidden"
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '5px',
+              right: '5px',
+              transform: 'translateY(-50%)',
+              zIndex: 50,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <h1
+              key={currentSlide}
+              className="font-heading-b font-bold leading-[1.08] tracking-tight text-white transition-opacity duration-700 text-[24px] whitespace-pre-line text-center"
+              style={{ color: 'rgba(255,255,255,1)', textShadow: '0 4px 24px rgba(0,0,0,0.6), 0 0 2px rgba(0,0,0,0.55)', width: '100%' }}
+            >
+              {activeHeadline}
+            </h1>
+          </div>
           {/* Solid base background */}
           <div className="absolute inset-0" style={{ background: 'transparent', zIndex: 0 }} />
 
@@ -649,6 +730,17 @@ const Hero = ({ timerData }) => {
                     }}
                   >
                   </div>
+                  {/* Mobile per-slide tint overlay */}
+                  <div
+                    aria-hidden="true"
+                    className="absolute inset-0 pointer-events-none"
+                    style={{
+                      background: position === 'center'
+                        ? 'linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55))'
+                        : 'linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35))',
+                      transition: 'background 450ms ease'
+                    }}
+                  />
                   {/* Text content centered */}
                   {/* Text removed for mobile as well */}
                 </div>

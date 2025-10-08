@@ -56,6 +56,19 @@ const Waitlist = () => {
   const touchStartXRef = React.useRef(0);
   const touchStartYRef = React.useRef(0);
   const touchActiveRef = React.useRef(false);
+  // Desktop breakpoint detection (>=1024px) for enabling clickable dots only on desktop
+  const [isDesktop, setIsDesktop] = useState(
+    typeof window !== 'undefined' ? window.innerWidth >= 1024 : false
+  );
+  React.useEffect(() => {
+    const onResize = () => {
+      if (typeof window === 'undefined') return;
+      const d = window.innerWidth >= 1024;
+      setIsDesktop(d);
+    };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   // Auto-scroll effect with pause/resume support
   React.useEffect(() => {
@@ -65,7 +78,7 @@ const Waitlist = () => {
     }
     autoIntervalRef.current = setInterval(() => {
       setCarouselPage((prev) => (prev + 1) % 3);
-    }, 4000);
+    }, 6000); // adjusted from 4000ms to 6000ms for 6s auto-scroll
     return () => {
       if (autoIntervalRef.current) clearInterval(autoIntervalRef.current);
     };
@@ -423,7 +436,7 @@ const Waitlist = () => {
 
       {/* Desktop & tablet layout (md and up) */}
       <section
-        id="waitlist"
+        id="waitlist-desktop" /* renamed to avoid duplicate id with mobile section */
         className="hidden md:block px-6 pt-20 md:pt-12 lg:pt-20 pb-20 md:-mt-40 lg:-mt-[180px]"
         style={{
           scrollMarginTop: '-13vh',
@@ -432,6 +445,24 @@ const Waitlist = () => {
           position: 'relative',
         }}
       >
+        {/* Backward-compatible anchor so existing #waitlist links still work */}
+        <a id="waitlist" aria-hidden="true" style={{ position: 'absolute', top: 0, left: 0, width: 0, height: 0 }} />
+        <style>{`
+          /* Landscape iPhone / small-height landscape phones in md range: neutralize large negative margin & ensure spacing */
+          @media (min-width:768px) and (max-width:1023.98px) and (orientation:landscape) and (max-height:500px) {
+            #waitlist-desktop {
+              margin-top: 0 !important; /* override md:-mt-40 */
+              padding-top: 4rem !important; /* ensure adequate top spacing */
+            }
+          }
+          /* Use dynamic viewport units where supported to keep section stable as browser UI collapses/expands */
+          @supports (min-height: 100dvh) {
+            #waitlist-desktop { min-height: 100dvh; }
+          }
+          @supports not (min-height: 100dvh) {
+            #waitlist-desktop { min-height: 100vh; }
+          }
+        `}</style>
         {/* Exact SVG as contained background via img */}
         <img
           src={WaitlistBg}
@@ -541,16 +572,41 @@ const Waitlist = () => {
                   gap: '8px',
                   marginTop: '18px',
                 }}>
-                  {[0,1,2].map((i) => (
-                    <span key={i} style={{
-                      width: '10px',
-                      height: '10px',
-                      borderRadius: '50%',
-                      background: carouselPage === i ? '#fff' : 'rgba(255,255,255,0.3)',
-                      display: 'inline-block',
-                      transition: 'background 0.3s',
-                    }} />
-                  ))}
+                  {[0,1,2].map((i) => {
+                    const active = carouselPage === i;
+                    const clickable = isDesktop; // only desktop
+                    const handleClick = () => {
+                      if (!clickable || active) return;
+                      setCarouselPaused(true);
+                      setCarouselPage(i);
+                      scheduleResume(5000);
+                    };
+                    return (
+                      <span
+                        key={i}
+                        role={clickable ? 'button' : undefined}
+                        aria-label={clickable ? `Show rewards set ${i + 1}` : undefined}
+                        aria-pressed={clickable ? active : undefined}
+                        tabIndex={clickable ? 0 : undefined}
+                        onClick={handleClick}
+                        onKeyDown={(e) => { if (clickable && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); handleClick(); } }}
+                        style={{
+                          width: '10px',
+                          height: '10px',
+                          borderRadius: '50%',
+                          background: active ? '#fff' : 'rgba(255,255,255,0.3)',
+                          display: 'inline-block',
+                          transition: 'background 0.3s, transform 0.25s',
+                          cursor: clickable ? (active ? 'default' : 'pointer') : 'default',
+                          outline: 'none'
+                        }}
+                        onFocus={(e) => { if (clickable) e.currentTarget.style.boxShadow = '0 0 0 3px rgba(255,255,255,0.35)'; }}
+                        onBlur={(e) => { if (clickable) e.currentTarget.style.boxShadow = 'none'; }}
+                        onMouseEnter={(e) => { if (clickable && !active) e.currentTarget.style.transform = 'scale(1.3)'; }}
+                        onMouseLeave={(e) => { if (clickable && !active) e.currentTarget.style.transform = 'scale(1)'; }}
+                      />
+                    );
+                  })}
                 </div>
               </div>
             </div>

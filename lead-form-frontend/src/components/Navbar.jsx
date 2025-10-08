@@ -119,13 +119,12 @@ const Navbar = () => {
           }
         `}
       >
-  <div className="flex items-center pl-0 pr-0 md:pr-8 py-3 xxs:py-3.5 md:py-4 w-full">
+  <div className="flex items-center pl-4 md:pl-0 pr-0 md:pr-8 py-3 xxs:py-3.5 md:py-4 w-full">
           {/* Logo - Left aligned (nudged a bit more right) */}
-          <div className="flex items-center flex-shrink-0 ml-1 xs:ml-2 sm:ml-2">
+          <div className="flex items-center flex-shrink-0 ml-0 md:pl-4 lg:pl-8">
             <div
               className="cursor-pointer hover:opacity-80 transition-opacity"
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              style={{ marginLeft: '16px' }} // tighter on mobile; desktop adjusted below
             >
               {/* Mobile logo (sm:hidden) */}
               <div className="flex items-center sm:hidden">
@@ -320,7 +319,7 @@ const Navbar = () => {
           style={{
             width: 'calc(100% - 4px)',
             height: 'clamp(200px, 45vw, 300px)',
-            top: 'calc(clamp(200px, 45vw, 300px) / -2 + 8px)',
+            top: 'calc(clamp(200px, 45vw, 300px) / -2 + 20px)', // adjusted from +8px to +20px to decrease negative offset (md only)
             left: '2px',
           }}
         >
@@ -337,7 +336,7 @@ const Navbar = () => {
           style={{
             width: 'calc(100% - 4px)',
             height: 'clamp(200px, 45vw, 300px)',
-            top: 'calc(clamp(200px, 45vw, 300px) / -2 + 36px)',
+            top: 'calc(clamp(200px, 45vw, 300px) / -2 + 68px)', // further lowered (was +52px, originally +36px) desktop only
             left: '2px',
           }}
         >
