@@ -16,144 +16,109 @@ const Blog = () => {
   const blogPosts = [
     {
       id: 1,
-      title: "The Loneliness Pandemic— How the World Became Isolated",
+      title: "Swipe Your Way to Real Hangouts—Tandem Makes Planning Effortless",
 
-      excerpt: `In 2024, the World Health Organization (WHO) recognized loneliness as a global public health concern, highlighting its significant impact on individuals across all age groups.`,
+      excerpt: `Dating apps changed how people meet, but why stop there? Tandem uses easy swipe gestures to make planning real-life fun with friends simpler and more exciting.`,
 
-      content: `Introduction
-In 2024, the World Health Organization (WHO) recognized loneliness as a global public health concern, highlighting its significant impact on individuals across all age groups.
+      content: `Dating apps changed how people meet, but why stop there? Tandem uses easy swipe gestures to make planning real-life fun with friends simpler and more exciting.
 
-1. The Data Speaks
-• Surge in Single-Person Households: Approximately 30% of U.S. households consist of individuals living alone, with similar trends observed in Europe and India's major cities.
-• Mental Health Toll: Chronic loneliness is linked to a 29% increased risk of coronary heart disease and a 32% increased risk of stroke. Additionally, it correlates with a 25% higher risk of dementia.
-
-2. Root Causes
-• Digital Overload: The prevalence of endless scrolling on social media platforms has replaced meaningful in-person interactions.
-• Urban Disconnection: Despite bustling city environments, real-world social connections have diminished.
-• Fragmented Planning: Coordinating meetups across multiple platforms like WhatsApp, Instagram, and various calendars often leads to confusion and cancellations.
-
-3. Why It Matters
-Loneliness transcends mere sadness; it's a pressing public health crisis. Isolation contributes to depression, weakens the immune system, and escalates healthcare costs globally.
-
-4. The Tandem Solution
-Tandem addresses these challenges by offering synchronized swiping, AI-driven recommendations, and gamified group planning, transforming digital interactions into joyful real-world connections.
-
-Conclusion & Call to Action:
-Combating loneliness requires more than sporadic events; it necessitates a platform that simplifies and enriches planning with friends. Join the Tandem waitlist today and be part of reconnecting our world.
+Swiping Isn’t Just for Dating Anymore
+   Tandem brings the familiar swipes everyone loves in dating apps - up to super-like, right to like, left to dislike, down to  \n   super-dislike and puts them to work for group activities. No more endless typing or confusion, just a few quick swipes \n   and a real plan for real life.
+\nSmart, Spontaneous Plans With AI
+  Tandem learns what everyone likes and gives smart suggestions that actually fit the group. It mixes in surprises so plans \n  always feel fresh and spontaneous, not just the same old routine.
+\nChoose How Your Group Plans
+  Whether starting with the crew and picking what to do together (group-first), or picking the activity first and inviting \n  friends to join (activity-first), Tandem lets everyone plan how they want. It’s flexible for every kind of get-together.
+\nEverything Sorted in One Place
+  No more jumping between WhatsApp, Instagram, calendars, and maps. Tandem offers instant RSVPs, maps, reminders, \n  and even chat right inside the app, everyone stays in the loop, no switching around.
+\nReady for Real Plans, Not Just Chats?
+  Swipe right not just for matches, but for friendship and good times. Get in early with Tandem and make every hangout \n  quick, easy, and actually happen.
 `,
       readMore: "Read more"
     },
     {
       id: 2,
-      title: "Why Endless Group Chats Are Making Us Lonelier",
+      title: "The Loneliness Crisis: Why We Feel More Alone Despite Being Connected",
 
-      excerpt: `Group chats, while intended to foster connection, have become overwhelming threads filled with unanswered questions, conflicting schedules, and decision paralysis.`,
+      excerpt: `In 2024, the World Health Organization called loneliness a global health crisis affecting people everywhere, young and old.It’s not just a feeling of sadness,`,
 
-      content: `Introduction
-Group chats, while intended to foster connection, have become overwhelming threads filled with unanswered questions, conflicting schedules, and decision paralysis.
-
-1. The Group-Chat Quagmire
-•23-Message Average: Studies indicate it takes an average of 23 messages to finalize dinner plans, leading to frustration and disengagement.
-•Decision Fatigue: Navigating through hundreds of unread messages often results in plan cancellations or avoidance.
-
-2. The Paradox of Choice
-An abundance of options and numerous participants can make decision-making exhausting, often leading to postponed plans that never materialize.
-
-3. From Chaos to Clarity
-   Tandem streamlines the planning process with real-time synchronized swiping, allowing friends to vote within minutes, resulting in quick and collective decisions.
-
-4. Real Stories, Real Results
-"We used to quit at 'Where do you want to go?' Now, in 3 swipes, it's decided!" — Anisha, 28, Bengaluru.
-
-Conclusion & Call to Action:
-Transform group-chat chaos into instant consensus. Sign up for the Tandem waitlist and reclaim your social life.
+      content: `In 2024, the World Health Organization called loneliness a global health crisis affecting people everywhere, young and old. It’s not just a feeling of sadness, loneliness can hurt our health, increasing risks like heart disease, stroke, and dementia.
+\nWhat’s Causing the Lonely World?
+• Living Solo: Around 30% of homes in the U.S. have just one person living there. This is similar in many big cities worldwide, \n   including in India.
+• Social Media Overload: Endless scrolling on feeds replaces real, face-to-face time, leaving us feeling disconnected even \n   when “connected.”
+• City Life Irony: Big cities are full of people, yet we often don’t know our neighbors or hang out much in person.
+• Too Many Apps, Too Much Confusion: Trying to plan outings on WhatsApp, Instagram, calendars, and chat apps \n  gets messy. Plans fall through, and the frustration builds.
+\nWhy This Matters
+  Loneliness is not just emotional pain. It lowers our immunity, leads to depression, and increases healthcare costs. It’s a \n  serious problem that affects how we live every day.
+\nHow Tandem Is the Answer
+Tandem flips this loneliness script by making social planning simple, fun, and effective.
+  • Swipe Together, Decide Together: Instead of confusing back-and-forth messages, friends swipe together on what \n    to do, making group decisions in just a few swipes.
+  • Smart Suggestions: AI picks activities your group will actually love leading to a stop to the endless scrolling.
+  • Plan Lock-In: Instant RSVPs and reminders mean fewer no-shows and more real meetups.
+  • All-In-One App: Chat, vote, schedule, and navigate from one app. No more juggling a dozen apps.
+  • Memory Wall: After events, photos and videos automatically create fun collages to relive good times and keep \n    the bond strong.
+\nTake the First Step to Beat Loneliness
+  Loneliness won’t disappear with random meetups. It needs a way to make planning easy, joyful, and hassle-free.\n  That’s exactly what Tandem does. Join the waitlist today and start turning social plans into meaningful moments\n  with friends.
 `,
       readMore: "Read more"
     },
     {
       id: 3,
-      title: " The Science of Shared Experiences—and Why They Matter",
+      title: " Why Group Chats Are Actually Making Us Feel More Alone",
 
-      excerpt: `Psychological research confirms that shared experiences create stronger bonds than solitary achievements. Planning outings together enhances relationships and well-being.`,
+      excerpt: `Group chats were supposed to bring us closer, but often they just create confusion and frustration. Instead of easy plans, we get long message threads `,
 
-      content: `Introduction
-Psychological research confirms that shared experiences create stronger bonds than solitary achievements. Planning outings together enhances relationships and well-being.
-
-1. Neurochemistry of Connection
-•Oxytocin Release: Shared laughter and novel experiences boost oxytocin levels, strengthening social bonds .
-•Memory Encoding: Co-planning and anticipation enhance the memorability of events.
-
-2. The Role of Intention
-Spontaneous meetups are more fulfilling when planned collaboratively, fostering a sense of belonging even before the event occurs.
-
-3. Gamification Amplifies Engagement
-Tandem's features like "streaks," "super-likes," and "memory wall" activate dopamine pathways, making planning a rewarding and engaging activity.
-
-4. Behavioral Nudges That Work
-•Timed Swipes (3 minutes): Creates a sense of urgency, reducing procrastination.
-•Group Feedback: Real-time likes guide users toward shared preferences.
-
-Conclusion & Call to Action:
-For deeper, more fulfilling connections, start with collaborative planning. Join Tandem's waitlist and make every outing a memorable experience.
+      content: `Group chats were supposed to bring us closer, but often they just create confusion and frustration. Instead of easy plans, we get long message threads full of unanswered questions and people disappearing into silence.
+\nThe Group-Chat Problem
+• Too Many Messages: It often takes around 23 messages just to decide where to eat or what movie to watch. This leads to tiredness and many people giving up on plans.
+• Decision Overload: With so many chats and unread messages, people avoid responding, causing plans to fall apart at the last minute.
+\nToo Many Choices, Too Many Voices
+ When there are too many options and lots of participants, making a decision becomes almost impossible. This leads to \n postponed outings or none at all.
+\nHow Tandem Fixes This Chaos
+ Tandem makes group planning quick and smooth. Friends swipe together in real-time, vote instantly, and arrive at \n a decision within minutes. No flooding chats, no confusion—just fun and easy planning.
+\nReal People, Real Wins
+ Anisha, 28 from Bengaluru, says, "We used to keep asking each other  'Where do you want to go?' Now, it’s decided in \n just 5 swipes!"
+\nReady to End Group Chat Madness?
+ Stop wasting time on endless chats that go nowhere. Join the Tandem waitlist and start making plans that \n actually happen. Reclaim your social life with ease and joy.
 `,
       readMore: "Read more"
     },
     {
       id: 4,
-      title: "Swipe Right on Real Life—How Tandem Bridges the Digital Gap",
+      title: "Why Doing Things Together Bonds Us—and How Tandem Makes It Happen",
 
-      excerpt: `Swipe-based interfaces revolutionized dating apps; Tandem applies this intuitive design to simplify planning real-life meetups with friends.`,
+      excerpt: `Research shows when people share experiences, their relationships get stronger and happier. Planning things together isn’t just a nice idea, it’s how memories`,
 
-      content: `Introduction
-Swipe-based interfaces revolutionized dating apps; Tandem applies this intuitive design to simplify planning real-life meetups with friends.
-
-1. From Dating Apps to Social Planning
-Tandem repurposes the familiar swipe gestures for activity planning:
-•Up: Super-like ("Must do this!")
-•Right: Like
-•Left: Dislike
-•Down: Super-dislike
-
-2. Personalization Meets Spontaneity
-•AI-Driven Recommendations: Learns from user preferences to suggest enjoyable events.
-•Randomness for Discovery: Introduces serendipity, keeping social experiences fresh.
-
-3. Group-First vs. Activity-First
-•Group-First: Assemble friends first, then choose an activity together.
-•Activity-First: Select an activity, then invite friends to join.
-
-4. Built-In Coordination
-•Map & Calendar Sync: One-tap RSVPs, map links, and calendar reminders.
-•Group Chat Integration: Centralizes discussions, eliminating the need to switch between apps.
-
-Conclusion & Call to Action:
-Don't limit swiping to dating—use it to enhance real-world fun with friends. Sign up now for early access to Tandem.
+      content: `Research shows when people share experiences, their relationships get stronger and happier. Planning things together isn’t just a nice idea, it’s how memories and deeper friendships are made.
+\nThe Magic Chemistry of Hanging Out
+• Laugh Together, Connect Better: When friends laugh or do new things together, their brains release oxytocin—the \n “bonding hormone”, making everyone feel closer.
+• Anticipation Makes Moments Stick: Planning things as a group builds excitement and ensures the memories last longer.
+\nIntentional Plans Create Real Belonging \n Spontaneous meetups are great, but when everyone helps plan, the sense of togetherness starts even before the event.
+\nHow Tandem Gamifies Better Bonding
+ Tandem makes group planning rewarding. Features like “streaks,” “Tandem Swipe,” and the “Wall of Moments” turn \n organizing into a playful, habit-forming activity, each swipe and vote releases feel-good dopamine and brings \n people closer.
+\nSmart Nudges for Maximum Fun
+• Quick Swipes, Fast Decisions: A three minute timer ensures nobody procrastinates, where everyone can vote instantly.
+• Live Feedback: Real-time likes and group responses help everyone pick what most want, making the process smooth \n  and efficient.
+\nReady to Make Every Moment Count?
+ Sharing experiences is how real connections are made. With Tandem, every plan becomes a fun shared journey even \n before you step out. Join the Tandem waitlist and get ready to make every outing unforgettable.
 `,
       readMore: "Read more"
     },
     {
       id: 5,
-      title: `From “Maybe Later” to “See You Tonight”—Winning the Battle Against FOMO`,
-      excerpt: `The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools haven't evolved to address it. Tandem transforms FOMO into JOMO (Joy of Missing Out) on the right things.
+      title: `Beat FOMO and Start Living - Tandem Turns “Maybe” Into “See You Tonight” `,
+      excerpt: `FOMO (Fear of Missing Out) is everywhere. Scrolling through friends’ stories can leave anyone feeling left out, especially when group chats get stuck in “maybe later”. 
 `,
-      content: `Introduction
-The Fear of Missing Out (FOMO) is prevalent, yet traditional planning tools haven't evolved to address it. Tandem transforms FOMO into JOMO (Joy of Missing Out) on the right things.
+      content: `FOMO (Fear of Missing Out) is everywhere. Scrolling through friends’ stories can leave anyone feeling left out, especially when group chats get stuck in “maybe later.” Planning tools haven’t caught up, but, Tandem changes everything, turning that FOMO into JOMO (Joy of Missing Out) on the things that don’t matter, and saying “yes” to what does.
+\nHow FOMO Sneaks In
+• Scroll, Regret, Repeat: Watching others have fun online stings, and missed replies in group chats lead to missed\n  chances to join in.
+• Procrastination: When plans take forever to decide, invitations get lost or ignored.
+\nHow Tandem Makes “See You Tonight” Happen
+Tandem’s three-minute sync means quick decisions & no endless waiting. The app uses a visual countdown to pump up \n excitement and help everyone stay on track, so meetups actually happen.
+\nRelive Great Moments With Friends
+ No more scattered photos. Tandem’s Memory Wall automatically creates shareable collages, so everyone can \n remember (and show off) the best parts of any event. Seeing highlights makes people want to join in next time.
+\nTurn Planning Into a Fun Habit
+ Tandem sends playful cues, like a morning message: “Your friends are planning brunch—swipe now to join!” Planning \n becomes part of the day, making it easy and natural to connect.
 
-1. The FOMO Loop
-•Scroll: Viewing friends' stories.
-•Regret: Feeling left out.
-•Procrastination: Delayed responses in group chats leading to missed opportunities.
-
-2. The JOMO Antidote
-•Instant Plans: Three-minute synchronization ensures quick decisions.
-•Visual Countdown: Tracks group progress, encouraging participation.
-
-3. Memory Wall: Relive Your Best Moments
-•Automatic Collages: Compiles photos and videos from events.
-•Shareable Highlights: Provides social proof, encouraging more sign-ups.
-
-4. The Habit Loop
-•Cue: Morning notification—"Your friends are planning brunch—swipe now!"
 `,
       readMore: "Read more"
     }

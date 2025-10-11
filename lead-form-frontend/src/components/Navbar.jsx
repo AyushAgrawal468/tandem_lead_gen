@@ -336,7 +336,7 @@ const Navbar = () => {
           style={{
             width: 'calc(100% - 4px)',
             height: 'clamp(200px, 45vw, 300px)',
-            top: 'calc(clamp(200px, 45vw, 300px) / -2 + 68px)', // further lowered (was +52px, originally +36px) desktop only
+            top: 'calc(clamp(200px, 45vw, 300px) / -2 + 56px)', // further lowered (was +52px, originally +36px) desktop only
             left: '2px',
           }}
         >

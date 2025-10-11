@@ -94,15 +94,21 @@ const Hero = ({ timerData }) => {
   }))
 
     // Per-slide headline texts (sample copy). If fewer images are present, texts loop.
-    const heroTexts = [
-      'Swipe on fun things to do, match with friends, \nand make it happen — that’s Tandem.',
-      'Discover passions together. Tandem turns shared experiences into deeper bonds making every moment you create matter.',
-      'Adventure with your tribe. Swipe, connect, and explore the world together with Tandem’s seamless planning.',
-      'Match. Play. Win. Tandem finds your perfect doubles partner for games that build friendships beyond the court.',
-      'From chat chaos to concert vibes, Tandem turns plans into stories you’ll tell forever. Swipe, join, and spark the moment.',
-      `Skip the small talk, dive right in. Tandem matches you with your game night crew for real fun, real fast.`
+    const heroTextsDesktop = [
+      `Swipe on plans not people. Tandem makes turning group chaos into real get-togethers effortless so friends focus on moments, not messages.`,
+      `Done with endless group chats and flaky plans? With Tandem's \nswipe-to-decide magic, your tribe syncs in seconds, turning every hangout into a story worth sharing.`,
+      `Discover, swipe, and lock in your \nnext adventure together. Tandem transforms shared experiences into lasting memories with a swipe and a smile.`
     ]
-    const activeHeadline = heroTexts[headlineSlide % heroTexts.length]
+    // Mobile versions with balanced line breaks for better readability
+    const heroTextsMobile = [
+      `Swipe on plans not people.\nTandem makes turning group\nchaos into real get-togethers\neffortless so friends focus on\nmoments, not messages.`,
+      `Done with endless group chats\nand flaky plans? With Tandem's\nswipe-to-decide magic, your tribe\nsyncs in seconds, turning every\nhangout into a story worth sharing.`,
+      `Discover, swipe, and lock in\nyour next adventure together.\nTandem transforms shared\nexperiences into lasting\nmemories with a swipe and a smile.`
+    ]
+    // Map text to images in pairs: slides 0-1 -> text 0, 2-3 -> text 1, 4-5 -> text 2, then loop
+    const textIndex = Math.floor(headlineSlide / 2) % heroTextsDesktop.length
+    const isMobileView = typeof window !== 'undefined' ? window.innerWidth < 768 : false
+    const activeHeadline = isMobileView ? heroTextsMobile[textIndex] : heroTextsDesktop[textIndex]
 
   // Delay headline update by 20ms after currentSlide changes for smoother perceived sync
   useEffect(() => {

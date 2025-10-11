@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface LeadRepository extends JpaRepository<Lead,Long> {
+    boolean existsByEmailAndMobile(String email,String mobile);
 }

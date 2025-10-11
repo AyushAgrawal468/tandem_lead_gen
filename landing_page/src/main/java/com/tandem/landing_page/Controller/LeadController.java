@@ -49,6 +49,9 @@ public class LeadController {
                 lead.setLocationFetched(null); // no match found
             }
         }
+        if(leadRepo.existsByEmailAndMobile(lead.getEmail(), lead.getMobile())) {
+            return lead; // Duplicate lead, do not save
+        }
         return leadRepo.save(lead);
     }
 
@@ -63,6 +66,7 @@ public class LeadController {
         ex.getBindingResult().getFieldErrors().forEach(error -> {
             errors.append(error.getField()).append(": ").append(error.getDefaultMessage()).append("; ");
         });
+
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors.toString());
     }
 }

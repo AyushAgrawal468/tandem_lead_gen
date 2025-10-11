@@ -16,7 +16,7 @@ public class LocationService {
 
     private final UserLocationRepository repository;
     // OpenCage API key for geocoding
-    private final String OPENCAGE_API_KEY = "8412a66ff5de4cfdb7b903319d63511d"; // put your key
+    private final String OPENCAGE_API_KEY = "6755c8da02424c11b3c93e75a8e2b189"; // put your key
 
     /**
      * Constructor for LocationService

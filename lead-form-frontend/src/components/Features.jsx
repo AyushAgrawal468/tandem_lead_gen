@@ -141,6 +141,10 @@ const Features = () => {
         #features .mobile-features-wrap { margin-top: 0 !important; padding-top: 0 !important; }
         #features .mobile-features-heading { padding-top: 0 !important; }
       }
+      @media (min-width: 1024px) {
+        /* Desktop only: reduce gap between Hero and Features by 45px */
+        #features { margin-top: -93px !important; }
+      }
       `}</style>
       {/* Mobile-only layout (do not affect desktop) */}
   <div className="block md:hidden mobile-features-wrap" style={{ marginTop: 0 }}>

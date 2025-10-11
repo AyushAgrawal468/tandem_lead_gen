@@ -23,28 +23,28 @@ const Waitlist = () => {
   // Rewards data for carousel
   const rewards = [
     {
-      title: 'Priority access',
-      description: 'Early beta invites before the public launch',
+      title: 'Free Tandem Premium for 6 Months',
+      description: 'Get ₹900 worth of premium features absolutely free.',
     },
     {
-      title: 'Invite credits',
-      description: 'Extra invites so your whole crew can join instantly.',
+      title: 'Exclusive Early Access',
+      description: `Be first to experience the world's most innovative social planning app.`,
     },
     {
-      title: 'Exclusive badge',
-      description: 'Get a special badge in the community.',
+      title: ' Early Priority for VIP Invites',
+      description: 'Exclusive access to beta events and premium experiences in your city.',
     },
     {
-      title: 'Beta feedback',
-      description: 'Help shape the product with direct feedback.',
+      title: 'Founder Access & Input',
+      description: 'Direct influence on product development through founder AMAs.',
     },
     {
-      title: 'Priority support',
-      description: 'Get faster responses from our support team.',
+      title: 'Special Partner Discounts',
+      description: `Exclusive deals at venues and restaurants across India's top 20 cities.`,
     },
     {
-      title: 'Event invites',
-      description: 'Access to exclusive beta events and webinars.',
+      title: 'Priority Onboarding Support',
+      description: 'Personalized assistance to maximize your Tandem experience from day one.',
     },
   ];
 
