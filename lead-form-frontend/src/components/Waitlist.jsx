@@ -271,8 +271,8 @@ const Waitlist = () => {
           left: 0,
           width: '100%',
           zIndex: 9999,
-          background: '#23243a',
-          color: '#fff',
+          background: '#f0f0f0', // light grey background
+          color: '#000', // black text
           textAlign: 'center',
           padding: '16px',
           fontWeight: 'bold',

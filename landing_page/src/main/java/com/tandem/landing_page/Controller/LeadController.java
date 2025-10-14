@@ -10,7 +10,6 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
-
 import java.util.Optional;
 
 @RestController
@@ -69,4 +68,6 @@ public class LeadController {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors.toString());
     }
+
+
 }
