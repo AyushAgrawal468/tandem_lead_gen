@@ -9,7 +9,7 @@ export default defineConfig({
       '/api': {
         target: 'https://tandem.it.com',
         changeOrigin: true,
-        secure: false,
+        secure: true,
       },
     },
   },
