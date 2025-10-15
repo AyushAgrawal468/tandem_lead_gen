@@ -20,7 +20,7 @@ const Admin = () => {
   const [rows, setRows] = useState([])
   const [fetchError, setFetchError] = useState('')
 
-  const backendBase = getApiBase() || 'https://tandem.it.com'
+  const backendBase = getApiBase() ?? window.location.origin;
 
   // Auto-check auth on page load: if not logged in, redirect to Spring login
   useEffect(() => {
