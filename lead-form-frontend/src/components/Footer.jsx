@@ -24,6 +24,56 @@ const Footer = () => {
           }
         }
       `}</style>
+      {/* desktop-only: disable color/border animation on legal buttons */}
+      <style>{`
+        @media (min-width: 1024px) {
+          #footer button.legal-link {
+            transition: none !important; /* override tailwind transition-colors */
+            outline: none !important;
+          }
+          #footer button.legal-link:focus,
+          #footer button.legal-link:active,
+          #footer button.legal-link:hover {
+            color: #ffffff !important; /* keep white */
+            text-decoration: none !important;
+            background: transparent !important;
+            border-color: transparent !important;
+            box-shadow: none !important; /* prevent any focus ring visuals */
+          }
+        }
+      `}</style>
+      {/* md-only: disable color animation on legal buttons */}
+      <style>{`
+        @media (min-width: 768px) and (max-width: 1023.98px) {
+          #footer button.legal-link {
+            transition: none !important; /* override tailwind transition-colors */
+            -webkit-tap-highlight-color: transparent; 
+          }
+          #footer button.legal-link:focus,
+          #footer button.legal-link:active,
+          #footer button.legal-link:hover {
+            color: #ffffff !important; /* keep white */
+            text-decoration: none !important;
+            background: transparent !important;
+          }
+        }
+      `}</style>
+      {/* Consistent thin scrollbars for legal modals across desktop, tablet, mobile */}
+      <style>{`
+        .legal-scroll { 
+          scrollbar-color: rgba(255,255,255,0.35) transparent; /* Firefox */
+          scrollbar-width: thin; /* Firefox */
+          -webkit-overflow-scrolling: touch; /* iOS momentum scroll */
+        }
+        .legal-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+        .legal-scroll::-webkit-scrollbar-track { background: transparent; }
+        .legal-scroll::-webkit-scrollbar-thumb { 
+          background: rgba(255,255,255,0.35); 
+          border-radius: 8px; 
+          border: 2px solid transparent; 
+        }
+        .legal-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.5); }
+      `}</style>
       {/* Terms and Conditions Popup */}
       {showTerms && typeof document !== 'undefined' && createPortal(
         <div
@@ -43,7 +93,7 @@ const Footer = () => {
           onClick={(e) => { if (e.target === e.currentTarget) setShowTerms(false) }}
         >
           <div
-            className="border border-gray-700 rounded-lg w-full max-w-xl overflow-y-auto"
+            className="border border-gray-700 rounded-lg w-full max-w-xl overflow-y-auto legal-scroll"
             style={{
               background: 'rgba(255, 255, 255, 0.10)',
               backdropFilter: 'blur(50px)',
@@ -56,17 +106,58 @@ const Footer = () => {
           >
             <h3 className="text-texthigh font-semibold text-[26px] leading-tight mb-5">Terms & Conditions</h3>
             <div className="text-textmid text-[15px] leading-relaxed space-y-4">
-              <p><strong className="text-texthigh">Intro.</strong> These sample terms outline placeholder conditions for use of the Tandem platform. Replace this entire text with your finalized legal copy later.</p>
-              <p><strong className="text-texthigh">Acceptance.</strong> By accessing or using the service you agree to the forthcoming official Terms, policies, and any supplemental guidelines.</p>
-              <p><strong className="text-texthigh">Sample Use Guidelines:</strong><br/>
-                • Do not engage in harmful, harassing, or fraudulent behavior.<br/>
-                • Respect local laws and intellectual property rights.<br/>
-                • Only upload content you have rights to share.<br/>
-                • Report misuse through official support channels.
-              </p>
-              <p><strong className="text-texthigh">Modifications.</strong> Tandem may publish updated versions. Continued use after updates indicates acceptance.</p>
-              <p><strong className="text-texthigh">Liability Placeholder.</strong> Insert limitation of liability, warranty disclaimer, and governing law sections here.</p>
-              <p className="italic text-textmid/80">(All of the above is placeholder instructional content—replace with real legal language.)</p>
+              <div>
+                <strong className="text-texthigh">1. Acceptance of Terms</strong>
+                <p>By registering or using Tandem, you accept these terms, our Privacy Policy, and any referenced guidelines.</p>
+              </div>
+              <div>
+                <strong className="text-texthigh">2. Eligibility</strong>
+                <p>Only users aged 18 and above may use Tandem. Tandem reserves the right to remove underage accounts without notice.</p>
+              </div>
+              <div>
+                <strong className="text-texthigh">3. User Account Responsibility</strong>
+                <p>Users agree to maintain confidentiality of their login credentials and are responsible for all account activity. Tandem is not responsible for unauthorized use due to negligence.</p>
+              </div>
+              <div>
+                <strong className="text-texthigh">4. Prohibited Activities</strong>
+                <p>Any abuse, harassment, illegal conduct, spamming, or behavior inconsistent with Tandem’s mission will result in immediate suspension or termination of your account.</p>
+              </div>
+              <div>
+                <strong className="text-texthigh">5. Content & Intellectual Property Rights</strong>
+                <p>By submitting content (text, images, event details), users grant Tandem a license to use such content solely for app-related features. Tandem will not share or sell user content to third parties for marketing unless explicit consent is given.</p>
+              </div>
+              <div>
+                <strong className="text-texthigh">6. Payments & Third-Party Transactions</strong>
+                <p>Where applicable, all ticketing, payment, or booking transactions are handled via secure third-party processors. Tandem is not liable for errors, failures or frauds committed by third-party payment gateways; users must follow up directly for dispute resolution.</p>
+              </div>
+              <div>
+                <strong className="text-texthigh">7. Account Suspension or Termination</strong>
+                <p>Tandem may suspend or terminate accounts at its sole discretion for breach of these terms or unlawful activity. Users may request account deletion by email.</p>
+              </div>
+              <div>
+                <strong className="text-texthigh">8. Data & Privacy Protection</strong>
+                <p>All user data is handled per Tandem’s Privacy Policy. For any privacy violation, contact the director at the provided emails.</p>
+              </div>
+              <div>
+                <strong className="text-texthigh">9. Limitation of Liability</strong>
+                <p>Tandem, Orbitandem Technologies Private Limited, its directors, or affiliates are not liable for any direct, indirect, incidental, consequential, or punitive damages resulting from use or inability to use the app, except as required by law.</p>
+              </div>
+              <div>
+                <strong className="text-texthigh">10. Indemnification</strong>
+                <p>Users indemnify Tandem and affiliates against any claims, liabilities, or expenses arising from breach of these terms or misuse of the service.</p>
+              </div>
+              <div>
+                <strong className="text-texthigh">11. Governing Law</strong>
+                <p>All disputes are governed by the laws of India, with exclusive jurisdiction in Bangalore courts.</p>
+              </div>
+              <div>
+                <strong className="text-texthigh">12. Modifications</strong>
+                <p>Tandem reserves the right to change these Terms & Conditions at any time. Continued use of the app after changes means acceptance of revised terms.</p>
+              </div>
+              <div>
+                <strong className="text-texthigh">13. Contact Information</strong>
+                <p>Legal Entity: Orbitandem Technologies Private Limited<br/>Director Contacts: shreyas.phadke@tandem.it.com , ayush.agrawal@tandem.it.com</p>
+              </div>
             </div>
             <div className="mt-8 flex items-center justify-end gap-3">
               <button
@@ -104,7 +195,7 @@ const Footer = () => {
           onClick={(e) => { if (e.target === e.currentTarget) setShowPrivacy(false) }}
         >
           <div
-            className="border border-gray-700 rounded-lg w-full max-w-xl overflow-y-auto"
+            className="border border-gray-700 rounded-lg w-full max-w-xl overflow-y-auto legal-scroll"
             style={{
               background: 'rgba(255, 255, 255, 0.10)',
               backdropFilter: 'blur(50px)',
@@ -117,17 +208,54 @@ const Footer = () => {
           >
             <h3 className="text-texthigh font-semibold text-[26px] leading-tight mb-5">Privacy Policy</h3>
             <div className="text-textmid text-[15px] leading-relaxed space-y-4">
-              <p><strong className="text-texthigh">Overview.</strong> This placeholder Privacy Policy explains (in sample form) how user data might be described. Replace with your formal policy text.</p>
-              <p><strong className="text-texthigh">Data We May Describe Collecting:</strong><br/>
-                • Basic account identifiers (email, display name).<br/>
-                • Session + usage metrics for improving features.<br/>
-                • Optional location context for activity relevance.<br/>
-                • Event participation + engagement signals.
-              </p>
-              <p><strong className="text-texthigh">Not Sold.</strong> Placeholder: We do not sell personal data; we use it only to power core collaborative planning features.</p>
-              <p><strong className="text-texthigh">Retention.</strong> Insert real retention periods & deletion flow instructions here.</p>
-              <p><strong className="text-texthigh">Security.</strong> Mention encryption, access controls, incident response, and compliance frameworks once finalized.</p>
-              <p className="italic text-textmid/80">(All content above is placeholder — substitute with your finalized privacy language.)</p>
+              <div>
+                <strong className="text-texthigh">1. Introduction</strong>
+                <p>Tandem is operated by Orbitandem Technologies Private Limited. Tandem is committed to protecting your privacy and personal information. This Privacy Policy outlines what data we collect, how we use it, your rights, and our safeguards.</p>
+              </div>
+              <div>
+                <strong className="text-texthigh">2. Data Collected</strong>
+                <p>We collect only the necessary personal data: name, phone number, and gender. Additional data such as event and usage information may be collected when you use features like calendar sync, photos, or messaging.</p>
+              </div>
+              <div>
+                <strong className="text-texthigh">3. Data Usage</strong>
+                <p>Your data is used to personalize your experience, enable social planning features, improve our app quality, and ensure safety. No personal data is shared with external partners except under legal compulsion or to deliver app features (e.g., payment processors), with clear user consent if required.</p>
+              </div>
+              <div>
+                <strong className="text-texthigh">4. User Control and Deletion</strong>
+                <p>You can request data correction or deletion by emailing us. In future releases, Tandem will enable self-serve data deletion, and portability features directly in the app.</p>
+              </div>
+              <div>
+                <strong className="text-texthigh">5. Data Retention</strong>
+                <p>If you delete your account, user data is retained for 12 months unless deletion is specifically requested earlier for regulatory compliance or user safety.</p>
+              </div>
+              <div>
+                <strong className="text-texthigh">6. Age Restrictions</strong>
+                <p>Only users of 18+ years old may register for Tandem. Any underage account will be removed, especially where events involve alcohol.</p>
+              </div>
+              <div>
+                <strong className="text-texthigh">7. Security Measures</strong>
+                <p>Tandem uses encryption, multi-level access controls, periodic vulnerability monitoring, and secure storage to protect your information. Compliance audits may be conducted periodically.</p>
+              </div>
+              <div>
+                <strong className="text-texthigh">8. Third-Party Processing and Sharing</strong>
+                <p>Personal data is not shared externally, except with trusted service providers strictly necessary for Tandem’s functionality (e.g., cloud hosts, analytics), all bound by confidentiality and security agreements. No user data is ever sold or monetized for advertising.</p>
+              </div>
+              <div>
+                <strong className="text-texthigh">9. Abuse & Reporting</strong>
+                <p>To report abuse, privacy breaches, or complaints, users can email: shreyas.phadke@tandem.it.com or ayush.agrawal@tandem.it.com. Additional in-app reporting features will be rolled out soon.</p>
+              </div>
+              <div>
+                <strong className="text-texthigh">10. International Transfers and Compliance</strong>
+                <p>Tandem currently serves Indian users and complies with Indian privacy regulations. As Tandem grows globally, policies will adapt to GDPR, CCPA, and regional data regimes, giving users expanded privacy rights and protections.</p>
+              </div>
+              <div>
+                <strong className="text-texthigh">11. Changes & Updates</strong>
+                <p>We reserve the right to update this Privacy Policy, with changes notified in-app and on our website.</p>
+              </div>
+              <div>
+                <strong className="text-texthigh">12. Contact and Legal Entity</strong>
+                <p>Legal Entity: Orbitandem Technologies Private Limited<br/>Director Contacts: shreyas.phadke@tandem.it.com, ayush.agrawal@tandem.it.com.</p>
+              </div>
             </div>
             <div className="mt-8 flex items-center justify-end gap-3">
               <button
