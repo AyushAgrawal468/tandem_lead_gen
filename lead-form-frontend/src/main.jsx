@@ -2,9 +2,6 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
-import { createBrowserRouter, RouterProvider } from 'react-router-dom'
-import Admin from './pages/Admin.jsx'
-import NotFound from './pages/NotFound.jsx'
 
 // Robust mobile viewport height fix: sets --vh to 1% of the visual viewport height
 function setViewportVars() {
@@ -23,14 +20,8 @@ if (typeof window !== 'undefined') {
   }
 }
 
-const router = createBrowserRouter([
-  { path: '/', element: <App /> },
-  { path: '/admin', element: <Admin /> },
-  { path: '*', element: <NotFound /> },
-])
-
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <App />
   </StrictMode>,
 )

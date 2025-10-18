@@ -68,12 +68,6 @@
 			<artifactId>spring-boot-starter</artifactId>
 
 		</dependency>
-
-		<!-- Added Spring Security starter so SecurityConfig imports resolve -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-security</artifactId>
-		</dependency>
 	</dependencies>
 
 	<build>

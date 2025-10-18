@@ -18,12 +18,5 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowCredentials(false); // set true if you’re using cookies/auth headers
     }
 
-    @Override
-    public void addViewControllers(ViewControllerRegistry registry) {
-        // Any route that isn't /api/** should forward to index.html
-        registry.addViewController("/{spring:(?!api).*}")
-                .setViewName("forward:/index.html");
-        registry.addViewController("/**/{spring:(?!api).*}")
-                .setViewName("forward:/index.html");
-    }
+
 }

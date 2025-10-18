@@ -15,23 +15,21 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Global font: use Anek Latin site-wide while keeping sizes/weights intact */
-@layer base {
-  html, body {
-    font-family: "Anek Latin", Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-  /* Ensure form controls inherit the font */
-  input, button, select, textarea {
-    font-family: inherit;
-  }
-}
-
 @layer components {
   .all-\[unset\] {
     all: unset;
   }
+}
+
+/* Apply Anek Latin globally to all text elements except feature carousel slide numbering */
+* {
+  font-family: "Anek Latin", Helvetica, sans-serif;
+}
+
+/* Exclude feature carousel slide numbering from global font */
+.fc-slide-number,
+.fc-slide-number * {
+  font-family: inherit !important;
 }
 
 :root {

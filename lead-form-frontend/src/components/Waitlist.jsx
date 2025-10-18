@@ -177,6 +177,8 @@ const Waitlist = () => {
     });
     setErrors({ ...errors, [e.target.name]: undefined });
     setBackendError('');
+    // If user starts typing again, hide the success message for a fresh entry
+    if (showConsole) setShowConsole(false);
   }
 
   const getSessionId = () => {
@@ -219,7 +221,6 @@ const Waitlist = () => {
       const data = await res.json();
       console.log("✅ Lead saved:", data);
   setShowConsole(true);
-  setTimeout(() => setShowConsole(false), SUCCESS_BANNER_MS);
   setFormData({ name: '', mobile: '', email: '' });
       setErrors({});
       setBackendError('');
@@ -264,25 +265,6 @@ const Waitlist = () => {
 
   return (
     <>
-      {showConsole && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          zIndex: 9999,
-          background: '#f0f0f0', // light grey background
-          color: '#000', // black text
-          textAlign: 'center',
-          padding: '16px',
-          fontWeight: 'bold',
-          fontSize: '1.1rem',
-          boxShadow: '0 2px 12px rgba(0,0,0,0.15)'
-        }}>
-          Thanks for registering!
-        </div>
-      )}
-
       {/* Mobile-only layout: stacked rewards + form */}
   <section
     id="waitlist"
@@ -358,6 +340,23 @@ const Waitlist = () => {
               >
                 Signup
               </h3>
+              {showConsole && (
+                <div style={{
+                  color: '#ffffffff',
+                  textAlign: 'center',
+                  padding: '16px',
+                  fontWeight: 'bold',
+                  fontSize: '1.1rem',
+                  fontFamily: 'Anek Latin, sans-serif',
+                  border: '1.5px solid rgba(255,255,255,0.18)',
+                  borderRadius: '8px',
+                  marginTop: '12px',
+                  marginBottom: '12px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                }}>
+                  Thanks for registering!
+                </div>
+              )}
               {backendError && (
                 <div style={{ color: '#FF4D4F', marginBottom: '12px', fontWeight: 500, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                   <span>{backendError}</span>
@@ -624,6 +623,24 @@ const Waitlist = () => {
                   marginBottom: '12px',
                   textAlign: 'left'
                 }}>Signup</h2>
+                {showConsole && (
+                  <div style={{
+                    
+                    color: '#ffffffff',
+                    textAlign: 'center',
+                    padding: '16px',
+                    fontWeight: 'bold',
+                    fontSize: '1.1rem',
+                    fontFamily: 'Anek Latin, sans-serif',
+                    border: '1.5px solid rgba(255,255,255,0.18)',
+                    borderRadius: '8px',
+                    marginTop: '12px',
+                    marginBottom: '12px',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                  }}>
+                    Thanks for registering!
+                  </div>
+                )}
                 {backendError && (
                   <div style={{ color: '#FF4D4F', marginBottom: '12px', fontWeight: 500, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                     <span>{backendError}</span>

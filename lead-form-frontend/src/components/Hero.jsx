@@ -480,7 +480,7 @@ const Hero = ({ timerData }) => {
             <h1
               key={currentSlide}
               className="font-heading-b font-bold leading-tight tracking-tight text-white transition-opacity duration-700 text-[26px] lg:text-[48px] whitespace-pre-line text-center"
-              style={{ fontFamily: '"Anek Latin", Helvetica, Arial, sans-serif', color: 'rgba(255,255,255,1)', textShadow: '0 4px 28px rgba(0,0,0,0.65), 0 0 2px rgba(0,0,0,0.6)', width: '100%' }}
+              style={{ color: 'rgba(255,255,255,1)', textShadow: '0 4px 28px rgba(0,0,0,0.65), 0 0 2px rgba(0,0,0,0.6)', width: '100%' }}
             >
               {activeHeadline}
             </h1>
@@ -665,7 +665,7 @@ const Hero = ({ timerData }) => {
             <h1
               key={currentSlide}
               className="font-heading-b font-bold leading-[1.08] tracking-tight text-white transition-opacity duration-700 text-[24px] whitespace-pre-line text-center"
-              style={{ fontFamily: '"Anek Latin", Helvetica, Arial, sans-serif', color: 'rgba(255,255,255,1)', textShadow: '0 4px 24px rgba(0,0,0,0.6), 0 0 2px rgba(0,0,0,0.55)', width: '100%' }}
+              style={{ color: 'rgba(255,255,255,1)', textShadow: '0 4px 24px rgba(0,0,0,0.6), 0 0 2px rgba(0,0,0,0.55)', width: '100%' }}
             >
               {activeHeadline}
             </h1>
