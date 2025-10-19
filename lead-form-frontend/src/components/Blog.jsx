@@ -727,6 +727,11 @@ Tandem’s three-minute sync means quick decisions & no endless waiting. The app
             color: rgba(255, 255, 255, 1) !important;
             text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4) !important;
           }
+          /* Mobile expanded overlay: ensure uniform line starts by collapsing extra spaces but keeping line breaks */
+          .blog-overlay-card .blog-text-section {
+            white-space: pre-line !important; /* respect \n but collapse multiple spaces */
+            text-indent: 0 !important;
+          }
         }
         
         /* Fixed height for mobile blog cards to ensure consistency across all phones */
