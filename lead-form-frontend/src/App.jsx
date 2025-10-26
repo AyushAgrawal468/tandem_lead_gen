@@ -113,7 +113,7 @@ function App() {
   // Local countdown (mirrors backend logic): fixed start + 20 days
   useEffect(() => {
     let isMounted = true;
-    const FIXED_START_TIME = 1760745600000; // Oct 12, 2025 00:00:00 UTC (ms)
+    const FIXED_START_TIME = 1761512820000; // Oct 26, 2025 21:07:00 UTC (ms)
     const COUNTDOWN_DURATION_MS = 9 * 24 * 60 * 60 * 1000; // 20 days
     const END_TIME = FIXED_START_TIME + COUNTDOWN_DURATION_MS;
 
