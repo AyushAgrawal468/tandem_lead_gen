@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://tandem.it.com/sitemap.xml

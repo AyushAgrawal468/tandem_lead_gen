@@ -95,6 +95,7 @@ const Navbar = () => {
         alt=""
         aria-hidden
         className="pointer-events-none"
+        loading="lazy" decoding="async"
         style={{
           position: 'absolute',
           top: 0,
@@ -327,6 +328,7 @@ const Navbar = () => {
             src={Ellipse7}
             alt="navbar top curve"
             className="block w-full h-full"
+            loading="lazy" decoding="async"
             style={{ transform: 'scaleX(1.012)', transformOrigin: 'center top' }}
           />
         </div>
@@ -344,6 +346,7 @@ const Navbar = () => {
             src={Ellipse7}
             alt="navbar top curve"
             className="block w-full h-full"
+            loading="lazy" decoding="async"
             style={{ transform: 'scaleX(1.012)', transformOrigin: 'center top' }}
           />
         </div>

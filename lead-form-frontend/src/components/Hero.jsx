@@ -400,6 +400,7 @@ const Hero = ({ timerData }) => {
           src={Ellipse5}
           alt="imax top curve"
           className="block w-full"
+          loading="lazy" decoding="async"
           style={{ height: 'auto', transform: 'scaleX(1.012)', transformOrigin: 'center top' }}
         />
       </div>
@@ -597,10 +598,13 @@ const Hero = ({ timerData }) => {
             let lockedStyle = {}
             return (
               <div ref={el => (slideRefs.current[index] = el)} key={slide.id} style={{ ...baseStyle, ...positionalStyle, ...lockedStyle }}>
-                <div 
-                  className="absolute inset-0 bg-cover bg-center bg-no-repeat will-change-transform"
-                  style={{ 
-                    backgroundImage: slide.image ? `url(${slide.image})` : 'none',
+                <img
+                  src={slide.image}
+                  alt={slide.alt || ''}
+                  className="absolute inset-0 w-full h-full object-cover object-center will-change-transform"
+                  loading="lazy"
+                  decoding="async"
+                  style={{
                     backgroundColor: 'transparent',
                     backfaceVisibility: 'hidden',
                     WebkitBackfaceVisibility: 'hidden',
@@ -608,11 +612,8 @@ const Hero = ({ timerData }) => {
                     filter: firstImgReady ? 'brightness(1.08) contrast(1.04) saturate(1.05)' : 'none',
                     transition: 'filter 600ms ease'
                   }}
-                >
-                  {index === 0 && slide.image && (
-                    <img src={slide.image} alt="" loading="eager" fetchPriority="high" decoding="async" style={{ width: 0, height: 0, opacity: 0, position: 'absolute' }} onLoad={() => setFirstImgReady(true)} />
-                  )}
-                </div>
+                  onLoad={index === 0 ? () => setFirstImgReady(true) : undefined}
+                />
                 {/* Per-slide tint overlay for readability (stronger on center) */}
                 <div
                   aria-hidden="true"
@@ -724,18 +725,20 @@ const Hero = ({ timerData }) => {
                     WebkitBackfaceVisibility: 'hidden'
                   }}
                 >
-                  <div
-                    className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-                    style={{ 
-                      backgroundImage: `url(${slide.image})`, 
-                      backgroundColor: 'transparent', 
-                      backfaceVisibility: 'hidden', 
-                      WebkitBackfaceVisibility: 'hidden', 
+                  <img
+                    src={slide.image}
+                    alt={slide.alt || ''}
+                    className="absolute inset-0 w-full h-full object-cover object-center"
+                    style={{
+                      backgroundColor: 'transparent',
+                      backfaceVisibility: 'hidden',
+                      WebkitBackfaceVisibility: 'hidden',
                       willChange: 'transform, opacity',
                       filter: 'brightness(1.1) contrast(1.05) saturate(1.1)'
                     }}
-                  >
-                  </div>
+                    loading="lazy"
+                    decoding="async"
+                  />
                   {/* Mobile per-slide tint overlay */}
                   <div
                     aria-hidden="true"
@@ -761,6 +764,7 @@ const Hero = ({ timerData }) => {
             src={Ellipse6}
             alt="imax lower curve"
             className="block w-full"
+            loading="lazy" decoding="async"
             style={{ 
               height: 'auto', 
               transform: 'scaleX(1.012)', 

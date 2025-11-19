@@ -469,6 +469,7 @@ const Waitlist = () => {
           aria-hidden
           // For small screens (sm) use object-cover to fill full height; md+ already uses object-cover, so desktop unchanged.
           className="pointer-events-none absolute inset-0 w-full h-full sm:object-cover sm:object-top md:object-cover md:object-top sm:waitlist-bg-sm"
+          loading="lazy" decoding="async"
           style={{ zIndex: 0, objectPosition: 'top center' }}
         />
         {/* SVG background shows naturally on sm without overlay */}

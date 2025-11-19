@@ -128,6 +128,7 @@ We’re here to help! You can reach us through in-app support, email, or via our
                     src={faq.icon} 
                     alt={`FAQ ${index + 1} icon`}
                     className="w-6 h-6"
+                    loading="lazy" decoding="async"
                     style={{ filter: 'brightness(0) invert(1)' }}
                   />
                   <span className="text-texthigh font-semibold">{faq.question}</span>

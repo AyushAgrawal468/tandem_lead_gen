@@ -1,5 +1,8 @@
 import React, { useState } from 'react'
 import { createPortal } from 'react-dom'
+import linkedinLogo from '../assets/linkedinlogo.png'
+import youtubeLogo from '../assets/youtubelogo.png'
+import whatsappLogo from '../assets/whatsapplogo.png'
 
 const Footer = () => {
   const [showTerms, setShowTerms] = useState(false);
@@ -289,14 +292,26 @@ const Footer = () => {
             <div className="flex items-center space-x-6">
               <p className="text-white text-[14px] leading-[21px] m-0">Social Links</p>
               <div className="flex items-center space-x-6">
+                {/* YouTube */}
+                <a href="https://www.youtube.com/@Get_Tandem" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="w-6 h-6 flex items-center justify-center" style={{width: '24px', height: '24px', aspectRatio: '1/1'}}>
+                  <img src={youtubeLogo} alt="YouTube" width={24} height={24} loading="lazy" decoding="async" style={{display: 'block', width: '24px', height: '24px'}} />
+                </a>
+                {/* LinkedIn */}
+                <a href="https://www.linkedin.com/company/orbitandem/?viewAsMember=true" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="w-6 h-6 flex items-center justify-center" style={{width: '24px', height: '24px', aspectRatio: '1/1'}}>
+                  <img src={linkedinLogo} alt="LinkedIn" width={24} height={24} loading="lazy" decoding="async" style={{display: 'block', width: '24px', height: '24px'}} />
+                </a>
+                {/* WhatsApp */}
+                <a href="https://wa.me/" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" className="w-6 h-6 flex items-center justify-center" style={{width: '24px', height: '24px', aspectRatio: '1/1'}}>
+                  <img src={whatsappLogo} alt="WhatsApp" width={24} height={24} loading="lazy" decoding="async" style={{display: 'block', width: '24px', height: '24px'}} />
+                </a>
                 {/* Facebook (original icon styling retained) */}
-                <a href="www.facebook.com/share/1ECumqAJ5t" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="w-6 h-6 flex items-center justify-center" style={{width: '24px', height: '24px', aspectRatio: '1/1'}}>
+                <a href="https://www.facebook.com/share/1ECumqAJ5t" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="w-6 h-6 flex items-center justify-center" style={{width: '24px', height: '24px', aspectRatio: '1/1'}}>
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="25" viewBox="0 0 24 25" fill="none" style={{display: 'block'}}>
                     <path d="M12 2.75C10.0716 2.75 8.18657 3.32183 6.58319 4.39317C4.97982 5.46451 3.73013 6.98726 2.99218 8.76884C2.25422 10.5504 2.06114 12.5108 2.43735 14.4021C2.81355 16.2934 3.74215 18.0307 5.10571 19.3943C6.46928 20.7579 8.20656 21.6865 10.0979 22.0627C11.9892 22.4389 13.9496 22.2458 15.7312 21.5078C17.5127 20.7699 19.0355 19.5202 20.1068 17.9168C21.1782 16.3134 21.75 14.4284 21.75 12.5C21.7473 9.91498 20.7192 7.43661 18.8913 5.60872C17.0634 3.78084 14.585 2.75273 12 2.75ZM12.75 20.7153V14.75H15C15.1989 14.75 15.3897 14.671 15.5303 14.5303C15.671 14.3897 15.75 14.1989 15.75 14C15.75 13.8011 15.671 13.6103 15.5303 13.4697C15.3897 13.329 15.1989 13.25 15 13.25H12.75V11C12.75 10.6022 12.908 10.2206 13.1893 9.93934C13.4706 9.65804 13.8522 9.5 14.25 9.5H15.75C15.9489 9.5 16.1397 9.42098 16.2803 9.28033C16.421 9.13968 16.5 8.94891 16.5 8.75C16.5 8.55109 16.421 8.36032 16.2803 8.21967C16.1397 8.07902 15.9489 8 15.75 8H14.25C13.4544 8 12.6913 8.31607 12.1287 8.87868C11.5661 9.44129 11.25 10.2044 11.25 11V13.25H9C8.80109 13.25 8.61033 13.329 8.46967 13.4697C8.32902 13.6103 8.25 13.8011 8.25 14C8.25 14.1989 8.32902 14.3897 8.46967 14.5303C8.61033 14.671 8.80109 14.75 9 14.75H11.25V20.7153C9.13575 20.5223 7.17728 19.5217 5.78198 17.9215C4.38667 16.3214 3.66195 14.2449 3.75855 12.1241C3.85515 10.0032 4.76564 8.00127 6.30064 6.5346C7.83563 5.06793 9.87696 4.24947 12 4.24947C14.1231 4.24947 16.1644 5.06793 17.6994 6.5346C19.2344 8.00127 20.1449 10.0032 20.2415 12.1241C20.3381 14.2449 19.6133 16.3214 18.218 17.9215C16.8227 19.5217 14.8643 20.5223 12.75 20.7153Z" fill="white"/>
                   </svg>
                 </a>
                 {/* X (Twitter) */}
-                <a href="https://x.com/get_tandem2025?t=WOhsnDog5fU4lXgefUOJmA&s=08 " target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)" className="w-6 h-6 flex items-center justify-center">
+                <a href="https://x.com/get_tandem2025?t=WOhsnDog5fU4lXgefUOJmA&s=08" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)" className="w-6 h-6 flex items-center justify-center">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" style={{display: 'block'}}>
                     <path d="M20.133 20.3478L14.2643 11.1247L20.0552 4.75438C20.1862 4.60674 20.2537 4.41343 20.2431 4.21636C20.2325 4.01929 20.1446 3.83435 19.9986 3.70161C19.8525 3.56888 19.66 3.49907 19.4628 3.50731C19.2657 3.51555 19.0797 3.60117 18.9452 3.74562L13.4289 9.81312L9.633 3.84781C9.56531 3.74127 9.47183 3.65353 9.36121 3.59274C9.25059 3.53194 9.12642 3.50004 9.00019 3.5H4.50019C4.36571 3.49993 4.2337 3.53603 4.11796 3.60449C4.00222 3.67296 3.90702 3.77129 3.84232 3.88918C3.77763 4.00707 3.74582 4.14018 3.75023 4.27458C3.75463 4.40898 3.7951 4.53973 3.86738 4.65313L9.73613 13.8753L3.94519 20.2503C3.87756 20.323 3.82503 20.4083 3.79063 20.5014C3.75623 20.5945 3.74065 20.6935 3.74479 20.7927C3.74894 20.8918 3.77272 20.9892 3.81477 21.0791C3.85681 21.169 3.91628 21.2496 3.98973 21.3164C4.06318 21.3831 4.14915 21.4346 4.24265 21.4679C4.33615 21.5012 4.43533 21.5156 4.53443 21.5103C4.63354 21.5049 4.7306 21.48 4.81999 21.4369C4.90938 21.3937 4.98932 21.3333 5.05519 21.2591L10.5714 15.1916L14.3674 21.1569C14.4356 21.2625 14.5293 21.3494 14.6399 21.4093C14.7505 21.4693 14.8744 21.5005 15.0002 21.5H19.5002C19.6345 21.5 19.7664 21.4638 19.882 21.3954C19.9976 21.327 20.0927 21.2288 20.1573 21.111C20.222 20.9933 20.2539 20.8604 20.2496 20.7261C20.2453 20.5918 20.205 20.4612 20.133 20.3478ZM15.4118 20L5.86613 5H8.58488L18.1343 20H15.4118Z" fill="white"/>
                   </svg>
@@ -336,6 +351,18 @@ const Footer = () => {
             </div>
 
             <div className="flex space-x-4 md:space-x-3 lg:space-x-4">
+              {/* YouTube */}
+              <a href="https://www.youtube.com/@Get_Tandem" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="w-6 h-6 flex items-center justify-center" style={{width: '24px', height: '24px', aspectRatio: '1/1'}}>
+                <img src={youtubeLogo} alt="YouTube" width={24} height={24} loading="lazy" decoding="async" style={{display: 'block', width: '24px', height: '24px'}} />
+              </a>
+              {/* LinkedIn */}
+              <a href="https://www.linkedin.com/company/orbitandem/?viewAsMember=true" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="w-6 h-6 flex items-center justify-center" style={{width: '24px', height: '24px', aspectRatio: '1/1'}}>
+                <img src={linkedinLogo} alt="LinkedIn" width={24} height={24} loading="lazy" decoding="async" style={{display: 'block', width: '24px', height: '24px'}} />
+              </a>
+              {/* WhatsApp */}
+              <a href="https://wa.me/" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" className="w-6 h-6 flex items-center justify-center" style={{width: '24px', height: '24px', aspectRatio: '1/1'}}>
+                <img src={whatsappLogo} alt="WhatsApp" width={24} height={24} loading="lazy" decoding="async" style={{display: 'block', width: '24px', height: '24px'}} />
+              </a>
               {/* First Logo (provided SVG) */}
               <a href="https://www.facebook.com/share/1ECumqAJ5t" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="w-6 h-6 flex items-center justify-center" style={{width: '24px', height: '24px', aspectRatio: '1/1'}}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="25" viewBox="0 0 24 25" fill="none" style={{display: 'block'}}>

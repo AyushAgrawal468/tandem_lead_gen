@@ -257,6 +257,7 @@ const Features = () => {
                           alt={`Feature ${realIdx + 1}`}
                           style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center center', background: '#23243a', pointerEvents: 'none' }}
                           draggable={false}
+                          loading="lazy" decoding="async"
                         />
                       </div>
                     </div>

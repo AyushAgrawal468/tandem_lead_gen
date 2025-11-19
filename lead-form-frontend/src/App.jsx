@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef, lazy, Suspense } from "react";
+import { Helmet } from 'react-helmet'
 import { apiUrl } from './lib/api';
 import LocationConsent from "./components/LocationConsent";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
+const GA_ID = 'G-XTYRTQY6R7';
 // Lazy load below-the-fold heavy sections to reduce initial bundle & blocking time
 const Features = lazy(() => import('./components/Features'));
 const Waitlist = lazy(() => import('./components/Waitlist'));
@@ -90,6 +92,29 @@ function getSessionId() {
 function App() {
   const [showConsent, setShowConsent] = useState(false);
   const [timerData, setTimerData] = useState(null);
+  // Globally enforce lazy-loading for all <img> elements (and future ones)
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof document === 'undefined') return;
+    const upgradeImg = (img) => {
+      if (!(img instanceof HTMLImageElement)) return;
+      if (!img.hasAttribute('loading')) img.setAttribute('loading', 'lazy');
+      img.setAttribute('decoding', 'async');
+      if (img.getAttribute('fetchpriority') === 'high') img.removeAttribute('fetchpriority');
+    };
+    document.querySelectorAll('img').forEach(upgradeImg);
+    const mo = new MutationObserver((mutations) => {
+      for (const m of mutations) {
+        m.addedNodes && m.addedNodes.forEach((node) => {
+          if (node instanceof HTMLImageElement) upgradeImg(node);
+          else if (node && node.querySelectorAll) {
+            node.querySelectorAll('img').forEach(upgradeImg);
+          }
+        });
+      }
+    });
+    mo.observe(document.documentElement, { childList: true, subtree: true });
+    return () => mo.disconnect();
+  }, []);
   // Defer non-critical sections until idle/first scroll for faster FCP
   const [deferSections, setDeferSections] = useState(false);
   useEffect(() => {
@@ -251,6 +276,21 @@ function App() {
 
   return (
     <div className="min-h-screen bg-bg-color text-texthigh font-body-r">
+      <Helmet>
+        <title>Tandem - Group Planning Made Simple</title>
+        <meta name="description" content="Stop wasting 23 messages per hangout. Tandem gets your friends together 2x more often." />
+      </Helmet>
+      {GA_ID && (
+        <Helmet>
+          <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}></script>
+          <script>{`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${GA_ID}');
+          `}</script>
+        </Helmet>
+      )}
       <LocationConsent
         visible={showConsent}
         onConsent={handleConsent}
