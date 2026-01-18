@@ -14,7 +14,12 @@ export default function ReferralRedirect() {
     const trackAndRedirect = async () => {
       const backendUrl = apiUrl(`/api/referral/${code}`);
       try {
-        const res = await fetch(backendUrl, { method: "POST" });
+        const res = await fetch(backendUrl, {
+      method: "POST",
+      headers: {
+        "X-API-KEY": "tandem_live_7KpQ2mX9vN4aR1cD8fH6jL3sZ0yW5uT2bE9gP1",
+      },
+    });
         console.log("✅ Backend response status:", res.status);
       } catch (e) {
         console.log("❌ Backend request failed:", e);
