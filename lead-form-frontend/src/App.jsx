@@ -1,52 +1,76 @@
 import React, { useState, useEffect, useRef, lazy, Suspense } from "react";
-import { Helmet } from 'react-helmet'
-import { apiUrl } from './lib/api';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Helmet } from "react-helmet";
+import { apiUrl } from "./lib/api";
+
 import LocationConsent from "./components/LocationConsent";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
-const GA_ID = 'G-XTYRTQY6R7';
-// Lazy load below-the-fold heavy sections to reduce initial bundle & blocking time
-const Features = lazy(() => import('./components/Features'));
-const Waitlist = lazy(() => import('./components/Waitlist'));
-const Blog = lazy(() => import('./components/Blog'));
-const FAQ = lazy(() => import('./components/FAQ'));
-const Footer = lazy(() => import('./components/Footer'));
-// Simple section engagement tracker using IntersectionObserver + Clarity custom events (deferred to idle)
+import ReferralRedirect from "./components/ReferralRedirect";
+
+const GA_ID = "G-XTYRTQY6R7";
+
+const Features = lazy(() => import("./components/Features"));
+const Waitlist = lazy(() => import("./components/Waitlist"));
+const Blog = lazy(() => import("./components/Blog"));
+const FAQ = lazy(() => import("./components/FAQ"));
+const Footer = lazy(() => import("./components/Footer"));
+
 function useSectionEngagement(sectionIds, minimumVisible = 0.5) {
   useEffect(() => {
-    if (typeof window === 'undefined' || !(window).IntersectionObserver) return;
-    const clarityAvailable = () => typeof window !== 'undefined' && typeof (window).clarity === 'function';
+    if (typeof window === "undefined" || !window.IntersectionObserver) return;
+
+    const clarityAvailable = () =>
+      typeof window !== "undefined" && typeof window.clarity === "function";
+
     const run = () => {
       const state = new Map();
-      sectionIds.forEach(id => state.set(id, { visible: false, enterTs: 0, totalMs: 0 }));
+      sectionIds.forEach((id) =>
+        state.set(id, { visible: false, enterTs: 0, totalMs: 0 })
+      );
+
       const sendEvent = (name, data) => {
         if (clarityAvailable()) {
-          try { (window).clarity('event', name, data); } catch (_) {}
+          try {
+            window.clarity("event", name, data);
+          } catch (_) {}
         }
       };
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          const id = entry.target.id;
-          if (!state.has(id)) return;
-          const rec = state.get(id);
-          const visibleNow = entry.intersectionRatio >= minimumVisible;
-          const now = performance.now();
-          if (visibleNow && !rec.visible) {
-            rec.visible = true;
-            rec.enterTs = now;
-            sendEvent('section_enter', { id });
-          } else if (!visibleNow && rec.visible) {
-            rec.visible = false;
-            const delta = now - rec.enterTs;
-            rec.totalMs += delta;
-            sendEvent('section_exit', { id, sessionTimeMs: Math.round(delta), cumulativeTimeMs: Math.round(rec.totalMs) });
-          }
-        });
-      }, { threshold: [minimumVisible] });
-      sectionIds.forEach(id => {
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            const id = entry.target.id;
+            if (!state.has(id)) return;
+
+            const rec = state.get(id);
+            const visibleNow = entry.intersectionRatio >= minimumVisible;
+            const now = performance.now();
+
+            if (visibleNow && !rec.visible) {
+              rec.visible = true;
+              rec.enterTs = now;
+              sendEvent("section_enter", { id });
+            } else if (!visibleNow && rec.visible) {
+              rec.visible = false;
+              const delta = now - rec.enterTs;
+              rec.totalMs += delta;
+              sendEvent("section_exit", {
+                id,
+                sessionTimeMs: Math.round(delta),
+                cumulativeTimeMs: Math.round(rec.totalMs),
+              });
+            }
+          });
+        },
+        { threshold: [minimumVisible] }
+      );
+
+      sectionIds.forEach((id) => {
         const el = document.getElementById(id);
         if (el) observer.observe(el);
       });
+
       const onBeforeUnload = () => {
         const now = performance.now();
         state.forEach((rec, id) => {
@@ -54,25 +78,36 @@ function useSectionEngagement(sectionIds, minimumVisible = 0.5) {
             const delta = now - rec.enterTs;
             rec.totalMs += delta;
             rec.visible = false;
-            sendEvent('section_exit', { id, sessionTimeMs: Math.round(delta), cumulativeTimeMs: Math.round(rec.totalMs), unload: true });
+            sendEvent("section_exit", {
+              id,
+              sessionTimeMs: Math.round(delta),
+              cumulativeTimeMs: Math.round(rec.totalMs),
+              unload: true,
+            });
           }
-          sendEvent('section_total', { id, totalTimeMs: Math.round(rec.totalMs) });
+          sendEvent("section_total", {
+            id,
+            totalTimeMs: Math.round(rec.totalMs),
+          });
         });
       };
-      window.addEventListener('beforeunload', onBeforeUnload);
+
+      window.addEventListener("beforeunload", onBeforeUnload);
       return () => {
-        window.removeEventListener('beforeunload', onBeforeUnload);
+        window.removeEventListener("beforeunload", onBeforeUnload);
         observer.disconnect();
       };
     };
-    const idleId = window.requestIdleCallback ? window.requestIdleCallback(run, { timeout: 2000 }) : setTimeout(run, 400);
+
+    const idleId = window.requestIdleCallback
+      ? window.requestIdleCallback(run, { timeout: 2000 })
+      : setTimeout(run, 400);
+
     return () => {
       if (window.cancelIdleCallback && idleId) window.cancelIdleCallback(idleId);
     };
-  }, [sectionIds.join('|'), minimumVisible]);
+  }, [sectionIds.join("|"), minimumVisible]);
 }
-// Lazy load timer component
-const CountdownTimer = lazy(() => import('./components/CountdownTimer'));
 
 // Generate a fresh session id on every page load/refresh
 let runtimeSessionId = null;
@@ -81,7 +116,6 @@ function getSessionId() {
     runtimeSessionId =
       Math.random().toString(36).substring(2) + Date.now().toString(36);
     try {
-      // Overwrite any stored value so other code sees the current session
       localStorage.setItem("sessionId", runtimeSessionId);
       sessionStorage.setItem("sessionId", runtimeSessionId);
     } catch (_) {}
@@ -89,57 +123,72 @@ function getSessionId() {
   return runtimeSessionId;
 }
 
-function App() {
+function LandingPage() {
   const [showConsent, setShowConsent] = useState(false);
   const [timerData, setTimerData] = useState(null);
-  // Globally enforce lazy-loading for all <img> elements (and future ones)
+
   useEffect(() => {
-    if (typeof window === 'undefined' || typeof document === 'undefined') return;
+    if (typeof window === "undefined" || typeof document === "undefined") return;
+
     const upgradeImg = (img) => {
       if (!(img instanceof HTMLImageElement)) return;
-      if (!img.hasAttribute('loading')) img.setAttribute('loading', 'lazy');
-      img.setAttribute('decoding', 'async');
-      if (img.getAttribute('fetchpriority') === 'high') img.removeAttribute('fetchpriority');
+      if (!img.hasAttribute("loading")) img.setAttribute("loading", "lazy");
+      img.setAttribute("decoding", "async");
+      if (img.getAttribute("fetchpriority") === "high")
+        img.removeAttribute("fetchpriority");
     };
-    document.querySelectorAll('img').forEach(upgradeImg);
+
+    document.querySelectorAll("img").forEach(upgradeImg);
+
     const mo = new MutationObserver((mutations) => {
       for (const m of mutations) {
-        m.addedNodes && m.addedNodes.forEach((node) => {
-          if (node instanceof HTMLImageElement) upgradeImg(node);
-          else if (node && node.querySelectorAll) {
-            node.querySelectorAll('img').forEach(upgradeImg);
-          }
-        });
+        m.addedNodes &&
+          m.addedNodes.forEach((node) => {
+            if (node instanceof HTMLImageElement) upgradeImg(node);
+            else if (node && node.querySelectorAll) {
+              node.querySelectorAll("img").forEach(upgradeImg);
+            }
+          });
       }
     });
+
     mo.observe(document.documentElement, { childList: true, subtree: true });
     return () => mo.disconnect();
   }, []);
-  // Defer non-critical sections until idle/first scroll for faster FCP
+
   const [deferSections, setDeferSections] = useState(false);
   useEffect(() => {
-    // Reveal on first scroll OR after idle timeout
     if (deferSections) return;
     const reveal = () => setDeferSections(true);
-    window.addEventListener('scroll', reveal, { once: true, passive: true });
-    const idle = (cb) => (window.requestIdleCallback ? window.requestIdleCallback(cb, { timeout: 1800 }) : setTimeout(cb, 300));
+    window.addEventListener("scroll", reveal, { once: true, passive: true });
+
+    const idle = (cb) =>
+      window.requestIdleCallback
+        ? window.requestIdleCallback(cb, { timeout: 1800 })
+        : setTimeout(cb, 300);
+
     const idleId = idle(() => setDeferSections(true));
+
     return () => {
-      window.removeEventListener('scroll', reveal);
-      if (window.cancelIdleCallback && typeof idleId === 'number') {
-        try { window.cancelIdleCallback(idleId); } catch {}
+      window.removeEventListener("scroll", reveal);
+      if (window.cancelIdleCallback && typeof idleId === "number") {
+        try {
+          window.cancelIdleCallback(idleId);
+        } catch {}
       }
     };
   }, [deferSections]);
-  // One-time log guards to avoid console spam in dev/StrictMode
-  const logGuardsRef = useRef({ usedStoredLog: false, consentPrecheckLog: false });
+
+  const logGuardsRef = useRef({
+    usedStoredLog: false,
+    consentPrecheckLog: false,
+  });
   const consentTimerRef = useRef(null);
 
-  // Local countdown (mirrors backend logic): fixed start + 20 days
   useEffect(() => {
     let isMounted = true;
-    const FIXED_START_TIME = 1765843200000; // Dec 16, 2025 00:00:00 UTC (ms)
-    const COUNTDOWN_DURATION_MS = 12 * 24 * 60 * 60 * 1000; // 12 days
+    const FIXED_START_TIME = 1765843200000;
+    const COUNTDOWN_DURATION_MS = 12 * 24 * 60 * 60 * 1000;
     const END_TIME = FIXED_START_TIME + COUNTDOWN_DURATION_MS;
 
     const computeCountdown = () => {
@@ -148,26 +197,25 @@ function App() {
       const timerObj = {
         startTime: FIXED_START_TIME,
         endTime: END_TIME,
-        remainingSeconds: remainingMs, // keep ms to match timer expectations
+        remainingSeconds: remainingMs,
       };
       if (isMounted) setTimerData(timerObj);
     };
 
     computeCountdown();
-    const interval = setInterval(computeCountdown, 1000); // update every second for smoother UX
+    const interval = setInterval(computeCountdown, 1000);
+
     return () => {
       isMounted = false;
       clearInterval(interval);
     };
   }, []);
 
-  // Track engagement for key sections (ensure each has an id)
-  useSectionEngagement(['hero','features','waitlist','blogs','faq','footer']);
+  useSectionEngagement(["hero", "features", "waitlist", "blogs", "faq", "footer"]);
 
-  // helper to post location with fresh sessionId
   const postLocation = (loc) => {
-    const sessionId = getSessionId(); // ✅ always fetch latest
-    fetch(apiUrl('api/location'), {
+    const sessionId = getSessionId();
+    fetch(apiUrl("api/location"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -182,19 +230,17 @@ function App() {
       .then(async (res) => {
         if (!res.ok) {
           const text = await res.text().catch(() => "");
-          throw new Error(`HTTP ${res.status} ${res.statusText} ${text ? '- ' + text : ''}`);
+          throw new Error(
+            `HTTP ${res.status} ${res.statusText} ${text ? "- " + text : ""}`
+          );
         }
         return res.json();
       })
       .then((data) => console.log("✅ Saved to backend:", data))
-      .catch((err) => {
-        // Common causes: backend not running on 8080, proxy misconfig, CORS, or network
-        console.error("❌ Error sending location:", err);
-      });
+      .catch((err) => console.error("❌ Error sending location:", err));
   };
 
   useEffect(() => {
-    // Check if LocationConsent component has already handled consent
     const getCookie = (name) => {
       return document.cookie
         .split("; ")
@@ -208,10 +254,13 @@ function App() {
     const locationConsent = getCookie("locationConsent");
     const userLocation = getCookie("userLocation");
     const handled = (() => {
-      try { return sessionStorage.getItem("locationHandled") === "true"; } catch { return false; }
+      try {
+        return sessionStorage.getItem("locationHandled") === "true";
+      } catch {
+        return false;
+      }
     })();
 
-    // If LocationConsent component already handled this, don't show popup
     if ((locationConsent === "true" && userLocation) || handled) {
       if (!logGuardsRef.current.consentPrecheckLog) {
         console.log("📍 Location consent already granted, using stored location");
@@ -220,18 +269,19 @@ function App() {
       return;
     }
 
-    // Only show consent popup if not already handled by LocationConsent component
     const timer = setTimeout(() => {
-      // Double-check that LocationConsent didn't handle it in the meantime
       const recheckConsent = getCookie("locationConsent");
       let recheckHandled = false;
-      try { recheckHandled = sessionStorage.getItem("locationHandled") === "true"; } catch {}
+      try {
+        recheckHandled = sessionStorage.getItem("locationHandled") === "true";
+      } catch {}
       if (recheckConsent !== "true" && !recheckHandled) {
         setShowConsent(true);
       }
     }, 800);
+
     consentTimerRef.current = timer;
-    
+
     return () => {
       if (consentTimerRef.current) {
         clearTimeout(consentTimerRef.current);
@@ -242,14 +292,16 @@ function App() {
 
   const handleConsent = (allowed, sessionId, locationData, isFromStoredData = false) => {
     setShowConsent(false);
-    try { sessionStorage.setItem("locationHandled", "true"); } catch {}
+    try {
+      sessionStorage.setItem("locationHandled", "true");
+    } catch {}
+
     if (consentTimerRef.current) {
       clearTimeout(consentTimerRef.current);
       consentTimerRef.current = null;
     }
-    
+
     if (allowed && locationData) {
-      // Only send to backend if this is fresh location data, not from stored cookies
       if (!isFromStoredData) {
         const loc = {
           lat: locationData.latitude,
@@ -260,17 +312,7 @@ function App() {
           ts: locationData.timestamp,
         };
         postLocation(loc);
-        console.log("📍 Fresh location received and sent to backend:", loc);
-      } else {
-        if (!logGuardsRef.current.usedStoredLog) {
-          console.log("📍 Using stored location data (not sending to backend again)");
-          logGuardsRef.current.usedStoredLog = true;
-        }
       }
-    } else if (allowed && !locationData) {
-      console.log("📍 Permission granted but no location data received");
-    } else {
-      console.log("📍 Location permission denied by user");
     }
   };
 
@@ -278,11 +320,18 @@ function App() {
     <div className="min-h-screen bg-bg-color text-texthigh font-body-r">
       <Helmet>
         <title>Tandem - Group Planning Made Simple</title>
-        <meta name="description" content="Stop wasting 23 messages per hangout. Tandem gets your friends together 2x more often." />
+        <meta
+          name="description"
+          content="Stop wasting 23 messages per hangout. Tandem gets your friends together 2x more often."
+        />
       </Helmet>
+
       {GA_ID && (
         <Helmet>
-          <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}></script>
+          <script
+            async
+            src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+          ></script>
           <script>{`
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
@@ -291,42 +340,98 @@ function App() {
           `}</script>
         </Helmet>
       )}
-      <LocationConsent
-        visible={showConsent}
-        onConsent={handleConsent}
-        sessionId={getSessionId()}
-      />
+
+      <LocationConsent visible={showConsent} onConsent={handleConsent} sessionId={getSessionId()} />
+
       <Navbar />
-      {/* Pass timerData props explicitly to Hero/CountdownTimer */}
+
       <Hero
         timerData={timerData}
         startTime={timerData?.startTime}
         endTime={timerData?.endTime}
         remainingSeconds={timerData?.remainingSeconds}
       />
-      <div className="cv-lazy" style={{ containIntrinsicSize: '320px', minHeight: deferSections ? undefined : '320px' }}>
-        <Suspense fallback={<div className="w-full py-24 text-center text-white/60">Loading features…</div>}>
+
+      <div
+        className="cv-lazy"
+        style={{
+          containIntrinsicSize: "320px",
+          minHeight: deferSections ? undefined : "320px",
+        }}
+      >
+        <Suspense
+          fallback={
+            <div className="w-full py-24 text-center text-white/60">
+              Loading features…
+            </div>
+          }
+        >
           {deferSections && <Features />}
         </Suspense>
       </div>
-      {/* Removed cv-lazy on Waitlist to avoid clipping its decorative top on desktop/tablet */}
-      <div style={{ minHeight: deferSections ? undefined : '400px' }}>
-        <Suspense fallback={<div className="w-full py-16 text-center text-white/60">Loading waitlist…</div>}>
+
+      <div style={{ minHeight: deferSections ? undefined : "400px" }}>
+        <Suspense
+          fallback={
+            <div className="w-full py-16 text-center text-white/60">
+              Loading waitlist…
+            </div>
+          }
+        >
           {deferSections && <Waitlist />}
         </Suspense>
       </div>
-      <div className="cv-lazy" style={{ containIntrinsicSize: '380px', minHeight: deferSections ? undefined : '380px' }}>
-        <Suspense fallback={<div className="w-full py-16 text-center text-white/60">Loading blog…</div>}>
+
+      <div
+        className="cv-lazy"
+        style={{
+          containIntrinsicSize: "380px",
+          minHeight: deferSections ? undefined : "380px",
+        }}
+      >
+        <Suspense
+          fallback={
+            <div className="w-full py-16 text-center text-white/60">
+              Loading blog…
+            </div>
+          }
+        >
           {deferSections && <Blog />}
         </Suspense>
       </div>
-      <div className="cv-lazy" style={{ containIntrinsicSize: '260px', minHeight: deferSections ? undefined : '260px' }}>
-        <Suspense fallback={<div className="w-full py-16 text-center text-white/60">Loading FAQ…</div>}>
+
+      <div
+        className="cv-lazy"
+        style={{
+          containIntrinsicSize: "260px",
+          minHeight: deferSections ? undefined : "260px",
+        }}
+      >
+        <Suspense
+          fallback={
+            <div className="w-full py-16 text-center text-white/60">
+              Loading FAQ…
+            </div>
+          }
+        >
           {deferSections && <FAQ />}
         </Suspense>
       </div>
-      <div className="cv-lazy" style={{ containIntrinsicSize: '220px', minHeight: deferSections ? undefined : '220px' }}>
-        <Suspense fallback={<div className="w-full py-16 text-center text-white/60">Loading footer…</div>}>
+
+      <div
+        className="cv-lazy"
+        style={{
+          containIntrinsicSize: "220px",
+          minHeight: deferSections ? undefined : "220px",
+        }}
+      >
+        <Suspense
+          fallback={
+            <div className="w-full py-16 text-center text-white/60">
+              Loading footer…
+            </div>
+          }
+        >
           {deferSections && <Footer />}
         </Suspense>
       </div>
@@ -334,4 +439,16 @@ function App() {
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        {/* Landing Page */}
+        <Route path="/" element={<LandingPage />} />
+
+        {/* Referral Redirect Page (no UI) */}
+        <Route path="/r/:code" element={<ReferralRedirect />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
