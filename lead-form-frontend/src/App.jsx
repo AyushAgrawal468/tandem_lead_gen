@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef, lazy, Suspense } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import { apiUrl } from "./lib/api";
+
 import LocationConsent from "./components/LocationConsent";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import AccountDeletion from "./pages/AccountDeletion";
 import ReferralRedirect from "./components/ReferralRedirect";
+import AccountDeletion from "./pages/AccountDeletion";
 
 const GA_ID = "G-XTYRTQY6R7";
 
@@ -109,10 +110,12 @@ function useSectionEngagement(sectionIds, minimumVisible = 0.5) {
   }, [sectionIds.join("|"), minimumVisible]);
 }
 
+// Generate a fresh session id on every page load/refresh
 let runtimeSessionId = null;
 function getSessionId() {
   if (!runtimeSessionId) {
-    runtimeSessionId = Math.random().toString(36).substring(2) + Date.now().toString(36);
+    runtimeSessionId =
+      Math.random().toString(36).substring(2) + Date.now().toString(36);
     try {
       localStorage.setItem("sessionId", runtimeSessionId);
       sessionStorage.setItem("sessionId", runtimeSessionId);
@@ -185,8 +188,8 @@ function LandingPage() {
 
   useEffect(() => {
     let isMounted = true;
-    const FIXED_START_TIME = 1765843200000;
-    const COUNTDOWN_DURATION_MS = 12 * 24 * 60 * 60 * 1000;
+    const FIXED_START_TIME =1769763813000 ;
+    const COUNTDOWN_DURATION_MS = 15 * 24 * 60 * 60 * 1000;
     const END_TIME = FIXED_START_TIME + COUNTDOWN_DURATION_MS;
 
     const computeCountdown = () => {
@@ -446,6 +449,10 @@ export default function App() {
 
         {/* Referral Redirect Page (no UI) */}
         <Route path="/r/:code" element={<ReferralRedirect />} />
+
+        {/*Account-Deletion Page */}
+        <Route path="/help/account-deletion" element={<AccountDeletion />} />
+
       </Routes>
     </BrowserRouter>
   );
