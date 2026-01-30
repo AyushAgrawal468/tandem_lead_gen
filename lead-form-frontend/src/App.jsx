@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef, lazy, Suspense } from "react";
-<<<<<<< HEAD
 import { Helmet } from "react-helmet";
 import { apiUrl } from "./lib/api";
 import LocationConsent from "./components/LocationConsent";
@@ -7,16 +6,7 @@ import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import AccountDeletion from "./pages/AccountDeletion";
-=======
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Helmet } from "react-helmet";
-import { apiUrl } from "./lib/api";
-
-import LocationConsent from "./components/LocationConsent";
-import Navbar from "./components/Navbar";
-import Hero from "./components/Hero";
 import ReferralRedirect from "./components/ReferralRedirect";
->>>>>>> 117f860909e5580125da5ab33ed924f46a06242f
 
 const GA_ID = "G-XTYRTQY6R7";
 
@@ -29,14 +19,6 @@ const Footer = lazy(() => import("./components/Footer"));
 function useSectionEngagement(sectionIds, minimumVisible = 0.5) {
   useEffect(() => {
     if (typeof window === "undefined" || !window.IntersectionObserver) return;
-<<<<<<< HEAD
-    const observer = new IntersectionObserver(() => {}, { threshold: [minimumVisible] });
-    sectionIds.forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) observer.observe(el);
-    });
-    return () => observer.disconnect();
-=======
 
     const clarityAvailable = () =>
       typeof window !== "undefined" && typeof window.clarity === "function";
@@ -124,7 +106,6 @@ function useSectionEngagement(sectionIds, minimumVisible = 0.5) {
     return () => {
       if (window.cancelIdleCallback && idleId) window.cancelIdleCallback(idleId);
     };
->>>>>>> 117f860909e5580125da5ab33ed924f46a06242f
   }, [sectionIds.join("|"), minimumVisible]);
 }
 
@@ -140,9 +121,6 @@ function getSessionId() {
   return runtimeSessionId;
 }
 
-<<<<<<< HEAD
-function HomePage({ showConsent, handleConsent, timerData }) {
-=======
 function LandingPage() {
   const [showConsent, setShowConsent] = useState(false);
   const [timerData, setTimerData] = useState(null);
@@ -336,7 +314,6 @@ function LandingPage() {
     }
   };
 
->>>>>>> 117f860909e5580125da5ab33ed924f46a06242f
   return (
     <div className="min-h-screen bg-bg-color text-texthigh font-body-r">
       <Helmet>
@@ -373,13 +350,6 @@ function LandingPage() {
         remainingSeconds={timerData?.remainingSeconds}
       />
 
-<<<<<<< HEAD
-      <Suspense fallback={null}><Features /></Suspense>
-      <Suspense fallback={null}><Waitlist /></Suspense>
-      <Suspense fallback={null}><Blog /></Suspense>
-      <Suspense fallback={null}><FAQ /></Suspense>
-      <Suspense fallback={null}><Footer /></Suspense>
-=======
       <div
         className="cv-lazy"
         style={{
@@ -463,65 +433,10 @@ function LandingPage() {
           {deferSections && <Footer />}
         </Suspense>
       </div>
->>>>>>> 117f860909e5580125da5ab33ed924f46a06242f
     </div>
   );
 }
 
-<<<<<<< HEAD
-function App() {
-  const [showConsent, setShowConsent] = useState(false);
-  const [timerData, setTimerData] = useState(null);
-
-  useSectionEngagement(["hero", "features", "waitlist", "blogs", "faq", "footer"]);
-
-  // ✅ RESTORED COUNTDOWN TIMER LOGIC
-  useEffect(() => {
-    let isMounted = true;
-
-    const FIXED_START_TIME = 1769751555000; // Jan 30, 2026
-    const COUNTDOWN_DURATION_MS = 15 * 24 * 60 * 60 * 1000; // 15 days
-    const END_TIME = FIXED_START_TIME + COUNTDOWN_DURATION_MS;
-
-    const updateTimer = () => {
-      const now = Date.now();
-      const remainingMs = Math.max(END_TIME - now, 0);
-
-      if (isMounted) {
-        setTimerData({
-          startTime: FIXED_START_TIME,
-          endTime: END_TIME,
-          remainingSeconds: remainingMs,
-        });
-      }
-    };
-
-    updateTimer();
-    const interval = setInterval(updateTimer, 1000);
-
-    return () => {
-      isMounted = false;
-      clearInterval(interval);
-    };
-  }, []);
-
-  const handleConsent = () => {};
-
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <HomePage
-              showConsent={showConsent}
-              handleConsent={handleConsent}
-              timerData={timerData}
-            />
-          }
-        />
-        <Route path="/help/account-deletion" element={<AccountDeletion />} />
-=======
 export default function App() {
   return (
     <BrowserRouter>
@@ -531,13 +446,7 @@ export default function App() {
 
         {/* Referral Redirect Page (no UI) */}
         <Route path="/r/:code" element={<ReferralRedirect />} />
->>>>>>> 117f860909e5580125da5ab33ed924f46a06242f
       </Routes>
     </BrowserRouter>
   );
 }
-<<<<<<< HEAD
-
-export default App;
-=======
->>>>>>> 117f860909e5580125da5ab33ed924f46a06242f
