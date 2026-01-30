@@ -7,7 +7,7 @@ export default defineConfig(({ mode }) => ({
   server: {
     proxy: {
       '/api': {
-        target: 'https://tandem.it.com',
+        target: 'https://tandem.it.com/',
         changeOrigin: true,
         secure: false,
       },
