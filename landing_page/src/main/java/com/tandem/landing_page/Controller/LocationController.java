@@ -14,14 +14,14 @@ import jakarta.validation.Valid;
 @CrossOrigin(origins = "*")
 public class LocationController {
 
-    private final LocationService service;
+    private final LocationService locationService;
 
     /**
      * Constructor for LocationController
-     * @param service LocationService instance
+     * @param locationService LocationService instance
      */
-    public LocationController(LocationService service) {
-        this.service = service;
+    public LocationController(LocationService locationService) {
+        this.locationService = locationService;
     }
 
     /**
@@ -32,7 +32,7 @@ public class LocationController {
      */
     @PostMapping
     public ResponseEntity<LocationResponse> saveLocation(@Valid @RequestBody LocationRequest request) {
-        UserLocation saved = service.saveLocationWithCity(request);
+        UserLocation saved = locationService.saveLocationWithCity(request);
         return ResponseEntity.ok(new LocationResponse(saved.getCity(), saved.getSessionId(), saved.getLat(), saved.getLon(), saved.getAccuracy()));
     }
 }
