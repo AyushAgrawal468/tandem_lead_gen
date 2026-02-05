@@ -448,7 +448,8 @@ export default function App() {
         <Route path="/" element={<LandingPage />} />
 
         {/* Referral Redirect Page (no UI) */}
-        <Route path="/r/:code" element={<ReferralRedirect />} />
+        <Route path="/r" element={<ReferralRedirect />} />
+
 
         {/*Account-Deletion Page */}
         <Route path="/help/account-deletion" element={<AccountDeletion />} />

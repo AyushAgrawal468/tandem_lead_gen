@@ -1,9 +1,10 @@
 import { useEffect, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { apiUrl } from "../lib/api";
 
 export default function ReferralRedirect() {
-  const { code } = useParams();
+  const [searchParams] = useSearchParams();
+  const code = searchParams.get("ref");
   const hasCalled = useRef(false);
 
   useEffect(() => {
