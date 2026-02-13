@@ -8,6 +8,7 @@ import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import ReferralRedirect from "./components/ReferralRedirect";
 import AccountDeletion from "./pages/AccountDeletion";
+import ChildSafety from "./pages/ChildSafety";
 
 const GA_ID = "G-XTYRTQY6R7";
 
@@ -453,6 +454,9 @@ export default function App() {
 
         {/*Account-Deletion Page */}
         <Route path="/help/account-deletion" element={<AccountDeletion />} />
+
+        {/* Child-Safety Page */}
+        <Route path="/help/child-safety" element={<ChildSafety />} />
 
       </Routes>
     </BrowserRouter>
