@@ -1,0 +1,4 @@
+[     552ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:5173/src/main.jsx:0
+[   66282ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:5173/src/index.css:0
+[  287918ms] [WARNING] No routes matched location "/terms-and-conditions"  @ http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=8455b228:633
+[  287918ms] [WARNING] No routes matched location "/terms-and-conditions"  @ http://localhost:5173/node_modules/.vite/deps/react-router-dom.js?v=8455b228:633

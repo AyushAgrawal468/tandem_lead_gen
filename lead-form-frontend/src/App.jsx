@@ -1,5 +1,44 @@
 import React, { useState, useEffect, useRef, lazy, Suspense } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, useNavigationType } from "react-router-dom";
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  const navType = useNavigationType();
+
+  useEffect(() => {
+    window.history.scrollRestoration = "manual";
+  }, []);
+
+  // Save scroll position on every scroll event
+  useEffect(() => {
+    const save = () => {
+      sessionStorage.setItem(`scrollY:${pathname}`, String(window.scrollY));
+    };
+    window.addEventListener("scroll", save, { passive: true });
+    return () => window.removeEventListener("scroll", save);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (navType === "PUSH") {
+      window.scrollTo(0, 0);
+    } else if (navType === "POP") {
+      const y = parseInt(sessionStorage.getItem(`scrollY:${pathname}`) ?? "0", 10);
+      if (y > 0) {
+        // Keep scrolling to target every frame for ~500ms to fight any layout
+        // shifts from lazy-loaded sections rendering after navigation.
+        let frames = 0;
+        const MAX_FRAMES = 30;
+        const restore = () => {
+          window.scrollTo(0, y);
+          if (frames++ < MAX_FRAMES) requestAnimationFrame(restore);
+        };
+        requestAnimationFrame(restore);
+      }
+    }
+  }, [pathname, navType]);
+
+  return null;
+}
 import { Helmet } from "react-helmet";
 import { apiUrl } from "./lib/api";
 
@@ -9,6 +48,8 @@ import Hero from "./components/Hero";
 import ReferralRedirect from "./components/ReferralRedirect";
 import AccountDeletion from "./pages/AccountDeletion";
 import ChildSafety from "./pages/ChildSafety";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsAndConditions from "./pages/TermsAndConditions";
 
 const GA_ID = "G-XTYRTQY6R7";
 
@@ -126,6 +167,7 @@ function getSessionId() {
 }
 
 function LandingPage() {
+  const navType = useNavigationType();
   const [showConsent, setShowConsent] = useState(false);
   const [timerData, setTimerData] = useState(null);
 
@@ -158,7 +200,12 @@ function LandingPage() {
     return () => mo.disconnect();
   }, []);
 
-  const [deferSections, setDeferSections] = useState(false);
+  const [deferSections, setDeferSections] = useState(() => {
+    // Only skip deferral on genuine back-navigation (saved scroll position exists).
+    // On first-ever visit navType is also "POP", so we check sessionStorage too.
+    if (navType !== "POP") return false;
+    try { return !!sessionStorage.getItem("scrollY:/"); } catch { return false; }
+  });
   useEffect(() => {
     if (deferSections) return;
     const reveal = () => setDeferSections(true);
@@ -444,6 +491,7 @@ function LandingPage() {
 export default function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         {/* Landing Page */}
         <Route path="/" element={<LandingPage />} />
@@ -457,6 +505,10 @@ export default function App() {
 
         {/* Child-Safety Page */}
         <Route path="/help/child-safety" element={<ChildSafety />} />
+
+        {/* Legal Pages */}
+        <Route path="/legal/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/legal/terms-and-conditions" element={<TermsAndConditions />} />
 
       </Routes>
     </BrowserRouter>

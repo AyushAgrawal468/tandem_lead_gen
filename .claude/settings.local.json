@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd \"C:/D-Drive/Tandem repos/tandem_lead_gen/lead-form-frontend\" && rm -rf node_modules/caniuse-lite node_modules/electron-to-chromium node_modules/node-releases node_modules/fastq && npm install 2>&1 | tail -5)",
+      "Bash(npx --yes kill-port 5173 2>&1; sleep 1; echo \"done\")",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_take_screenshot",
+      "mcp__playwright__browser_evaluate",
+      "WebFetch(domain:docs.google.com)",
+      "Bash(sleep 3 && curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173)",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_snapshot",
+      "mcp__playwright__browser_navigate_back"
+    ]
+  }
+}
