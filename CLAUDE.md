@@ -32,17 +32,32 @@ npm run generate:sitemap  # Regenerate sitemap only
 - **Entry**: `src/main.jsx` → `src/App.jsx`
 - **Routes**: `/` (landing page), `/r` (referral redirect), `/help/account-deletion`, `/help/child-safety`, `/legal/privacy-policy`, `/legal/terms-and-conditions`
 - **API calls**: always go through `src/lib/api.js` → `apiUrl()` helper. In dev, Vite proxies `/api/*` to `https://tandem.it.com/`. Set `VITE_API_BASE` env var to point to a different backend.
-- **Performance**: Below-the-fold sections (Features, Waitlist, Blog, FAQ, Footer) are lazy-loaded via `React.lazy` + `Suspense`, deferred until first scroll or idle callback.
+- **Performance**: Below-the-fold sections (Features, Waitlist, Blog, FAQ, Footer) are lazy-loaded via `React.lazy` + `Suspense`, deferred until first scroll or idle callback (`deferSections` state in `LandingPage`). On back-navigation where a saved scroll position exists, `deferSections` starts as `true` immediately so content is ready before scroll restores.
 - **Analytics**: Google Analytics 4 (`G-XTYRTQY6R7`) + Microsoft Clarity, with custom section-engagement tracking via `IntersectionObserver`.
 - **Session tracking**: A `sessionId` is generated fresh on every page load (stored in `localStorage` + `sessionStorage`). It links location data to waitlist submissions on the backend.
+
+### Scroll Restoration (`src/App.jsx` — `ScrollToTop` component)
+- `window.history.scrollRestoration = "manual"` — prevents the browser from interfering.
+- **Forward navigation (PUSH)**: scrolls to top of the new page.
+- **Back navigation (POP)**: restores the saved `scrollY` position using a 30-frame `requestAnimationFrame` retry loop (~500ms at 60fps). This fights layout shifts from lazy sections rendering after navigation.
+- Scroll position is saved to `sessionStorage` as `scrollY:<pathname>` on every scroll event.
+- **Do not** use page height (`scrollHeight`) as a condition for restoring scroll — it varies between sessions (different images loaded, viewport size, etc.) and causes the restore to silently never fire.
 
 ### Legal Pages
 | Route | File | Notes |
 |---|---|---|
 | `/legal/privacy-policy` | `src/pages/PrivacyPolicy.jsx` | Full 14-section policy (A–N) from official PDF. Includes Navbar, dark theme. |
-| `/legal/terms-and-conditions` | `src/pages/TermsAndConditions.jsx` | 13-section T&C. Includes Navbar, dark theme. |
+| `/legal/terms-and-conditions` | `src/pages/TermsAndConditions.jsx` | 11-section T&C (A–K), content mirrors the official Google Doc. Includes Navbar, dark theme. |
 
 Legal pages use the site's dark theme: `#111111` bg, `#F2F2F2` text, `#00FFC8` headings, `"Anek Latin"` font. Content `div` must have `position: relative; z-index: 60` to render above the Navbar's absolute-positioned gradient overlay (`z-index: 49`).
+
+### UI Change Workflow
+After **any** UI change, verify with the Playwright MCP server before considering the task done:
+1. Start dev server if needed (`npm run dev`)
+2. Navigate to the affected page
+3. Simulate real user behaviour (scroll, click, go back)
+4. Measure outcome via `mcp__playwright__browser_evaluate` (e.g. `window.scrollY`, DOM state)
+5. Fix and re-verify in a loop until behaviour matches requirements exactly
 
 ### Environment Variables
 | Variable | Default | Description |

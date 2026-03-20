@@ -1,6 +1,9 @@
 package com.tandem.landing_page.Controller;
 
 import com.tandem.landing_page.Entity.ReferralHit;
+import com.tandem.landing_page.dto.AttributionRequest;
+import com.tandem.landing_page.dto.AttributionResponse;
+import com.tandem.landing_page.dto.ReferralClickRequest;
 import com.tandem.landing_page.service.ReferralHitService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -31,50 +33,70 @@ public class ReferralHitController {
             @PathVariable String code,
             @RequestHeader(value = "User-Agent", required = false) String userAgent,
             @RequestHeader(value = "X-API-KEY", required = false) String apiKey,
+            @RequestBody(required = false) ReferralClickRequest body,
             HttpServletRequest request
     ) {
-
         if (apiKey == null || apiKey.isBlank() || !requiredApiKey.equals(apiKey)) {
             HashMap<String, Object> response = new HashMap<>();
             response.put("success", false);
             response.put("message", "Unauthorized: Missing or invalid X-API-KEY");
             response.put("data", null);
-
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
 
         String ip = request.getRemoteAddr();
-        referralHitService.save(code, userAgent, ip);
+        Integer screenWidth = body != null ? body.getScreenWidth() : null;
+        String lang = body != null ? body.getLang() : null;
+        String platform = body != null ? body.getPlatform() : null;
+
+        referralHitService.save(code, userAgent, ip, screenWidth, lang, platform);
 
         return ResponseEntity.ok(Map.of(
                 "success", true,
                 "message", "Referral tracked",
                 "code", code
-        )); 
+        ));
     }
 
     @GetMapping("/{code}")
     public ResponseEntity<?> getReferralHits(@PathVariable("code") String referralCode) {
-
         ReferralHit referralHit = referralHitService.getReferalHitsByReferralCode(referralCode);
 
         HashMap<String, Object> response = new HashMap<>();
-
         if (referralHit == null) {
             response.put("success", false);
             response.put("message", "No referral hit found for code: " + referralCode);
             response.put("data", null);
-
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
 
         response.put("success", true);
         response.put("message", "Referral hit found");
         response.put("data", referralHit);
-
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Deferred attribution endpoint — called by otp-auth-service on app first cold start.
+     * Runs fingerprint scoring against recent clicks and returns the best matching referral code.
+     */
+    @PostMapping("/attribute")
+    public ResponseEntity<?> attributeInstall(
+            @RequestHeader(value = "X-API-KEY", required = false) String apiKey,
+            @RequestBody AttributionRequest req
+    ) {
+        if (apiKey == null || apiKey.isBlank() || !requiredApiKey.equals(apiKey)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
+                    "success", false,
+                    "message", "Unauthorized: Missing or invalid X-API-KEY"
+            ));
+        }
 
+        AttributionResponse result = referralHitService.attribute(req);
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "matched", result.isMatched(),
+                "referralCode", result.getReferralCode() != null ? result.getReferralCode() : ""
+        ));
+    }
 }
-

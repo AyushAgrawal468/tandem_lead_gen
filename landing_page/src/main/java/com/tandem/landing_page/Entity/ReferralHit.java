@@ -19,6 +19,9 @@ public class ReferralHit {
 
     private String userAgent;
     private String ip;
+    private Integer screenWidth;
+    private String lang;
+    private String platform;
 
     @PrePersist
     public void prePersist() {
@@ -62,5 +65,29 @@ public class ReferralHit {
 
     public void setIp(String ip) {
         this.ip = ip;
+    }
+
+    public Integer getScreenWidth() {
+        return screenWidth;
+    }
+
+    public void setScreenWidth(Integer screenWidth) {
+        this.screenWidth = screenWidth;
+    }
+
+    public String getLang() {
+        return lang;
+    }
+
+    public void setLang(String lang) {
+        this.lang = lang;
+    }
+
+    public String getPlatform() {
+        return platform;
+    }
+
+    public void setPlatform(String platform) {
+        this.platform = platform;
     }
 }
