@@ -27,12 +27,25 @@ export default function ReferralRedirect() {
     };
 
     const trackReferral = async () => {
+      const ua = navigator.userAgent;
+      const platform = /iPhone|iPad|iPod/.test(ua)
+        ? "ios"
+        : /Android/.test(ua)
+        ? "android"
+        : "unknown";
+
       try {
         await fetch(apiUrl(`/api/referral/${code}`), {
           method: "POST",
           headers: {
             "X-API-KEY": "tandem_live_7KpQ2mX9vN4aR1cD8fH6jL3sZ0yW5uT2bE9gP1",
+            "Content-Type": "application/json",
           },
+          body: JSON.stringify({
+            screenWidth: window.screen.width,
+            lang: navigator.language,
+            platform,
+          }),
         });
       } catch (e) {
         console.log("Referral API failed:", e);
