@@ -44,7 +44,13 @@ public class ReferralHitController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
 
-        String ip = request.getRemoteAddr();
+        String ip = request.getHeader("X-Forwarded-For");
+        if (ip == null || ip.isBlank()) {
+            ip = request.getRemoteAddr();
+        } else {
+            ip = ip.split(",")[0].trim();
+        }
+        
         Integer screenWidth = body != null ? body.getScreenWidth() : null;
         String lang = body != null ? body.getLang() : null;
         String platform = body != null ? body.getPlatform() : null;
