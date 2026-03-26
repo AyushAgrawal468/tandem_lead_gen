@@ -4,6 +4,7 @@ import com.tandem.landing_page.Entity.ReferralHit;
 import com.tandem.landing_page.Repository.ReferralHitRepository;
 import com.tandem.landing_page.dto.AttributionRequest;
 import com.tandem.landing_page.dto.AttributionResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -18,10 +19,37 @@ public class ReferralHitService {
     private static final int ATTRIBUTION_THRESHOLD = 75;
     private static final int ATTRIBUTION_WINDOW_MINUTES = 30;
 
+    @Value("${app.store.ios-url}")
+    private String iosStoreUrl;
+
+    @Value("${app.store.android-url}")
+    private String androidStoreUrl;
+
+    @Value("${app.store.fallback-url}")
+    private String fallbackUrl;
+
     private final ReferralHitRepository repository;
 
     public ReferralHitService(ReferralHitRepository repository) {
         this.repository = repository;
+    }
+
+    /**
+     * Resolves the correct store URL based on the User-Agent string.
+     * Used by both the referral redirect flow and the public /download endpoint.
+     */
+    public String resolveStoreUrl(String userAgent) {
+        if (userAgent == null || userAgent.isBlank()) {
+            return fallbackUrl;
+        }
+        String ua = userAgent.toLowerCase();
+        if (ua.contains("iphone") || ua.contains("ipad") || ua.contains("ipod")) {
+            return iosStoreUrl;
+        }
+        if (ua.contains("android")) {
+            return androidStoreUrl;
+        }
+        return fallbackUrl;
     }
 
     public void save(String code, String userAgent, String ip,

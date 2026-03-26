@@ -17,10 +17,12 @@ public class LeadService {
     }
 
     public Lead saveLead(Lead lead) {
-        // check if sessionId exists in user_loc
+        if (leadRepository.existsByEmailAndMobile(lead.getEmail(), lead.getMobile())) {
+            return lead; // duplicate — do not save
+        }
         if (lead.getSessionId() != null) {
             userLocationRepository.findBySessionId(lead.getSessionId())
-                    .ifPresent(userLoc -> lead.setLocationFetched(userLoc.getCity())); // set city if found
+                    .ifPresent(userLoc -> lead.setLocationFetched(userLoc.getCity()));
         }
         return leadRepository.save(lead);
     }

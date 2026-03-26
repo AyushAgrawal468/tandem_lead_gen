@@ -88,17 +88,24 @@ Standard Spring Boot layered architecture: `Controller → Service → Repositor
 |---|---|---|---|
 | `POST` | `/api/leads` | None | Submit waitlist lead (name, email, mobile, sessionId) |
 | `POST` | `/api/location` | None | Save user geolocation (lat, lon, accuracy, sessionId) |
-| `POST` | `/api/referral/{code}` | `X-API-KEY` header | Track a referral link hit |
-| `GET` | `/api/referral/{code}` | None | Retrieve referral hit data |
+| `POST` | `/api/referral/{code}` | `X-API-KEY` header | Record a referral click with device fingerprint |
+| `GET` | `/api/referral/{code}` | None | Fetch most recent referral hit for a code |
+| `POST` | `/api/referral/attribute` | `X-API-KEY` header | Deferred attribution: match an app install to a referral click |
 
-**Lead submission flow:** When a lead is saved, the backend looks up the matching `UserLocation` record by `sessionId` and sets the `locationFetched` (city) field on the lead — linking the geolocation consent data to the waitlist entry.
+**Lead submission flow:** `LeadController` validates input (name: alphabets+spaces, mobile: 10-digit or `+91` format, email), deduplicates on `(email, mobile)`, then looks up `UserLocation` by `sessionId` to attach the city. Note: `LeadService` exists but is not used by the controller — the save logic is inline.
 
-**Referral flow:** The `/r?ref=CODE` frontend route calls `POST /api/referral/{code}` (with the hardcoded `X-API-KEY`) then immediately redirects the user to the iOS App Store or Google Play Store based on their user agent.
+**Referral click flow:** The `/r?ref=CODE` frontend route calls `POST /api/referral/{code}` with device fingerprint fields (`screenWidth`, `lang`, `platform`) and the `X-API-KEY`, then redirects based on user agent to the iOS App Store or Google Play.
+
+**Deferred attribution flow:** Called by the `otp-auth-service` at app cold start. `POST /api/referral/attribute` receives `{ip, userAgent, screenWidth, lang, installTs}` and scores all referral clicks within a 30-minute window against the install. Scoring: IP match = 60 pts (filtered at query level), user-agent match = 20 pts, time proximity ≤15 min = 15 pts, screen width match = 5 pts. Returns the top match if score ≥ 75.
+
+**IP extraction:** `ReferralHitController` reads `X-Forwarded-For` first (taking the first IP in the comma-separated list), falling back to `request.getRemoteAddr()`. Required for accurate attribution behind load balancers/proxies.
+
+**Location geocoding:** `LocationService` calls the OpenCage Geocoding API and resolves city via fallback hierarchy: city → town → village.
 
 ### Configuration & Profiles
-- **`application.properties`** — defaults + profile selector (`spring.profiles.active=${SPRING_PROFILES_ACTIVE:dev}`)
+- **`application.properties`** — base config: DB pool (HikariCP max 10, min 2), API key, OpenCage key, port 8080
 - **`application-dev.properties`** — local PostgreSQL (`localhost:5432/leads_db`)
-- **`application-prod.properties`** — production overrides (currently empty placeholder)
-- Database: `spring.jpa.hibernate.ddl-auto=update` (auto-migrates schema on startup)
-- External service: OpenCage Geocoding API for reverse geocoding locations
-- CORS: allows `http://localhost:5173` (dev) and `https://tandem.it.com` (prod)
+- **`application-atul.properties`** — another dev override with a different DB password
+- **`application-prod.properties`** — empty placeholder; production env vars must be set externally
+- Database: `spring.jpa.hibernate.ddl-auto=update` — schema auto-migrates on startup (no Flyway/Liquibase)
+- **CORS:** `WebConfig` restricts to `http://localhost:5173` and `https://tandem.it.com`, but `LeadController` and `LocationController` override this with `@CrossOrigin(origins = "*")` — only referral endpoints respect the `WebConfig` restriction.
