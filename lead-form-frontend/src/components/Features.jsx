@@ -131,7 +131,7 @@ const Features = () => {
   }, [mobileIndex, ratios, frameW, mobileImages.length])
 
   return (
-  <section id="features" className="pt-2 xs:pt-4 md:pt-2 lg:pt-4 pb-8 xs:pb-12 md:pb-40 lg:pb-48" style={{ zIndex: 50, position: 'relative', scrollMarginTop: '40px' }}>
+  <section id="features" className="pt-2 xs:pt-4 md:pt-2 lg:pt-4 pb-8 xs:pb-12 md:pb-10 lg:pb-12" style={{ zIndex: 50, position: 'relative', scrollMarginTop: '40px' }}>
       {/* Simplified mobile spacing: remove negative pull & complex media overrides for consistent timer clearance */}
       <style>{`
       @media (max-width: 767.98px) {
@@ -355,8 +355,8 @@ const Features = () => {
                 </>
               )}
             />
-          {/* Extra spacer for desktop/tablet to ensure carousel clears next section */}
-          <div className="hidden sm:block h-32 md:h-40 lg:h-48"></div>
+          {/* APP LAUNCHED: spacer was for Waitlist overlap — uncomment if Waitlist re-enabled */}
+          {/* <div className="hidden sm:block h-32 md:h-40 lg:h-48"></div> */}
         </div>
       </div>
     </section>

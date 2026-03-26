@@ -1,10 +1,23 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Ellipse7 from '../assets/Ellipse 7.svg'
 import GradientImage from '../assets/navbarEllipse-background.svg';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isHelpOpen, setIsHelpOpen] = useState(false)       // desktop dropdown
+  const [isMobileHelpOpen, setIsMobileHelpOpen] = useState(false) // mobile accordion
+  const helpDropdownRef = useRef(null)
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (helpDropdownRef.current && !helpDropdownRef.current.contains(e.target)) {
+        setIsHelpOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   // Handle scroll effect
   useEffect(() => {
@@ -73,7 +86,7 @@ const Navbar = () => {
 
   // Handle join now button click
   const handleJoinNow = () => {
-    scrollToSection('waitlist')
+    scrollToSection('download')
     setIsMenuOpen(false)
   }
 
@@ -83,6 +96,7 @@ const Navbar = () => {
       document.body.style.overflow = 'hidden'
     } else {
       document.body.style.overflow = ''
+      setIsMobileHelpOpen(false)
     }
     return () => { document.body.style.overflow = '' }
   }, [isMenuOpen])
@@ -201,12 +215,76 @@ const Navbar = () => {
                 Blogs
               </div>
 
-              <div 
+              <div
                 onClick={() => scrollToSection('faq')}
                 className="relative w-fit [font-family:'Anek_Latin-Bold',Helvetica] font-bold text-white tracking-[0] whitespace-nowrap cursor-pointer hover:text-gray-300 transition-colors"
                 style={{ fontSize: 'clamp(12px, 1.6vw, 18px)', lineHeight: 1.6 }}
               >
                 FAQ
+              </div>
+
+              {/* Help dropdown */}
+              <div ref={helpDropdownRef} className="relative">
+                <div
+                  onClick={() => setIsHelpOpen((v) => !v)}
+                  className="flex items-center gap-1 [font-family:'Anek_Latin-Bold',Helvetica] font-bold text-white tracking-[0] whitespace-nowrap cursor-pointer hover:text-gray-300 transition-colors"
+                  style={{ fontSize: 'clamp(12px, 1.6vw, 18px)', lineHeight: 1.6 }}
+                >
+                  Help
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="12" height="12"
+                    viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" strokeWidth="2.5"
+                    strokeLinecap="round" strokeLinejoin="round"
+                    style={{ transition: 'transform 0.2s', transform: isHelpOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                  >
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
+                </div>
+                {isHelpOpen && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 'calc(100% + 10px)',
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      background: '#1a1a1a',
+                      border: '1px solid rgba(255,255,255,0.12)',
+                      borderRadius: '10px',
+                      padding: '8px 0',
+                      minWidth: '180px',
+                      zIndex: 100,
+                      boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+                    }}
+                  >
+                    {[
+                      { label: 'Child Safety', href: '/help/child-safety' },
+                      { label: 'Account Deletion', href: '/help/account-deletion' },
+                      { label: 'Refund Policy', href: '/help/refund-policy' },
+                    ].map(({ label, href }) => (
+                      <a
+                        key={href}
+                        href={href}
+                        onClick={() => setIsHelpOpen(false)}
+                        style={{
+                          display: 'block',
+                          padding: '10px 20px',
+                          color: '#F2F2F2',
+                          fontSize: 'clamp(12px, 1.4vw, 15px)',
+                          fontWeight: '600',
+                          textDecoration: 'none',
+                          whiteSpace: 'nowrap',
+                          transition: 'background 0.15s, color 0.15s',
+                        }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.color = '#00FFC8' }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#F2F2F2' }}
+                      >
+                        {label}
+                      </a>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Exact Figma Button CSS */}
@@ -220,7 +298,7 @@ const Navbar = () => {
                   }}
                 >
                   <div className="font-bold tracking-[0] !ml-[unset]" style={{ fontSize: 'clamp(12px, 1.6vw, 18px)', lineHeight: 1.6 }}>
-                    Join now
+                    Download
                   </div>
                   <div 
                     className="absolute bottom-0 left-0 right-0 h-[3px]"
@@ -299,13 +377,51 @@ const Navbar = () => {
               FAQ
             </div>
 
+            {/* Help accordion */}
+            <div>
+              <div
+                onClick={() => setIsMobileHelpOpen((v) => !v)}
+                className="flex items-center gap-2 text-white font-bold text-2xl cursor-pointer hover:text-gray-300 transition-colors"
+              >
+                Help
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18" height="18"
+                  viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" strokeWidth="2.5"
+                  strokeLinecap="round" strokeLinejoin="round"
+                  style={{ transition: 'transform 0.2s', transform: isMobileHelpOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                >
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </div>
+              {isMobileHelpOpen && (
+                <div className="mt-3 ml-2 space-y-4">
+                  {[
+                    { label: 'Child Safety', href: '/help/child-safety' },
+                    { label: 'Account Deletion', href: '/help/account-deletion' },
+                    { label: 'Refund Policy', href: '/help/refund-policy' },
+                  ].map(({ label, href }) => (
+                    <a
+                      key={href}
+                      href={href}
+                      onClick={() => setIsMenuOpen(false)}
+                      style={{ display: 'block', color: '#BCBCBC', fontSize: '1.1rem', fontWeight: '600', textDecoration: 'none' }}
+                    >
+                      {label}
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Join now button */}
             <div className="pt-2">
               <button
                 onClick={handleJoinNow}
                 className="flex items-center justify-center gap-2.5 text-black font-bold bg-white rounded-[24px] border-b-2 border-[#C1F546] px-4 py-2 grow shrink-0 basis-0"
               >
-                Join now
+                Download
               </button>
             </div>
           </nav>
