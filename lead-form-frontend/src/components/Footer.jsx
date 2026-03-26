@@ -58,7 +58,7 @@ const Footer = () => {
               </div>
             </div>
             <p className="text-white text-[14px] leading-[21px]" style={{ fontFamily: '"Anek Latin", sans-serif' }}>
-              © 2025 Orbitandem Technologies Private Limited. All rights reserved.
+              © 2026 Orbitandem Technologies Private Limited. All rights reserved.
             </p>
           </div>
         </div>
@@ -70,7 +70,7 @@ const Footer = () => {
               className="text-white text-[18px] leading-[27px] font-normal whitespace-nowrap"
               style={{ fontFamily: '"Anek Latin", sans-serif', paddingLeft: 0, marginLeft: 0 }}
             >
-              © 2025 Orbitandem Technologies Private Limited. All Rights Reserved.
+              © 2026 Orbitandem Technologies Private Limited. All Rights Reserved.
             </p>
           </div>
 

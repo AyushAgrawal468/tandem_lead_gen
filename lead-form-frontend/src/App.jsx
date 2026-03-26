@@ -50,13 +50,16 @@ import AccountDeletion from "./pages/AccountDeletion";
 import ChildSafety from "./pages/ChildSafety";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsAndConditions from "./pages/TermsAndConditions";
+import RefundPolicy from "./pages/RefundPolicy";
 
 const GA_ID = "G-XTYRTQY6R7";
 
 const Features = lazy(() => import("./components/Features"));
-const Waitlist = lazy(() => import("./components/Waitlist"));
+// APP LAUNCHED: Waitlist hidden — uncomment to re-enable
+// const Waitlist = lazy(() => import("./components/Waitlist"));
 const Blog = lazy(() => import("./components/Blog"));
 const FAQ = lazy(() => import("./components/FAQ"));
+const DownloadSection = lazy(() => import("./components/DownloadSection"));
 const Footer = lazy(() => import("./components/Footer"));
 
 function useSectionEngagement(sectionIds, minimumVisible = 0.5) {
@@ -419,6 +422,7 @@ function LandingPage() {
         </Suspense>
       </div>
 
+      {/* APP LAUNCHED: Waitlist hidden — uncomment to re-enable
       <div style={{ minHeight: deferSections ? undefined : "400px" }}>
         <Suspense
           fallback={
@@ -430,6 +434,7 @@ function LandingPage() {
           {deferSections && <Waitlist />}
         </Suspense>
       </div>
+      */}
 
       <div
         className="cv-lazy"
@@ -464,6 +469,18 @@ function LandingPage() {
           }
         >
           {deferSections && <FAQ />}
+        </Suspense>
+      </div>
+
+      <div
+        className="cv-lazy"
+        style={{
+          containIntrinsicSize: "340px",
+          minHeight: deferSections ? undefined : "340px",
+        }}
+      >
+        <Suspense fallback={<div className="w-full py-16" />}>
+          {deferSections && <DownloadSection />}
         </Suspense>
       </div>
 
@@ -505,10 +522,12 @@ export default function App() {
 
         {/* Child-Safety Page */}
         <Route path="/help/child-safety" element={<ChildSafety />} />
+        <Route path="/help/refund-policy" element={<RefundPolicy />} />
 
         {/* Legal Pages */}
         <Route path="/legal/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/legal/terms-and-conditions" element={<TermsAndConditions />} />
+        
 
       </Routes>
     </BrowserRouter>

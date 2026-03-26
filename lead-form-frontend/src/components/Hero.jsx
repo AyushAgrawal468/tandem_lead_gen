@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import Ellipse5 from '../assets/Ellipse 5.svg'
 import Ellipse6 from '../assets/Ellipse 6.svg'
-import CountdownTimer from './CountdownTimer'
+// import CountdownTimer from './CountdownTimer' // APP LAUNCHED: replaced with QR card
+import QrCardBg from '../assets/qr-card-bg.svg'
+import QrCode from '../assets/qr-code.svg'
+import QrCardBgMobile from '../assets/qr-card-bg-mobile.svg'
+import QrCodeMobile from '../assets/qr-code-mobile.svg'
 
 // Dynamically import up to 4 hero images from assets/hero-images
 // Users should place their images there; we sort by filename for stable order.
@@ -839,59 +843,59 @@ const Hero = ({ timerData }) => {
           />
         </div>
 
-        {/* Global timer above the bottom semicircle, anchored to the inner right edge */}
-        {/* Desktop/Tablet timer only (removed mobile timer) */}
+        {/* QR download card — desktop/tablet */}
         <div
           className="absolute pointer-events-auto hidden md:block"
           style={{
             zIndex: 1000,
             right: '32px',
-            bottom: adjustedTimerBottom,
+            bottom: `calc(${adjustedTimerBottom} - 40px)`,
           }}
         >
-          {!timerData ? (
-            <div className="flex items-center justify-center w-[200px] h-[100px]">
-              <span className="animate-pulse text-white text-lg">Loading timer…</span>
-            </div>
-          ) : (
-            <CountdownTimer
-              remainingSeconds={timerData.remainingSeconds}
-              endTime={timerData.endTime}
-              startTime={timerData.startTime}
-              width={TIMER_W}
-              height={TIMER_H}
-              radius={TIMER_R}
-              strokeWidth={TIMER_SW}
-              displayWidth={TIMER_DISPLAY_W}
-              displayHeight={TIMER_DISPLAY_H}
+          <div style={{ position: 'relative', width: '200px', height: '200px' }}>
+            <img src={QrCardBg} alt="Download Tandem" width={200} height={200} style={{ display: 'block' }} />
+            <img
+              src={QrCode}
+              alt="Scan to download Tandem"
+              style={{
+                position: 'absolute',
+                top: '14px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: '108px',
+                height: '108px',
+                objectFit: 'contain',
+              }}
             />
-          )}
+          </div>
         </div>
 
-        {/* Mobile timer: moved further down and slightly reduced to avoid overlap with Features heading */}
+        {/* QR download card — mobile */}
         <div
-          className="absolute pointer-events-none block md:hidden"
+          className="absolute block md:hidden"
           style={{
             zIndex: 1001,
-            right: '3px',
-            top: `${MOBILE_TIMER_TOP}px`
+            right: '18px',
+            top: `${MOBILE_TIMER_TOP}px`,
+            pointerEvents: 'auto',
           }}
         >
-          {!timerData ? (
-            <div className="flex items-center justify-center w-full h-full">
-              <span className="animate-pulse text-white text-sm">Loading…</span>
-            </div>
-          ) : (
-            <CountdownTimer
-              remainingSeconds={timerData.remainingSeconds}
-              endTime={timerData.endTime}
-              startTime={timerData.startTime}
-              width={TIMER_W - 30}
-              height={TIMER_H - 20}
-              radius={TIMER_R}
-              strokeWidth={TIMER_SW}
+          <div style={{ position: 'relative', width: '148px', height: '77px' }}>
+            <img src={QrCardBgMobile} alt="Download Tandem" width={148} height={77} style={{ display: 'block', width: '148px', height: '77px' }} />
+            <img
+              src={QrCodeMobile}
+              alt="Scan to download Tandem"
+              style={{
+                position: 'absolute',
+                top: '50%',
+                left: '28%',
+                transform: 'translate(-50%, -50%)',
+                width: '51px',
+                height: '51px',
+                objectFit: 'contain',
+              }}
             />
-          )}
+          </div>
         </div>
       </div>
     </section>
