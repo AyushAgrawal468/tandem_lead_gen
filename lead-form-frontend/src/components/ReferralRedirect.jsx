@@ -12,9 +12,9 @@ export default function ReferralRedirect() {
     hasCalled.current = true;
 
     const playStoreUrl =
-      "https://play.google.com/store/apps/details?id=com.whatsapp&pcampaignid=web_share";
+      "https://play.google.com/store/apps/details?id=com.tandemit.tandemit";
     const appStoreUrl =
-      "https://apps.apple.com/app/whatsapp-messenger/id310633997";
+      "https://apps.apple.com/in/app/tandem-events-experiences/id6756263621";
 
     const redirectUser = () => {
       const ua = navigator.userAgent.toLowerCase();
