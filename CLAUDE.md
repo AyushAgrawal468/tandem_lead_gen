@@ -91,8 +91,9 @@ Standard Spring Boot layered architecture: `Controller → Service → Repositor
 | `POST` | `/api/referral/{code}` | `X-API-KEY` header | Record a referral click with device fingerprint |
 | `GET` | `/api/referral/{code}` | None | Fetch most recent referral hit for a code |
 | `POST` | `/api/referral/attribute` | `X-API-KEY` header | Deferred attribution: match an app install to a referral click |
+| `GET` | `/download` | None | Public marketing redirect — sends users to App Store, Play Store, or website based on User-Agent |
 
-**Lead submission flow:** `LeadController` validates input (name: alphabets+spaces, mobile: 10-digit or `+91` format, email), deduplicates on `(email, mobile)`, then looks up `UserLocation` by `sessionId` to attach the city. Note: `LeadService` exists but is not used by the controller — the save logic is inline.
+**Lead submission flow:** `LeadController` delegates entirely to `LeadService.saveLead()`, which handles deduplication on `(email, mobile)`, looks up `UserLocation` by `sessionId` to attach the city, then saves.
 
 **Referral click flow:** The `/r?ref=CODE` frontend route calls `POST /api/referral/{code}` with device fingerprint fields (`screenWidth`, `lang`, `platform`) and the `X-API-KEY`, then redirects based on user agent to the iOS App Store or Google Play.
 
@@ -103,9 +104,9 @@ Standard Spring Boot layered architecture: `Controller → Service → Repositor
 **Location geocoding:** `LocationService` calls the OpenCage Geocoding API and resolves city via fallback hierarchy: city → town → village.
 
 ### Configuration & Profiles
-- **`application.properties`** — base config: DB pool (HikariCP max 10, min 2), API key, OpenCage key, port 8080
+- **`application.properties`** — base config: DB pool (HikariCP max 10, min 2), API key, OpenCage key, port 8080, `app.store.*` URLs for the `/download` redirect
 - **`application-dev.properties`** — local PostgreSQL (`localhost:5432/leads_db`)
 - **`application-atul.properties`** — another dev override with a different DB password
 - **`application-prod.properties`** — empty placeholder; production env vars must be set externally
 - Database: `spring.jpa.hibernate.ddl-auto=update` — schema auto-migrates on startup (no Flyway/Liquibase)
-- **CORS:** `WebConfig` restricts to `http://localhost:5173` and `https://tandem.it.com`, but `LeadController` and `LocationController` override this with `@CrossOrigin(origins = "*")` — only referral endpoints respect the `WebConfig` restriction.
+- **CORS:** `WebConfig` restricts `/api/**` to `http://localhost:5173` and `https://tandem.it.com`. `LeadController` and `LocationController` override this with `@CrossOrigin(origins = "*")`. `/download` has its own open-origin mapping in `WebConfig` (public marketing endpoint).

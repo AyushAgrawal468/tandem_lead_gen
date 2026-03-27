@@ -46,6 +46,7 @@ import LocationConsent from "./components/LocationConsent";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import ReferralRedirect from "./components/ReferralRedirect";
+import DownloadRedirect from "./components/DownloadRedirect";
 import AccountDeletion from "./pages/AccountDeletion";
 import ChildSafety from "./pages/ChildSafety";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
@@ -515,6 +516,9 @@ export default function App() {
 
         {/* Referral Redirect Page (no UI) */}
         <Route path="/r" element={<ReferralRedirect />} />
+
+        {/* Download redirect — sends user to App Store or Play Store based on UA */}
+        <Route path="/download" element={<DownloadRedirect />} />
 
 
         {/*Account-Deletion Page */}
