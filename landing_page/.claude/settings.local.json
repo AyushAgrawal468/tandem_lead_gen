@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./mvnw clean:*)",
+      "Read(//c/D-Drive/Tandem repos/tandem_lead_gen/lead-form-frontend/**)",
+      "Bash(npm run:*)"
+    ]
+  }
+}
