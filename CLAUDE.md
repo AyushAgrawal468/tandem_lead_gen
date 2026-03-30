@@ -30,7 +30,7 @@ npm run generate:sitemap  # Regenerate sitemap only
 
 ### Architecture
 - **Entry**: `src/main.jsx` → `src/App.jsx`
-- **Routes**: `/` (landing page), `/r` (referral redirect), `/help/account-deletion`, `/help/child-safety`, `/legal/privacy-policy`, `/legal/terms-and-conditions`
+- **Routes**: `/` (landing page), `/r` (referral redirect), `/e/:eventId` (event share deep link), `/download`, `/help/account-deletion`, `/help/child-safety`, `/legal/privacy-policy`, `/legal/terms-and-conditions`
 - **API calls**: always go through `src/lib/api.js` → `apiUrl()` helper. In dev, Vite proxies `/api/*` to `https://tandem.it.com/`. Set `VITE_API_BASE` env var to point to a different backend.
 - **Performance**: Below-the-fold sections (Features, Waitlist, Blog, FAQ, Footer) are lazy-loaded via `React.lazy` + `Suspense`, deferred until first scroll or idle callback (`deferSections` state in `LandingPage`). On back-navigation where a saved scroll position exists, `deferSections` starts as `true` immediately so content is ready before scroll restores.
 - **Analytics**: Google Analytics 4 (`G-XTYRTQY6R7`) + Microsoft Clarity, with custom section-engagement tracking via `IntersectionObserver`.
@@ -91,6 +91,8 @@ Standard Spring Boot layered architecture: `Controller → Service → Repositor
 | `POST` | `/api/referral/{code}` | `X-API-KEY` header | Record a referral click with device fingerprint |
 | `GET` | `/api/referral/{code}` | None | Fetch most recent referral hit for a code |
 | `POST` | `/api/referral/attribute` | `X-API-KEY` header | Deferred attribution: match an app install to a referral click |
+| `POST` | `/api/event-link/{eventId}` | `X-API-KEY` header | Record an event share link click with device fingerprint |
+| `POST` | `/api/event-link/attribute` | `X-API-KEY` header | Deferred attribution: match an app install to an event link click; returns `eventId` |
 | `GET` | `/download` | None | Public marketing redirect — sends users to App Store, Play Store, or website based on User-Agent |
 
 **Lead submission flow:** `LeadController` delegates entirely to `LeadService.saveLead()`, which handles deduplication on `(email, mobile)`, looks up `UserLocation` by `sessionId` to attach the city, then saves.
@@ -98,6 +100,15 @@ Standard Spring Boot layered architecture: `Controller → Service → Repositor
 **Referral click flow:** The `/r?ref=CODE` frontend route calls `POST /api/referral/{code}` with device fingerprint fields (`screenWidth`, `lang`, `platform`) and the `X-API-KEY`, then redirects based on user agent to the iOS App Store or Google Play.
 
 **Deferred attribution flow:** Called by the `otp-auth-service` at app cold start. `POST /api/referral/attribute` receives `{ip, userAgent, screenWidth, lang, installTs}` and scores all referral clicks within a 30-minute window against the install. Scoring: IP match = 60 pts (filtered at query level), user-agent match = 20 pts, time proximity ≤15 min = 15 pts, screen width match = 5 pts. Returns the top match if score ≥ 75.
+
+**Event share deep link flow:** `/e/:eventId` frontend route (`EventRedirect.jsx`) tracks the click via `POST /api/event-link/{eventId}` then redirects to App Store or Play Store based on User-Agent. If the app is already installed, iOS Universal Links / Android App Links intercept the URL before the browser loads — this page is only reached by users without the app. On first app launch, the app calls `POST /api/event-link/attribute` to retrieve the `eventId` for deferred deep linking. Same fingerprint scoring as referral attribution; returns `{ matched, eventId }`. DB table: `event_link_hits`.
+
+**Universal Links / App Links setup:**
+- `public/.well-known/assetlinks.json` — Android verification (package: `com.tandemit.tandemit`, SHA-256 fingerprint set)
+- `public/.well-known/apple-app-site-association` — iOS verification (Team ID: `MF5NQJQ727`, Bundle ID: `com.tandemit.tandemit`)
+- Both use `paths: ["*"]` to cover all current and future deep link paths
+- `.htaccess` forces `Content-Type: application/json` for `apple-app-site-association` (no file extension)
+- App-side setup (pending mobile dev team): Android `<intent-filter android:autoVerify="true">` in `AndroidManifest.xml`; iOS Associated Domains (`applinks:tandem.it.com`) + URL handling in `SceneDelegate`
 
 **IP extraction:** `ReferralHitController` reads `X-Forwarded-For` first (taking the first IP in the comma-separated list), falling back to `request.getRemoteAddr()`. Required for accurate attribution behind load balancers/proxies.
 
