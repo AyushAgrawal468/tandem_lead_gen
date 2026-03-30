@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.tandemit.tandemit",
+      "sha256_cert_fingerprints": [
+        "D1:39:0E:51:58:A7:61:D0:C6:80:A6:90:D8:26:99:BC:C8:24:53:3D:1B:3A:A4:82:D5:00:46:3C:87:16:7F:0A"
+      ]
+    }
+  }
+]
