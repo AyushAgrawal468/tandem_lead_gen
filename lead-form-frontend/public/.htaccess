@@ -1,14 +1,20 @@
+# Serve .well-known files as JSON with correct content type
+<IfModule mod_headers.c>
+  <FilesMatch "^(assetlinks\.json|apple-app-site-association)$">
+    Header set Content-Type "application/json"
+  </FilesMatch>
+</IfModule>
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
+
+  # Never rewrite .well-known/ — serve these files directly
+  RewriteRule ^\.well-known/ - [L]
+
   RewriteRule ^index\.html$ - [L]
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteCond %{REQUEST_FILENAME} !-l
   RewriteRule . /index.html [L]
 </IfModule>
-
-# Serve Apple's verification file as JSON (no file extension)
-<Files "apple-app-site-association">
-  AddType application/json .
-</Files>
