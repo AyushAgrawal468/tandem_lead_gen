@@ -7,3 +7,8 @@
   RewriteCond %{REQUEST_FILENAME} !-l
   RewriteRule . /index.html [L]
 </IfModule>
+
+# Serve Apple's verification file as JSON (no file extension)
+<Files "apple-app-site-association">
+  AddType application/json .
+</Files>
