@@ -18,7 +18,33 @@ const subHeading = {
   color: "#F2F2F2",
 };
 
+const refundSectionHeading = {
+  marginTop: "40px",
+  marginBottom: "10px",
+  fontSize: "clamp(16px, 2vw, 20px)",
+  fontWeight: "700",
+  color: "#F2F2F2",
+  paddingBottom: "8px",
+  borderBottom: "1px solid #2a2a2a",
+};
+
+const refundSubHeading = {
+  marginTop: "24px",
+  marginBottom: "8px",
+  fontSize: "clamp(14px, 1.8vw, 17px)",
+  fontWeight: "600",
+  color: "#A77DFF",
+};
+
 const liStyle = { marginBottom: "10px", paddingLeft: "8px" };
+
+const calloutBox = {
+  margin: "20px 0",
+  padding: "14px 18px",
+  background: "#1a1a1a",
+  borderLeft: "3px solid #A77DFF",
+  borderRadius: "4px",
+};
 
 const TermsAndConditions = () => {
   return (
@@ -29,16 +55,17 @@ const TermsAndConditions = () => {
       <div style={{ maxWidth: "860px", margin: "0 auto", padding: "clamp(24px, 5vw, 60px) clamp(16px, 4vw, 40px) 80px", position: "relative", zIndex: 60 }}>
 
         <h1 style={{ fontSize: "clamp(28px, 4vw, 42px)", fontWeight: "700", marginBottom: "8px", color: "#F2F2F2" }}>
-          Terms &amp; Conditions
+          Terms &amp; Conditions &amp; Refund Policy
         </h1>
         <p style={{ color: "#969696", fontSize: "14px", marginBottom: "36px" }}>
-          Last updated: 27th January 2026 &nbsp;·&nbsp; Orbitandem Technologies Private Limited
+          Last updated: 24th March 2026 &nbsp;·&nbsp; Orbitandem Technologies Private Limited
         </p>
 
         <hr style={{ borderColor: "#2a2a2a", marginBottom: "36px" }} />
 
         <div style={{ fontSize: "clamp(14px, 1.8vw, 17px)", lineHeight: "1.8", color: "#BCBCBC" }}>
 
+          {/* ── AGREEMENT ── */}
           <h2 style={sectionHeading}>AGREEMENT TO OUR LEGAL TERMS</h2>
 
           <p>
@@ -57,6 +84,7 @@ const TermsAndConditions = () => {
             </a>.
           </p>
 
+          {/* ── A ── */}
           <h2 style={sectionHeading}>A. ACCEPTANCE OF TERMS</h2>
           <ul style={{ paddingLeft: "20px", listStyleType: "disc" }}>
             <li style={liStyle}>
@@ -67,6 +95,7 @@ const TermsAndConditions = () => {
             </li>
           </ul>
 
+          {/* ── B ── */}
           <h2 style={sectionHeading}>B. Eligibility</h2>
           <ul style={{ paddingLeft: "20px", listStyleType: "disc" }}>
             <li style={liStyle}>
@@ -74,6 +103,7 @@ const TermsAndConditions = () => {
             </li>
           </ul>
 
+          {/* ── C ── */}
           <h2 style={sectionHeading}>C. USER REGISTRATION</h2>
           <ul style={{ paddingLeft: "20px", listStyleType: "disc" }}>
             <li style={liStyle}>
@@ -81,6 +111,7 @@ const TermsAndConditions = () => {
             </li>
           </ul>
 
+          {/* ── D ── */}
           <h2 style={sectionHeading}>D. USER REPRESENTATIONS</h2>
           <ul style={{ paddingLeft: "20px", listStyleType: "disc" }}>
             <li style={liStyle}>
@@ -91,6 +122,7 @@ const TermsAndConditions = () => {
             </li>
           </ul>
 
+          {/* ── E ── */}
           <h2 style={sectionHeading}>E. INTELLECTUAL PROPERTY RIGHTS</h2>
 
           <h3 style={subHeading}>Our intellectual property</h3>
@@ -111,8 +143,8 @@ const TermsAndConditions = () => {
             Subject to your compliance with these Legal Terms, including the activities described below, we grant you a non-exclusive, non-transferable, revocable license to:
           </p>
           <ul style={{ paddingLeft: "20px", marginTop: "10px", listStyle: "none" }}>
-            <li style={{ marginBottom: "10px", paddingLeft: "8px" }}>■ access the Services; and</li>
-            <li style={{ marginBottom: "10px", paddingLeft: "8px" }}>■ download or print a copy of any portion of the Content to which you have properly gained access,</li>
+            <li style={{ marginBottom: "10px", paddingLeft: "8px" }}>&#9632; access the Services; and</li>
+            <li style={{ marginBottom: "10px", paddingLeft: "8px" }}>&#9632; download or print a copy of any portion of the Content to which you have properly gained access,</li>
           </ul>
           <p style={{ marginTop: "10px" }}>solely for your personal, non-commercial use.</p>
           <p style={{ marginTop: "12px" }}>
@@ -153,18 +185,19 @@ const TermsAndConditions = () => {
             <strong style={{ color: "#F2F2F2" }}>You are responsible for what you post or upload:</strong> By sending us Submissions and/or posting Contributions through any part of the Services or making Contributions accessible through the Services by linking your account through the Services to any of your social networking accounts, you:
           </p>
           <ul style={{ paddingLeft: "20px", marginTop: "10px", listStyle: "none" }}>
-            <li style={{ marginBottom: "10px", paddingLeft: "8px" }}>■ confirm that you have read and agree with our terms and conditions, and will not post, send, publish, upload, or transmit through the Services any Submission nor post any Contribution that is illegal, harassing, hateful, harmful, defamatory, obscene, bullying, abusive, discriminatory, threatening to any person or group, sexually explicit, false, inaccurate, deceitful, or misleading;</li>
-            <li style={{ marginBottom: "10px", paddingLeft: "8px" }}>■ to the extent permissible by applicable law, waive any and all moral rights to any such Submission and/or Contribution;</li>
-            <li style={{ marginBottom: "10px", paddingLeft: "8px" }}>■ warrant that any such Submissions and/or Contributions are original to you or that you have the necessary rights and licenses to submit such Submissions and/or Contributions and that you have full authority to grant us the above-mentioned rights in relation to your Submissions and/or Contributions; and</li>
-            <li style={{ marginBottom: "10px", paddingLeft: "8px" }}>■ warrant and represent that your Submissions and/or Contributions do not constitute confidential information.</li>
-            <li style={{ marginBottom: "10px", paddingLeft: "8px" }}>■ You are solely responsible for your Submissions and/or Contributions and you expressly agree to reimburse us for any and all losses that we may suffer because of your breach of (a) this section, (b) any third party's intellectual property rights, or (c) applicable law.</li>
+            <li style={{ marginBottom: "10px", paddingLeft: "8px" }}>&#9632; confirm that you have read and agree with our terms and conditions, and will not post, send, publish, upload, or transmit through the Services any Submission nor post any Contribution that is illegal, harassing, hateful, harmful, defamatory, obscene, bullying, abusive, discriminatory, threatening to any person or group, sexually explicit, false, inaccurate, deceitful, or misleading;</li>
+            <li style={{ marginBottom: "10px", paddingLeft: "8px" }}>&#9632; to the extent permissible by applicable law, waive any and all moral rights to any such Submission and/or Contribution;</li>
+            <li style={{ marginBottom: "10px", paddingLeft: "8px" }}>&#9632; warrant that any such Submissions and/or Contributions are original to you or that you have the necessary rights and licenses to submit such Submissions and/or Contributions and that you have full authority to grant us the above-mentioned rights in relation to your Submissions and/or Contributions; and</li>
+            <li style={{ marginBottom: "10px", paddingLeft: "8px" }}>&#9632; warrant and represent that your Submissions and/or Contributions do not constitute confidential information.</li>
+            <li style={{ marginBottom: "10px", paddingLeft: "8px" }}>&#9632; You are solely responsible for your Submissions and/or Contributions and you expressly agree to reimburse us for any and all losses that we may suffer because of your breach of (a) this section, (b) any third party's intellectual property rights, or (c) applicable law.</li>
           </ul>
           <ul style={{ paddingLeft: "20px", listStyleType: "disc", marginTop: "10px" }}>
             <li style={liStyle}>
-              We may remove or edit your Content: Although we have no obligation to monitor any Contributions, we shall have the right to remove or edit any Contributions at any time without notice if in our reasonable opinion we consider such Contributions harmful or in breach of these Legal Terms. If we remove or edit any such Contributions, we may also suspend or disable your account and report you to the authorities.
+              <strong style={{ color: "#F2F2F2" }}>We may remove or edit your Content:</strong> Although we have no obligation to monitor any Contributions, we shall have the right to remove or edit any Contributions at any time without notice if in our reasonable opinion we consider such Contributions harmful or in breach of these Legal Terms. If we remove or edit any such Contributions, we may also suspend or disable your account and report you to the authorities.
             </li>
           </ul>
 
+          {/* ── F ── */}
           <h2 style={sectionHeading}>F. PURCHASES AND PAYMENT</h2>
           <ul style={{ paddingLeft: "20px", listStyleType: "disc" }}>
             <li style={liStyle}>
@@ -178,6 +211,7 @@ const TermsAndConditions = () => {
             </li>
           </ul>
 
+          {/* ── G ── */}
           <h2 style={sectionHeading}>G. LIMITATIONS OF LIABILITY</h2>
           <ul style={{ paddingLeft: "20px", listStyleType: "disc" }}>
             <li style={liStyle}>
@@ -185,6 +219,7 @@ const TermsAndConditions = () => {
             </li>
           </ul>
 
+          {/* ── H ── */}
           <h2 style={sectionHeading}>H. INDEMNIFICATION</h2>
           <ul style={{ paddingLeft: "20px", listStyleType: "disc" }}>
             <li style={liStyle}>
@@ -192,6 +227,7 @@ const TermsAndConditions = () => {
             </li>
           </ul>
 
+          {/* ── I ── */}
           <h2 style={sectionHeading}>I. USER DATA</h2>
           <ul style={{ paddingLeft: "20px", listStyleType: "disc" }}>
             <li style={liStyle}>
@@ -199,6 +235,7 @@ const TermsAndConditions = () => {
             </li>
           </ul>
 
+          {/* ── J ── */}
           <h2 style={sectionHeading}>J. PRIVACY POLICY</h2>
           <p>
             We care about data privacy and security. Please review our{" "}
@@ -206,6 +243,7 @@ const TermsAndConditions = () => {
             {" "}By using the Services, you agree to be bound by our Privacy Policy, which is incorporated into these Legal Terms. Please be advised the Services are hosted in India. If you access the Services from any other region of the world with laws or other requirements governing personal data collection, use, or disclosure that differ from applicable laws in India, then through your continued use of the Services, you are transferring your data to India, and you expressly consent to have your data transferred to and processed in India.
           </p>
 
+          {/* ── K ── */}
           <h2 style={sectionHeading}>K. DISPUTE RESOLUTION</h2>
           <ul style={{ paddingLeft: "20px", listStyleType: "disc" }}>
             <li style={liStyle}>
@@ -215,10 +253,259 @@ const TermsAndConditions = () => {
 
         </div>
 
+        {/* ════════════════════════════════════════
+            REFUND POLICY
+        ════════════════════════════════════════ */}
+        <hr style={{ borderColor: "#2a2a2a", marginTop: "60px", marginBottom: "48px" }} />
+
+        <div style={{ fontSize: "clamp(14px, 1.8vw, 17px)", lineHeight: "1.8", color: "#BCBCBC" }}>
+
+          <h2 style={{ fontSize: "clamp(24px, 3.5vw, 36px)", fontWeight: "700", marginBottom: "6px", color: "#F2F2F2" }}>
+            Refund Policy
+          </h2>
+          <p style={{ color: "#969696", fontSize: "14px", marginBottom: "32px" }}>
+            Effective Date: 24 March 2026 &nbsp;|&nbsp; Last Updated: 24 March 2026
+          </p>
+
+          {/* 1 */}
+          <h3 style={refundSectionHeading}>1. Introduction &amp; Scope</h3>
+          <p>
+            This Refund Policy ("Policy") is published by Orbitandem Technologies Private Limited, the company behind Tandem: Events &amp; Experiences ("Tandem", "we", "us", or "our"), a phygital social-networking platform that lets users discover events and experiences, swipe to express interest, and connect with friends and contacts who share the same preferences.
+          </p>
+          <p style={{ marginTop: "12px" }}>
+            This Policy applies to all purchases made on or through Tandem, including the Tandem website, iOS application, and Android application (collectively, the "Platform"). Depending on the nature of your purchase and the channel through which it was made, different rules apply. Please read this Policy in full before completing any transaction on the Platform.
+          </p>
+          <p style={{ marginTop: "12px" }}>
+            By making a purchase on the Platform, you confirm that you have read, understood, and agree to this Policy.
+          </p>
+
+          {/* 2 */}
+          <h3 style={refundSectionHeading}>2. Types of Purchases &amp; Applicable Refund Rules</h3>
+          <p>
+            Tandem offers several categories of paid products and services. The refund rules for each category are set out below.
+          </p>
+
+          <h4 style={refundSubHeading}>2.1 Subscriptions (Premium Plans)</h4>
+          <ul style={{ paddingLeft: "20px", listStyleType: "disc" }}>
+            <li style={liStyle}>Tandem subscription plans (monthly or annual) may be cancelled by the user at any time through the Platform or the relevant app store settings.</li>
+            <li style={liStyle}>Upon cancellation, your subscription will not be renewed at the next billing cycle. You will, however, retain access to all premium features until the last day of your current paid billing period.</li>
+            <li style={liStyle}>No partial or pro-rated refunds will be issued for the unused portion of a billing cycle, except where required by applicable law.</li>
+            <li style={liStyle}>Annual plan holders who cancel within 7 (seven) days of their initial purchase date (and have not used any premium features) may request a full refund by writing to our support team at{" "}
+              <a href="mailto:support@tandem.it.com" style={{ color: "#00FFC8", textDecoration: "none" }}>support@tandem.it.com</a>.
+            </li>
+          </ul>
+
+          <h4 style={refundSubHeading}>2.2 Event &amp; Experience Tickets — Tandem-Managed Events</h4>
+          <ul style={{ paddingLeft: "20px", listStyleType: "disc" }}>
+            <li style={liStyle}>Tickets purchased through Tandem for events directly managed or hosted by Tandem may be eligible for a refund, subject to the cancellation window specified at the time of purchase.</li>
+            <li style={liStyle}>If no specific cancellation window is stated, requests submitted more than 48 hours before the event start time will be reviewed on a case-by-case basis.</li>
+            <li style={liStyle}>No refund will be issued for tickets cancelled within 48 hours of the event start time, or for no-shows (see Section 4).</li>
+          </ul>
+
+          <h4 style={refundSubHeading}>2.3 Event &amp; Experience Tickets — Third-Party Hosted Events</h4>
+          <ul style={{ paddingLeft: "20px", listStyleType: "disc" }}>
+            <li style={liStyle}>For events and experiences listed on Tandem but organised or managed by third-party hosts, the refund policy of the relevant host or organiser applies.</li>
+            <li style={liStyle}>Tandem acts solely as a discovery and booking facilitator in such cases and is not responsible for processing or honouring refunds on behalf of third-party organisers.</li>
+            <li style={liStyle}>Users are strongly advised to review the organiser's refund terms before purchasing tickets for third-party events.</li>
+            <li style={liStyle}>Where a third-party organiser cancels a paid event, the provisions of Section 3 below apply.</li>
+          </ul>
+
+          <h4 style={refundSubHeading}>2.4 In-App Credits &amp; Virtual Currency</h4>
+          <ul style={{ paddingLeft: "20px", listStyleType: "disc" }}>
+            <li style={liStyle}>In-app credits or virtual currency credited to your Tandem account are granted on a rolling basis.</li>
+            <li style={liStyle}>Credits expire 6 (six) months from the date they are credited to your account if unused. Each credit batch carries its own 6-month expiry calculated from its individual credit date.</li>
+            <li style={liStyle}>Expired credits cannot be reinstated or refunded.</li>
+            <li style={liStyle}>Credits that have been used or applied towards a purchase are non-refundable.</li>
+            <li style={liStyle}>Unused, non-expired credits are generally non-refundable except in the case of account closure initiated by Tandem without cause, in which case Tandem will review refund eligibility at its sole discretion.</li>
+          </ul>
+
+          <h4 style={refundSubHeading}>2.5 One-Time Feature Purchases</h4>
+          <ul style={{ paddingLeft: "20px", listStyleType: "disc" }}>
+            <li style={liStyle}>One-time in-app feature purchases (such as event boosts, spotlight placements, or similar consumable features) are non-refundable once purchased, regardless of whether they have been used.</li>
+            <li style={liStyle}>These features are made available to you immediately upon purchase and are therefore consumed at the point of sale.</li>
+          </ul>
+
+          {/* 3 */}
+          <h3 style={refundSectionHeading}>3. Event Cancellations by Hosts or Organisers</h3>
+          <p>
+            If a paid event or experience listed on the Platform is cancelled by the host or organiser (whether Tandem-managed or third-party), the following rules apply:
+          </p>
+          <ul style={{ paddingLeft: "20px", listStyleType: "disc", marginTop: "12px" }}>
+            <li style={liStyle}>All amounts paid by users to book tickets for the cancelled event will be refunded in full.</li>
+            <li style={liStyle}>Refunds will be processed within 7 (seven) working days from the date Tandem or the organiser confirms the cancellation.</li>
+            <li style={liStyle}>Refunds will be credited to the original payment method used at the time of booking (see Section 7).</li>
+            <li style={liStyle}>Tandem will make reasonable efforts to notify affected users of the cancellation and the refund timeline by email and/or in-app notification.</li>
+            <li style={liStyle}>In cases where an event is postponed or rescheduled rather than cancelled outright, Tandem will communicate available options (attend the rescheduled event or request a refund) and users will have a reasonable window to decide, as communicated at the time.</li>
+          </ul>
+
+          <div style={calloutBox}>
+            <p style={{ color: "#969696", fontSize: "13px", marginBottom: "6px", fontWeight: "600" }}>Important Note on Third-Party Cancellations</p>
+            <p style={{ fontStyle: "italic", fontSize: "clamp(13px, 1.6vw, 15px)" }}>
+              Where a third-party organiser cancels an event, Tandem will facilitate the refund process to the best of its ability. However, Tandem&apos;s ability to issue refunds is contingent on receiving the corresponding funds from the organiser. Tandem shall not be held liable for delays caused by a third-party organiser&apos;s failure to remit funds in a timely manner.
+            </p>
+          </div>
+
+          {/* 4 */}
+          <h3 style={refundSectionHeading}>4. No-Show Policy</h3>
+          <p>
+            If you have purchased a ticket and do not attend the event or experience — whether because you forgot, were unable to make it, or for any other personal reason — your ticket is non-refundable. No exceptions will be made for no-shows. We encourage users to carefully review event details and ensure availability before purchasing tickets.
+          </p>
+
+          {/* 5 */}
+          <h3 style={refundSectionHeading}>5. Platform-Specific Refund Rules (iOS &amp; Android)</h3>
+          <p>
+            Purchases made through the Apple App Store or Google Play Store are subject to the respective refund policies of Apple Inc. and Google LLC. Tandem does not control, and cannot override, the refund policies of these third-party platforms.
+          </p>
+
+          <h4 style={refundSubHeading}>5.1 Apple App Store (iOS)</h4>
+          <ul style={{ paddingLeft: "20px", listStyleType: "disc" }}>
+            <li style={liStyle}>If you purchased a Tandem subscription or in-app purchase through the Apple App Store, any refund request must be submitted directly to Apple.</li>
+            <li style={liStyle}>You may request a refund via reportaproblem.apple.com or through your Apple ID account settings.</li>
+            <li style={liStyle}>Apple&apos;s refund decisions are final and are not within Tandem&apos;s control.</li>
+          </ul>
+
+          <h4 style={refundSubHeading}>5.2 Google Play Store (Android)</h4>
+          <ul style={{ paddingLeft: "20px", listStyleType: "disc" }}>
+            <li style={liStyle}>If you purchased a Tandem subscription or in-app purchase through Google Play, any refund request must be submitted directly to Google.</li>
+            <li style={liStyle}>You may request a refund via play.google.com/store/account/subscriptions or by contacting Google Play support.</li>
+            <li style={liStyle}>Google&apos;s refund decisions are final and are not within Tandem&apos;s control.</li>
+          </ul>
+
+          <div style={calloutBox}>
+            <p style={{ color: "#969696", fontSize: "13px", marginBottom: "6px", fontWeight: "600" }}>Platform Purchases</p>
+            <p style={{ fontStyle: "italic", fontSize: "clamp(13px, 1.6vw, 15px)" }}>
+              For clarity: if you see a charge from "Apple" or "Google Play" on your statement, your purchase was processed by that platform and must be refunded through them. If you see a charge from "Tandem" or "Orbitandem Technologies" or "Tandem : Events &amp; Experiences", please contact us directly.
+            </p>
+          </div>
+
+          {/* 6 */}
+          <h3 style={refundSectionHeading}>6. How to Request a Refund</h3>
+          <p>To request a refund for a Tandem-processed purchase, please use one of the following channels:</p>
+          <ul style={{ paddingLeft: "20px", listStyleType: "disc", marginTop: "12px" }}>
+            <li style={liStyle}>
+              <strong style={{ color: "#F2F2F2" }}>Email:</strong> Send your refund request to{" "}
+              <a href="mailto:support@tandem.it.com" style={{ color: "#00FFC8", textDecoration: "none" }}>support@tandem.it.com</a>{" "}
+              with the subject line "Refund Request — [Your Order ID]".
+            </li>
+            <li style={liStyle}>
+              <strong style={{ color: "#F2F2F2" }}>Help Centre:</strong> Submit a support ticket through the Tandem in-app Help Centre or at tandem.it.com/help.
+            </li>
+          </ul>
+          <p style={{ marginTop: "12px" }}>Please include the following information with your request to help us process it efficiently:</p>
+          <ul style={{ paddingLeft: "20px", listStyleType: "circle", marginTop: "8px" }}>
+            <li style={liStyle}>Your registered phone number</li>
+            <li style={liStyle}>Order ID or transaction reference number</li>
+            <li style={liStyle}>Name and date of the event or purchase</li>
+            <li style={liStyle}>Reason for the refund request</li>
+            <li style={liStyle}>Any supporting documentation (e.g., cancellation confirmation)</li>
+          </ul>
+          <p style={{ marginTop: "12px" }}>
+            We aim to acknowledge all refund requests within 3 (three) business days of receipt.
+          </p>
+
+          {/* 7 */}
+          <h3 style={refundSectionHeading}>7. Refund Method &amp; Timeline</h3>
+          <ul style={{ paddingLeft: "20px", listStyleType: "disc" }}>
+            <li style={liStyle}>Approved refunds will be credited to the original payment method used at the time of the transaction (credit card, debit card, UPI, net banking, or other supported payment method).</li>
+            <li style={liStyle}>Tandem does not issue refunds via cash, cheque, or alternative payment methods unless expressly agreed in writing.</li>
+            <li style={liStyle}>Once a refund is approved and processed by Tandem, the time taken for the credit to appear in your account depends on your bank or payment provider and is typically 5–10 business days.</li>
+            <li style={liStyle}>For event cancellation refunds, please refer to the 7 working-day processing window outlined in Section 3.</li>
+            <li style={liStyle}>Tandem reserves the right to deduct applicable payment gateway fees from the refund amount where such fees are non-recoverable by Tandem, and will notify you of any such deduction prior to processing.</li>
+          </ul>
+
+          {/* 8 */}
+          <h3 style={refundSectionHeading}>8. Exceptional Circumstances &amp; Limitation of Liability</h3>
+          <p>
+            Tandem will give reasonable consideration to refund requests arising from the following exceptional circumstances, provided they are supported by appropriate evidence:
+          </p>
+          <ul style={{ paddingLeft: "20px", listStyleType: "disc", marginTop: "12px" }}>
+            <li style={liStyle}><strong style={{ color: "#F2F2F2" }}>Technical errors:</strong> Duplicate charges or failed transactions caused directly by a verifiable error in the Tandem Platform or its payment processing systems.</li>
+            <li style={liStyle}><strong style={{ color: "#F2F2F2" }}>Unauthorised transactions:</strong> Purchases made as a result of documented unauthorised access to your Tandem account. Users must report such incidents to{" "}
+              <a href="mailto:support@tandem.it.com" style={{ color: "#00FFC8", textDecoration: "none" }}>support@tandem.it.com</a>{" "}
+              and to the relevant authorities promptly.
+            </li>
+            <li style={liStyle}><strong style={{ color: "#F2F2F2" }}>Significant service unavailability:</strong> Where a paid feature or ticketed event is rendered wholly inaccessible due to a Tandem platform outage or technical failure attributable to Tandem, and no equivalent remedy (rescheduling or alternative access) is offered.</li>
+          </ul>
+          <p style={{ marginTop: "16px" }}>The following circumstances do not qualify for a refund under this Policy:</p>
+          <ul style={{ paddingLeft: "20px", listStyleType: "disc", marginTop: "8px" }}>
+            <li style={liStyle}>Change of mind after purchase.</li>
+            <li style={liStyle}>Failure to use a purchased feature, subscription, or ticket.</li>
+            <li style={liStyle}>Third-party service disruptions (internet outages, device failures, etc.) outside Tandem&apos;s control.</li>
+            <li style={liStyle}>Events of force majeure, including natural disasters, pandemics, government restrictions, war, or any circumstances beyond Tandem&apos;s reasonable control.</li>
+          </ul>
+
+          <div style={calloutBox}>
+            <p style={{ color: "#969696", fontSize: "13px", marginBottom: "6px", fontWeight: "600" }}>Limitation of Liability</p>
+            <p style={{ fontStyle: "italic", fontSize: "clamp(13px, 1.6vw, 15px)" }}>
+              To the fullest extent permitted by applicable law, Orbitandem Technologies Private Limited&apos;s total liability in connection with any refund claim shall be limited to the amount actually paid by the user for the specific purchase in dispute. Tandem shall not be liable for any indirect, incidental, or consequential loss arising from any purchase or refund decision.
+            </p>
+          </div>
+
+          {/* 9 */}
+          <h3 style={refundSectionHeading}>9. Legal Compliance</h3>
+          <p>
+            This Policy is intended to comply with, and should be read in conjunction with, the following legal frameworks:
+          </p>
+
+          <h4 style={refundSubHeading}>9.1 Indian Consumer Protection Act, 2019</h4>
+          <p>
+            For users in India, this Policy is governed by and complies with the Consumer Protection Act, 2019, and the rules framed thereunder, including the Consumer Protection (E-Commerce) Rules, 2020. Where any provision of this Policy is inconsistent with mandatory consumer rights under Indian law, those legal provisions shall prevail.
+          </p>
+
+          <h4 style={refundSubHeading}>9.2 App Store &amp; Play Store Policies</h4>
+          <p>
+            Where purchases are made through the Apple App Store or Google Play Store, Apple&apos;s and Google&apos;s respective developer and consumer policies apply in addition to this Policy. In the event of any conflict between this Policy and those platform policies, the platform&apos;s policy shall prevail for purchases made through that platform.
+          </p>
+
+          {/* 10 */}
+          <h3 style={refundSectionHeading}>10. Changes to This Policy</h3>
+          <p>
+            Tandem reserves the right to update, modify, or replace this Policy at any time, at its sole discretion, without prior notice. Changes will be effective immediately upon publication of the revised Policy on the Platform.
+          </p>
+          <p style={{ marginTop: "12px" }}>
+            We will make reasonable efforts to notify registered users of material changes via email to the address associated with your Tandem account and/or via an in-app notification. Your continued use of the Platform following any changes constitutes your acceptance of the revised Policy.
+          </p>
+          <p style={{ marginTop: "12px" }}>
+            We recommend checking this page periodically to stay informed of the current terms.
+          </p>
+
+          {/* 11 */}
+          <h3 style={refundSectionHeading}>11. Contact &amp; Dispute Resolution</h3>
+          <p>For any refund-related queries, disputes, or concerns, please contact us at:</p>
+
+          <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "16px", fontSize: "clamp(13px, 1.6vw, 15px)" }}>
+            <tbody>
+              {[
+                { label: "Legal / Refunds", value: <a href="mailto:legal@tandem.it.com" style={{ color: "#00FFC8", textDecoration: "none" }}>legal@tandem.it.com</a> },
+                { label: "General Support", value: <><a href="mailto:support@tandem.it.com" style={{ color: "#00FFC8", textDecoration: "none" }}>support@tandem.it.com</a>{" | tandem.it.com/help"}</> },
+                { label: "Registered Entity", value: "Orbitandem Technologies Private Limited" },
+                { label: "Website", value: "www.tandem.it.com" },
+              ].map((row, i) => (
+                <tr key={i} style={{ borderBottom: "1px solid #2a2a2a" }}>
+                  <td style={{ padding: "10px 14px", fontWeight: "600", color: "#F2F2F2", whiteSpace: "nowrap", width: "200px", background: "#1a1a1a" }}>{row.label}</td>
+                  <td style={{ padding: "10px 14px", color: "#BCBCBC" }}>{row.value}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          <p style={{ marginTop: "20px" }}>
+            If your concern is not resolved to your satisfaction through our support channels, you may escalate the matter as follows:
+          </p>
+          <ul style={{ paddingLeft: "20px", listStyleType: "disc", marginTop: "8px" }}>
+            <li style={liStyle}><strong style={{ color: "#F2F2F2" }}>In India:</strong> File a complaint with the National Consumer Disputes Redressal Commission (NCDRC) or the appropriate State Consumer Disputes Redressal Commission, as applicable.</li>
+            <li style={liStyle}><strong style={{ color: "#F2F2F2" }}>Via App Stores:</strong> Contact Apple or Google support for purchases processed through their respective platforms.</li>
+          </ul>
+          <p style={{ marginTop: "16px" }}>
+            Tandem is committed to resolving all disputes fairly and in good faith. We encourage users to contact us before initiating any formal proceedings, as most concerns can be resolved quickly through direct communication.
+          </p>
+
+        </div>
+
         <hr style={{ borderColor: "#2a2a2a", marginTop: "60px", marginBottom: "24px" }} />
         <p style={{ color: "#969696", fontSize: "13px" }}>
-          By using Tandem, you acknowledge that you have read, understood, and agree to be bound by
-          these Terms &amp; Conditions.
+          &copy; 2026 Orbitandem Technologies Private Limited. All rights reserved.{" "}
+          Tandem: Events &amp; Experiences | www.tandem.it.com
         </p>
 
       </div>
