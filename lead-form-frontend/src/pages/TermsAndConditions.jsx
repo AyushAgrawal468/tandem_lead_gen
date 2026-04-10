@@ -57,8 +57,11 @@ const TermsAndConditions = () => {
         <h1 style={{ fontSize: "clamp(28px, 4vw, 42px)", fontWeight: "700", marginBottom: "8px", color: "#F2F2F2" }}>
           Terms &amp; Conditions &amp; Refund Policy
         </h1>
-        <p style={{ color: "#969696", fontSize: "14px", marginBottom: "36px" }}>
+        <p style={{ color: "#969696", fontSize: "14px", marginBottom: "8px" }}>
           Last updated: 24th March 2026 &nbsp;·&nbsp; Orbitandem Technologies Private Limited
+        </p>
+        <p style={{ color: "#969696", fontSize: "14px", marginBottom: "36px" }}>
+          For contact: <a href="tel:+919871218897" style={{ color: "#00FFC8", textDecoration: "none" }}>+919871218897</a>
         </p>
 
         <hr style={{ borderColor: "#2a2a2a", marginBottom: "36px" }} />
