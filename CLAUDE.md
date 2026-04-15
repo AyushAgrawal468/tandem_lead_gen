@@ -101,14 +101,14 @@ Standard Spring Boot layered architecture: `Controller → Service → Repositor
 
 **Deferred attribution flow:** Called by the `otp-auth-service` at app cold start. `POST /api/referral/attribute` receives `{ip, userAgent, screenWidth, lang, installTs}` and scores all referral clicks within a 30-minute window against the install. Scoring: IP match = 60 pts (filtered at query level), user-agent match = 20 pts, time proximity ≤15 min = 15 pts, screen width match = 5 pts. Returns the top match if score ≥ 75.
 
-**Event share deep link flow:** `/e/:eventId` frontend route (`EventRedirect.jsx`) tracks the click via `POST /api/event-link/{eventId}` then redirects to App Store or Play Store based on User-Agent. If the app is already installed, iOS Universal Links / Android App Links intercept the URL before the browser loads — this page is only reached by users without the app. On first app launch, the app calls `POST /api/event-link/attribute` to retrieve the `eventId` for deferred deep linking. Same fingerprint scoring as referral attribution; returns `{ matched, eventId }`. DB table: `event_link_hits`.
+**Event share deep link flow:** `/e/:eventId` React route (`EventRedirect.jsx`) handles the fallback when the app is NOT installed — Apache serves React for this path. If the app IS installed, the OS intercepts `https://tandem.it.com/e/<eventId>` via Universal Links / App Links before any browser request. `EventRedirect.jsx` calls `POST /api/event-link/{eventId}` (tracked in `event_link_hits` table) then redirects to App Store or Play Store. On first app launch after install, the app calls `POST /api/event-link/attribute` → fingerprint match → returns `{ matched, eventId }` → app navigates to the event. Same fingerprint scoring as referral attribution (threshold 75). There is no Spring Boot controller for `GET /e/{eventId}` — Apache routes that path to React, not Spring Boot.
 
 **Universal Links / App Links setup:**
-- `public/.well-known/assetlinks.json` — Android verification (package: `com.tandemit.tandemit`, SHA-256 fingerprint set)
-- `public/.well-known/apple-app-site-association` — iOS verification (Team ID: `MF5NQJQ727`, Bundle ID: `com.tandemit.tandemit`)
-- Both use `paths: ["*"]` to cover all current and future deep link paths
-- `.htaccess` forces `Content-Type: application/json` for `apple-app-site-association` (no file extension)
-- App-side setup (pending mobile dev team): Android `<intent-filter android:autoVerify="true">` in `AndroidManifest.xml`; iOS Associated Domains (`applinks:tandem.it.com`) + URL handling in `SceneDelegate`
+- `.well-known/assetlinks.json` and `.well-known/apple-app-site-association` are served by the server at `tandem.it.com/.well-known/` — the server proxies `/.well-known/*` to Spring Boot (same as `/api/*`), bypassing the React SPA rewrite. Do NOT serve these as static files via `.htaccess` — Apache's SPA rewrite intercepts and returns `index.html` as `text/html`.
+- Both files are hardcoded in `WellKnownController.java` with `Content-Type: application/json`.
+- Android: `assetlinks.json` verified ✅ (package: `com.tandemit.tandemit`, SHA-256: `D1:39:...7F:0A`). Intent-filter for `tandem.it.com` added to `AndroidManifest.xml` alongside the existing `api.tandem.it.com` filter.
+- iOS: `apple-app-site-association` live (Team ID: `MF5NQJQ727`, Bundle ID: `com.tandemit.tandemit`). Pending mobile team: Associated Domains (`applinks:tandem.it.com`) + URL handler in `SceneDelegate`.
+- Both use `paths: ["*"]` to cover all current and future deep link paths.
 
 **IP extraction:** `ReferralHitController` reads `X-Forwarded-For` first (taking the first IP in the comma-separated list), falling back to `request.getRemoteAddr()`. Required for accurate attribution behind load balancers/proxies.
 
