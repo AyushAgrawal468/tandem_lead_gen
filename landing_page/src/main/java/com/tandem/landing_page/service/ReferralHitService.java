@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 
@@ -74,28 +76,35 @@ public class ReferralHitService {
             return new AttributionResponse(false, null);
         }
 
-        LocalDateTime since = LocalDateTime.now().minusMinutes(ATTRIBUTION_WINDOW_MINUTES);
+        LocalDateTime since = LocalDateTime.now(ZoneOffset.UTC).minusMinutes(ATTRIBUTION_WINDOW_MINUTES);
         List<ReferralHit> candidates = repository.findByIpAndCreatedAtAfter(req.getIp(), since);
 
         if (candidates.isEmpty()) {
             return new AttributionResponse(false, null);
         }
 
-        // Parse installTs if provided — used for time-window scoring
+        // Parse installTs if provided — used for time-window scoring.
+        // App sends IST (no offset); DB createdAt is UTC. Convert IST → UTC for correct delta.
         LocalDateTime installTime = null;
         if (req.getInstallTs() != null && !req.getInstallTs().isBlank()) {
             try {
-                installTime = OffsetDateTime.parse(req.getInstallTs()).toLocalDateTime();
+                // Has explicit offset (e.g. "Z" or "+05:30") — convert to UTC
+                installTime = OffsetDateTime.parse(req.getInstallTs())
+                        .withOffsetSameInstant(ZoneOffset.UTC)
+                        .toLocalDateTime();
             } catch (Exception e) {
                 try {
-                    installTime = LocalDateTime.parse(req.getInstallTs());
+                    // No offset — treat as IST (Flutter app clock), convert to UTC
+                    installTime = LocalDateTime.parse(req.getInstallTs())
+                            .atZone(ZoneId.of("Asia/Kolkata"))
+                            .withZoneSameInstant(ZoneOffset.UTC)
+                            .toLocalDateTime();
                 } catch (Exception ex) {
-                    // fallback: use now
-                    installTime = LocalDateTime.now();
+                    installTime = LocalDateTime.now(ZoneOffset.UTC);
                 }
             }
         } else {
-            installTime = LocalDateTime.now();
+            installTime = LocalDateTime.now(ZoneOffset.UTC);
         }
 
         int bestScore = 0;
@@ -107,22 +116,19 @@ public class ReferralHitService {
             // IP match — already guaranteed by the query, but worth 60 pts
             score += 60;
 
-            // User-Agent match (20 pts)
-            if (req.getUserAgent() != null && req.getUserAgent().equals(hit.getUserAgent())) {
-                score += 20;
-            }
-
-            // Time window: click within 15 min of install (15 pts)
+            // Time window: click within 15 min of install (30 pts)
+            // UA signal removed — browser UA (Chrome) never matches Dart HTTP client UA
             if (hit.getCreatedAt() != null) {
                 long deltaSecs = Math.abs(Duration.between(hit.getCreatedAt(), installTime).getSeconds());
                 if (deltaSecs <= 900) { // 15 minutes
-                    score += 15;
+                    score += 30;
                 }
             }
 
-            // Screen width match (5 pts)
-            if (req.getScreenWidth() != null && req.getScreenWidth().equals(hit.getScreenWidth())) {
-                score += 5;
+            // Screen width match ±2px tolerance (10 pts)
+            if (req.getScreenWidth() != null && hit.getScreenWidth() != null
+                    && Math.abs(req.getScreenWidth() - hit.getScreenWidth()) <= 2) {
+                score += 10;
             }
 
             if (score > bestScore) {
