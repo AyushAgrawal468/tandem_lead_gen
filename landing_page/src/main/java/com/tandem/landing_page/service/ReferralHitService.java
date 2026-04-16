@@ -77,7 +77,8 @@ public class ReferralHitService {
         }
 
         LocalDateTime since = LocalDateTime.now(ZoneOffset.UTC).minusMinutes(ATTRIBUTION_WINDOW_MINUTES);
-        List<ReferralHit> candidates = repository.findByIpAndCreatedAtAfter(req.getIp(), since);
+        String ipPrefix = extractSubnet(req.getIp());
+        List<ReferralHit> candidates = repository.findByIpStartingWithAndCreatedAtAfter(ipPrefix, since);
 
         if (candidates.isEmpty()) {
             return new AttributionResponse(false, null);
@@ -113,8 +114,12 @@ public class ReferralHitService {
         for (ReferralHit hit : candidates) {
             int score = 0;
 
-            // IP match — already guaranteed by the query, but worth 60 pts
-            score += 60;
+            // Exact IP = 60 pts; same /24 subnet (CGNAT sibling) = 40 pts
+            if (req.getIp().equals(hit.getIp())) {
+                score += 60;
+            } else {
+                score += 40;
+            }
 
             // Time window: click within 15 min of install (30 pts)
             // UA signal removed — browser UA (Chrome) never matches Dart HTTP client UA
@@ -142,5 +147,11 @@ public class ReferralHitService {
         }
 
         return new AttributionResponse(false, null);
+    }
+
+    /** Extracts the /24 prefix (e.g. "103.163.62.193" → "103.163.62."). */
+    private String extractSubnet(String ip) {
+        int lastDot = ip.lastIndexOf('.');
+        return lastDot > 0 ? ip.substring(0, lastDot + 1) : ip;
     }
 }
