@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface EventLinkHitRepository extends JpaRepository<EventLinkHit, Long> {
     List<EventLinkHit> findByIpAndCreatedAtAfter(String ip, LocalDateTime since);
+    List<EventLinkHit> findByIpStartingWithAndCreatedAtAfter(String ipPrefix, LocalDateTime since);
 }
