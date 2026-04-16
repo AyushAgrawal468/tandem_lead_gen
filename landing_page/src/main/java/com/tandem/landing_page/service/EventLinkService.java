@@ -3,6 +3,8 @@ package com.tandem.landing_page.service;
 import com.tandem.landing_page.Entity.EventLinkHit;
 import com.tandem.landing_page.Repository.EventLinkHitRepository;
 import com.tandem.landing_page.dto.AttributionRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -14,6 +16,8 @@ import java.util.List;
 
 @Service
 public class EventLinkService {
+
+    private static final Logger logger = LoggerFactory.getLogger(EventLinkService.class);
 
     private static final int ATTRIBUTION_THRESHOLD = 75;
     private static final int ATTRIBUTION_WINDOW_MINUTES = 30;
@@ -50,7 +54,11 @@ public class EventLinkService {
         String ipPrefix = extractSubnet(req.getIp());
         List<EventLinkHit> candidates = repository.findByIpStartingWithAndCreatedAtAfter(ipPrefix, since);
 
+        logger.info("[attribute] ip={}, ipPrefix={}, since={}, installTs={}, candidates={}",
+                req.getIp(), ipPrefix, since, req.getInstallTs(), candidates.size());
+
         if (candidates.isEmpty()) {
+            logger.info("[attribute] No candidates found for ip prefix={}", ipPrefix);
             return null;
         }
 
@@ -92,8 +100,9 @@ public class EventLinkService {
             }
 
             // Time window: click within 15 min of install (30 pts)
+            long deltaSecs = -1;
             if (hit.getCreatedAt() != null) {
-                long deltaSecs = Math.abs(Duration.between(hit.getCreatedAt(), installTime).getSeconds());
+                deltaSecs = Math.abs(Duration.between(hit.getCreatedAt(), installTime).getSeconds());
                 if (deltaSecs <= 900) {
                     score += 30;
                 }
@@ -105,11 +114,16 @@ public class EventLinkService {
                 score += 10;
             }
 
+            logger.info("[attribute] candidate hitId={}, hitIp={}, hitCreatedAt={}, hitScreenWidth={} | installTime={}, deltaSecs={}, score={}",
+                    hit.getId(), hit.getIp(), hit.getCreatedAt(), hit.getScreenWidth(), installTime, deltaSecs, score);
+
             if (score > bestScore) {
                 bestScore = score;
                 bestHit = hit;
             }
         }
+
+        logger.info("[attribute] bestScore={}, threshold={}, matched={}", bestScore, ATTRIBUTION_THRESHOLD, bestScore >= ATTRIBUTION_THRESHOLD);
 
         if (bestScore >= ATTRIBUTION_THRESHOLD && bestHit != null) {
             return bestHit.getEventId();
