@@ -52,7 +52,7 @@ public class EventLinkService {
 
         LocalDateTime since = LocalDateTime.now(ZoneOffset.UTC).minusMinutes(ATTRIBUTION_WINDOW_MINUTES);
         String ipPrefix = extractSubnet(req.getIp());
-        List<EventLinkHit> candidates = repository.findByIpStartingWithAndCreatedAtAfter(ipPrefix, since);
+        List<EventLinkHit> candidates = repository.findByIpStartingWithAndCreatedAtAfterAndResolvedFalse(ipPrefix, since);
 
         logger.info("[attribute] ip={}, ipPrefix={}, since={}, installTs={}, candidates={}",
                 req.getIp(), ipPrefix, since, req.getInstallTs(), candidates.size());
@@ -126,6 +126,8 @@ public class EventLinkService {
         logger.info("[attribute] bestScore={}, threshold={}, matched={}", bestScore, ATTRIBUTION_THRESHOLD, bestScore >= ATTRIBUTION_THRESHOLD);
 
         if (bestScore >= ATTRIBUTION_THRESHOLD && bestHit != null) {
+            bestHit.setResolved(true);
+            repository.save(bestHit);
             return bestHit.getEventId();
         }
 
