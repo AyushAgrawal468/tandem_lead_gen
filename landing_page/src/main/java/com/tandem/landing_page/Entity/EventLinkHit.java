@@ -18,6 +18,9 @@ public class EventLinkHit {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
+    @Column(nullable = false)
+    private boolean resolved = false;
+
     private String userAgent;
     private String ip;
     private Integer screenWidth;
@@ -53,4 +56,7 @@ public class EventLinkHit {
 
     public String getPlatform() { return platform; }
     public void setPlatform(String platform) { this.platform = platform; }
+
+    public boolean isResolved() { return resolved; }
+    public void setResolved(boolean resolved) { this.resolved = resolved; }
 }
