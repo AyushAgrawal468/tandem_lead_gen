@@ -18,7 +18,7 @@ public class EventLinkHit {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "boolean not null default false")
     private boolean resolved = false;
 
     private String userAgent;
