@@ -20,6 +20,8 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Service
 public class HealthCheckService {
@@ -27,6 +29,7 @@ public class HealthCheckService {
     private static final String SERVICE_NAME = "otp-auth-service";
     private static final ZoneId IST = ZoneId.of("Asia/Kolkata");
     private static final int TIMEOUT_MS = 10_000;
+    private static final DateTimeFormatter ALERT_FMT = DateTimeFormatter.ofPattern("dd-MMM-yyyy HH:mm:ss");
 
     @Value("${health.check.otp-auth.url}")
     private String healthCheckUrl;
@@ -35,10 +38,12 @@ public class HealthCheckService {
     private String authKey;
 
     private final HealthCheckLogRepository repository;
+    private final TelegramAlertService telegramAlertService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public HealthCheckService(HealthCheckLogRepository repository) {
+    public HealthCheckService(HealthCheckLogRepository repository, TelegramAlertService telegramAlertService) {
         this.repository = repository;
+        this.telegramAlertService = telegramAlertService;
     }
 
     public void checkAndLog() {
@@ -92,6 +97,29 @@ public class HealthCheckService {
         log.setCreatedAt(istNow);
 
         repository.save(log);
+        checkAndAlert(log);
+    }
+
+    private void checkAndAlert(HealthCheckLog latest) {
+        if ("ok".equals(latest.getStatus())) return;
+
+        List<HealthCheckLog> recent = repository.findTop3ByServiceNameOrderByCheckedAtDesc(SERVICE_NAME);
+        if (recent.size() < 2) return;
+
+        boolean lastTwoFailed = !"ok".equals(recent.get(0).getStatus())
+                && !"ok".equals(recent.get(1).getStatus());
+
+        if (lastTwoFailed) {
+            String time = latest.getCheckedAt().format(ALERT_FMT);
+            String msg = String.format(
+                    "🚨 [Tandem Alert] %s is DOWN\n\nStatus: %s\nHTTP Code: %s\nTime (IST): %s\n\nHealth check failed. Will keep alerting until service recovers.",
+                    SERVICE_NAME,
+                    latest.getStatus(),
+                    latest.getHttpCode() != null ? latest.getHttpCode() : "N/A",
+                    time
+            );
+            telegramAlertService.sendAlert(msg);
+        }
     }
 
     private void parseBody(HealthCheckLog log, String body) {
