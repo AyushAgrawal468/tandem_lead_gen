@@ -1,0 +1,67 @@
+package com.tandem.landing_page.Entity;
+
+import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "combined_link_hits")
+public class CombinedLinkHit {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String referralCode;
+
+    @Column(nullable = false)
+    private String eventId;
+
+    @Column(nullable = false)
+    private LocalDateTime createdAt;
+
+    @Column(nullable = false, columnDefinition = "boolean not null default false")
+    private boolean resolved = false;
+
+    private String userAgent;
+    private String ip;
+    private Integer screenWidth;
+    private String lang;
+    private String platform;
+
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public CombinedLinkHit() {}
+
+    public Long getId() { return id; }
+
+    public String getReferralCode() { return referralCode; }
+    public void setReferralCode(String referralCode) { this.referralCode = referralCode; }
+
+    public String getEventId() { return eventId; }
+    public void setEventId(String eventId) { this.eventId = eventId; }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public boolean isResolved() { return resolved; }
+    public void setResolved(boolean resolved) { this.resolved = resolved; }
+
+    public String getUserAgent() { return userAgent; }
+    public void setUserAgent(String userAgent) { this.userAgent = userAgent; }
+
+    public String getIp() { return ip; }
+    public void setIp(String ip) { this.ip = ip; }
+
+    public Integer getScreenWidth() { return screenWidth; }
+    public void setScreenWidth(Integer screenWidth) { this.screenWidth = screenWidth; }
+
+    public String getLang() { return lang; }
+    public void setLang(String lang) { this.lang = lang; }
+
+    public String getPlatform() { return platform; }
+    public void setPlatform(String platform) { this.platform = platform; }
+}

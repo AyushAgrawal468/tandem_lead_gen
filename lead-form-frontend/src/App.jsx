@@ -48,6 +48,7 @@ import Hero from "./components/Hero";
 import ReferralRedirect from "./components/ReferralRedirect";
 import DownloadRedirect from "./components/DownloadRedirect";
 import EventRedirect from "./components/EventRedirect";
+import CombinedRedirect from "./components/CombinedRedirect";
 import AccountDeletion from "./pages/AccountDeletion";
 import ChildSafety from "./pages/ChildSafety";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
@@ -520,6 +521,9 @@ export default function App() {
 
         {/* Event share deep link — redirects to store; app opens event after install */}
         <Route path="/e/:eventId" element={<EventRedirect />} />
+
+        {/* Combined event+referral link — tracks both, redirects to store */}
+        <Route path="/l/links" element={<CombinedRedirect />} />
 
         {/* Download redirect — sends user to App Store or Play Store based on UA */}
         <Route path="/download" element={<DownloadRedirect />} />
