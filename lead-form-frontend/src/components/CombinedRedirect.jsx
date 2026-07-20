@@ -25,7 +25,7 @@ export default function CombinedRedirect() {
 
     const trackAndRedirect = async () => {
       try {
-        const url = new URL(apiUrl("/api/links/click"));
+        const url = new URL(apiUrl("/api/links/click"), window.location.origin);
         if (referralCode) url.searchParams.set("referralCode", referralCode);
         if (eventId) url.searchParams.set("eventId", eventId);
 

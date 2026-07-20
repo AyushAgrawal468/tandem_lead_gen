@@ -30,9 +30,9 @@ npm run generate:sitemap  # Regenerate sitemap only
 
 ### Architecture
 - **Entry**: `src/main.jsx` → `src/App.jsx`
-- **Routes**: `/` (landing page), `/r` (referral redirect), `/e/:eventId` (event share deep link), `/download`, `/help/account-deletion`, `/help/child-safety`, `/legal/privacy-policy`, `/legal/terms-and-conditions`
+- **Routes**: `/` (landing page), `/r` (referral redirect), `/e/:eventId` (event share deep link), `/l/links` (combined event+referral link), `/download`, `/help/account-deletion`, `/help/child-safety`, `/help/refund-policy`, `/legal/privacy-policy`, `/legal/terms-and-conditions`
 - **API calls**: always go through `src/lib/api.js` → `apiUrl()` helper. In dev, Vite proxies `/api/*` to `https://tandem.it.com/`. Set `VITE_API_BASE` env var to point to a different backend.
-- **Performance**: Below-the-fold sections (Features, Waitlist, Blog, FAQ, Footer) are lazy-loaded via `React.lazy` + `Suspense`, deferred until first scroll or idle callback (`deferSections` state in `LandingPage`). On back-navigation where a saved scroll position exists, `deferSections` starts as `true` immediately so content is ready before scroll restores.
+- **Performance**: Below-the-fold sections (Features, Blog, FAQ, DownloadSection, Footer) are lazy-loaded via `React.lazy` + `Suspense`, deferred until first scroll or idle callback (`deferSections` state in `LandingPage`). On back-navigation where a saved scroll position exists, `deferSections` starts as `true` immediately so content is ready before scroll restores. **Waitlist is currently hidden** (app launched) — component exists but is commented out in `App.jsx`.
 - **Analytics**: Google Analytics 4 (`G-XTYRTQY6R7`) + Microsoft Clarity, with custom section-engagement tracking via `IntersectionObserver`.
 - **Session tracking**: A `sessionId` is generated fresh on every page load (stored in `localStorage` + `sessionStorage`). It links location data to waitlist submissions on the backend.
 
@@ -93,15 +93,19 @@ Standard Spring Boot layered architecture: `Controller → Service → Repositor
 | `POST` | `/api/referral/attribute` | `X-API-KEY` header | Deferred attribution: match an app install to a referral click |
 | `POST` | `/api/event-link/{eventId}` | `X-API-KEY` header | Record an event share link click with device fingerprint |
 | `POST` | `/api/event-link/attribute` | `X-API-KEY` header | Deferred attribution: match an app install to an event link click; returns `eventId` |
+| `POST` | `/api/links/click` | `X-API-KEY` header | Record a combined event+referral link click (`?referralCode=&eventId=`); stored in `combined_link_hits` |
+| `POST` | `/api/links/attribute` | `X-API-KEY` header | Unified deferred attribution: checks `combined_link_hits` first, falls back to `referral_hits`; returns `{ matched, referralCode, eventId }` |
 | `GET` | `/download` | None | Public marketing redirect — sends users to App Store, Play Store, or website based on User-Agent |
 
 **Lead submission flow:** `LeadController` delegates entirely to `LeadService.saveLead()`, which handles deduplication on `(email, mobile)`, looks up `UserLocation` by `sessionId` to attach the city, then saves.
 
 **Referral click flow:** The `/r?ref=CODE` frontend route calls `POST /api/referral/{code}` with device fingerprint fields (`screenWidth`, `lang`, `platform`) and the `X-API-KEY`, then redirects based on user agent to the iOS App Store or Google Play.
 
-**Deferred attribution flow:** Called by the `otp-auth-service` at app cold start. `POST /api/referral/attribute` receives `{ip, userAgent, screenWidth, lang, installTs}` and scores all referral clicks within a 30-minute window against the install. Scoring: IP match = 60 pts (filtered at query level), user-agent match = 20 pts, time proximity ≤15 min = 15 pts, screen width match = 5 pts. Returns the top match if score ≥ 75.
+**Deferred attribution flow:** Called by the `otp-auth-service` at app cold start. Receives `{ip, userAgent, screenWidth, lang, installTs}` and scores candidates within a 30-minute window. **Scoring (identical across all 3 attribution endpoints):** exact IP match = 60 pts / same /24 subnet = 40 pts, time proximity ≤15 min = 30 pts, screen width match ±2px = 10 pts. Threshold: ≥ 75 pts to attribute. UA is NOT scored (browser UA never matches Dart HTTP client UA). For new `/l/links` format use `POST /api/links/attribute`; for legacy `/r?ref=` use `POST /api/referral/attribute`; for event-only links use `POST /api/event-link/attribute`.
 
 **Event share deep link flow:** `/e/:eventId` React route (`EventRedirect.jsx`) handles the fallback when the app is NOT installed — Apache serves React for this path. If the app IS installed, the OS intercepts `https://tandem.it.com/e/<eventId>` via Universal Links / App Links before any browser request. `EventRedirect.jsx` calls `POST /api/event-link/{eventId}` (tracked in `event_link_hits` table) then redirects to App Store or Play Store. On first app launch after install, the app calls `POST /api/event-link/attribute` → fingerprint match → returns `{ matched, eventId }` → app navigates to the event. Same fingerprint scoring as referral attribution (threshold 75). There is no Spring Boot controller for `GET /e/{eventId}` — Apache routes that path to React, not Spring Boot.
+
+**Combined event+referral link flow:** `/l/links?event-id=<id>&referral-code=<code>` React route (`CombinedRedirect.jsx`) — used when a shareable link carries both an event and a referral. `CombinedRedirect.jsx` calls `POST /api/links/click` with both IDs as query params (`referralCode`, `eventId`) and device fingerprint in the body, then redirects to the store. Hit stored in `combined_link_hits` table. On app cold start, `POST /api/links/attribute` checks `combined_link_hits` first (with resolved deduplication), then falls back to legacy `referral_hits`. Returns `{ matched, referralCode, eventId }`. Note: `referralCode` is optional (nullable); `eventId` is required (saved as `""` if absent).
 
 **Universal Links / App Links setup:**
 - `.well-known/assetlinks.json` and `.well-known/apple-app-site-association` are served by the server at `tandem.it.com/.well-known/` — the server proxies `/.well-known/*` to Spring Boot (same as `/api/*`), bypassing the React SPA rewrite. Do NOT serve these as static files via `.htaccess` — Apache's SPA rewrite intercepts and returns `index.html` as `text/html`.
@@ -110,7 +114,7 @@ Standard Spring Boot layered architecture: `Controller → Service → Repositor
 - iOS: `apple-app-site-association` live (Team ID: `MF5NQJQ727`, Bundle ID: `com.tandemit.tandemit`). Pending mobile team: Associated Domains (`applinks:tandem.it.com`) + URL handler in `SceneDelegate`.
 - Both use `paths: ["*"]` to cover all current and future deep link paths.
 
-**IP extraction:** `ReferralHitController` reads `X-Forwarded-For` first (taking the first IP in the comma-separated list), falling back to `request.getRemoteAddr()`. Required for accurate attribution behind load balancers/proxies.
+**IP extraction:** All three click-tracking controllers (`ReferralHitController`, `EventLinkController`, `CombinedLinkController`) read `X-Forwarded-For` first (taking the first IP in the comma-separated list), falling back to `request.getRemoteAddr()`. Required for accurate attribution behind load balancers/proxies.
 
 **Location geocoding:** `LocationService` calls the OpenCage Geocoding API and resolves city via fallback hierarchy: city → town → village.
 
@@ -120,4 +124,5 @@ Standard Spring Boot layered architecture: `Controller → Service → Repositor
 - **`application-atul.properties`** — another dev override with a different DB password
 - **`application-prod.properties`** — empty placeholder; production env vars must be set externally
 - Database: `spring.jpa.hibernate.ddl-auto=update` — schema auto-migrates on startup (no Flyway/Liquibase)
-- **CORS:** `WebConfig` restricts `/api/**` to `http://localhost:5173` and `https://tandem.it.com`. `LeadController` and `LocationController` override this with `@CrossOrigin(origins = "*")`. `/download` has its own open-origin mapping in `WebConfig` (public marketing endpoint).
+- **CORS:** `WebConfig` restricts `/api/**` to `http://localhost:5173` and `https://tandem.it.com`. `LeadController`, `LocationController`, `ReferralHitController`, `EventLinkController`, and `CombinedLinkController` all override this with `@CrossOrigin(origins = "*")`. `/download` has its own open-origin mapping in `WebConfig` (public marketing endpoint).
+- **Timezone:** All entity `@PrePersist` hooks use `LocalDateTime.now()` (JVM default timezone). Attribution services query with `LocalDateTime.now(ZoneOffset.UTC)`. These are consistent only when the JVM runs in UTC — do not change the server timezone without updating the entities to use `LocalDateTime.now(ZoneOffset.UTC)`.
