@@ -25,11 +25,12 @@ export default function CombinedRedirect() {
 
     const trackAndRedirect = async () => {
       try {
-        const url = new URL(apiUrl("/api/links/click"), window.location.origin);
-        if (referralCode) url.searchParams.set("referralCode", referralCode);
-        if (eventId) url.searchParams.set("eventId", eventId);
+        const qs = new URLSearchParams();
+        if (referralCode) qs.set("referralCode", referralCode);
+        if (eventId) qs.set("eventId", eventId);
+        const query = qs.toString() ? `?${qs.toString()}` : "";
 
-        await fetch(url.toString(), {
+        await fetch(apiUrl(`/api/links/click${query}`), {
           method: "POST",
           headers: {
             "X-API-KEY": "tandem_live_7KpQ2mX9vN4aR1cD8fH6jL3sZ0yW5uT2bE9gP1",

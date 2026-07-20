@@ -14,7 +14,6 @@ public class CombinedLinkHit {
 
     private String referralCode;
 
-    @Column(nullable = false)
     private String eventId;
 
     @Column(nullable = false)
