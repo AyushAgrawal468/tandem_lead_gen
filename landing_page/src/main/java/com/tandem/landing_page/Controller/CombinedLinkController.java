@@ -54,7 +54,7 @@ public class CombinedLinkController {
 
         combinedLinkService.save(
                 referralCode,
-                eventId,
+                eventId != null ? eventId : "",
                 userAgent,
                 ip,
                 body != null ? body.getScreenWidth() : null,
