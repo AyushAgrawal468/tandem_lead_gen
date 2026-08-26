@@ -27,6 +27,7 @@ import java.util.List;
 public class HealthCheckService {
 
     private static final String SERVICE_NAME = "otp-auth-service";
+    private static final String SCRAPER_SERVICE_NAME = "scraper-service";
     private static final ZoneId IST = ZoneId.of("Asia/Kolkata");
     private static final int TIMEOUT_MS = 10_000;
     private static final DateTimeFormatter ALERT_FMT = DateTimeFormatter.ofPattern("dd-MMM-yyyy HH:mm:ss");
@@ -36,6 +37,9 @@ public class HealthCheckService {
 
     @Value("${health.check.otp-auth.auth-key}")
     private String authKey;
+
+    @Value("${health.check.scraper.url}")
+    private String scraperHealthUrl;
 
     private final HealthCheckLogRepository repository;
     private final TelegramAlertService telegramAlertService;
@@ -47,8 +51,16 @@ public class HealthCheckService {
     }
 
     public void checkAndLog() {
+        doCheck(SERVICE_NAME, healthCheckUrl, authKey);
+    }
+
+    public void checkScraperAndLog() {
+        doCheck(SCRAPER_SERVICE_NAME, scraperHealthUrl, null);
+    }
+
+    private void doCheck(String serviceName, String url, String authKey) {
         HealthCheckLog log = new HealthCheckLog();
-        log.setServiceName(SERVICE_NAME);
+        log.setServiceName(serviceName);
 
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(TIMEOUT_MS);
@@ -56,7 +68,7 @@ public class HealthCheckService {
         RestTemplate restTemplate = new RestTemplate(factory);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.set("X-Internal-Auth", authKey);
+        if (authKey != null) headers.set("X-Internal-Auth", authKey);
         HttpEntity<Void> request = new HttpEntity<>(headers);
 
         Instant sentInstant = Instant.now();
@@ -64,7 +76,7 @@ public class HealthCheckService {
 
         try {
             ResponseEntity<String> response = restTemplate.exchange(
-                    healthCheckUrl, HttpMethod.GET, request, String.class);
+                    url, HttpMethod.GET, request, String.class);
 
             Instant receivedInstant = Instant.now();
             log.setResponseReceivedAt(LocalDateTime.ofInstant(receivedInstant, ZoneOffset.UTC));

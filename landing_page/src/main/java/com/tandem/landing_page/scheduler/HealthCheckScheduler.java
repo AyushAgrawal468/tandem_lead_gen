@@ -17,4 +17,9 @@ public class HealthCheckScheduler {
     public void runHealthCheck() {
         healthCheckService.checkAndLog();
     }
+
+    @Scheduled(cron = "0 0/15 * * * *")
+    public void runScraperHealthCheck() {
+        healthCheckService.checkScraperAndLog();
+    }
 }
