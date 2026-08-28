@@ -2,7 +2,6 @@ package com.tandem.landing_page.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -17,22 +16,21 @@ public class TelegramAlertService {
 
     private static final Logger log = LoggerFactory.getLogger(TelegramAlertService.class);
 
-    @Value("${telegram.bot.token}")
-    private String botToken;
-
-    @Value("${telegram.chat.id}")
-    private String chatId;
-
+    private final ConfigService configService;
     private final RestTemplate restTemplate = new RestTemplate();
 
+    public TelegramAlertService(ConfigService configService) {
+        this.configService = configService;
+    }
+
     public void sendAlert(String message) {
-        String url = "https://api.telegram.org/bot" + botToken + "/sendMessage";
+        String url = "https://api.telegram.org/bot" + configService.get("telegram.bot.token") + "/sendMessage";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         Map<String, String> body = new HashMap<>();
-        body.put("chat_id", chatId);
+        body.put("chat_id", configService.get("telegram.chat.id"));
         body.put("text", message);
 
         HttpEntity<Map<String, String>> request = new HttpEntity<>(body, headers);

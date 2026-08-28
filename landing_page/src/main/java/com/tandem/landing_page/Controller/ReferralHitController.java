@@ -6,7 +6,7 @@ import com.tandem.landing_page.dto.AttributionResponse;
 import com.tandem.landing_page.dto.ReferralClickRequest;
 import com.tandem.landing_page.service.ReferralHitService;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Value;
+import com.tandem.landing_page.service.ConfigService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,12 +20,11 @@ import java.util.Map;
 public class ReferralHitController {
 
     private final ReferralHitService referralHitService;
+    private final ConfigService configService;
 
-    @Value("${app.security.api-key}")
-    private String requiredApiKey;
-
-    public ReferralHitController(ReferralHitService service) {
+    public ReferralHitController(ReferralHitService service, ConfigService configService) {
         this.referralHitService = service;
+        this.configService = configService;
     }
 
     @PostMapping("/{code}")
@@ -36,7 +35,7 @@ public class ReferralHitController {
             @RequestBody(required = false) ReferralClickRequest body,
             HttpServletRequest request
     ) {
-        if (apiKey == null || apiKey.isBlank() || !requiredApiKey.equals(apiKey)) {
+        if (apiKey == null || apiKey.isBlank() || !configService.get("app.security.api-key").equals(apiKey)) {
             HashMap<String, Object> response = new HashMap<>();
             response.put("success", false);
             response.put("message", "Unauthorized: Missing or invalid X-API-KEY");
@@ -91,7 +90,7 @@ public class ReferralHitController {
             @RequestHeader(value = "X-API-KEY", required = false) String apiKey,
             @RequestBody AttributionRequest req
     ) {
-        if (apiKey == null || apiKey.isBlank() || !requiredApiKey.equals(apiKey)) {
+        if (apiKey == null || apiKey.isBlank() || !configService.get("app.security.api-key").equals(apiKey)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
                     "success", false,
                     "message", "Unauthorized: Missing or invalid X-API-KEY"

@@ -35,7 +35,7 @@ public class HealthCheckService {
     @Value("${health.check.otp-auth.url}")
     private String healthCheckUrl;
 
-    @Value("${health.check.otp-auth.auth-key}")
+    // ponytail: auth-key loaded from app_config table, not properties
     private String authKey;
 
     @Value("${health.check.scraper.url}")
@@ -43,11 +43,18 @@ public class HealthCheckService {
 
     private final HealthCheckLogRepository repository;
     private final TelegramAlertService telegramAlertService;
+    private final ConfigService configService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public HealthCheckService(HealthCheckLogRepository repository, TelegramAlertService telegramAlertService) {
+    public HealthCheckService(HealthCheckLogRepository repository, TelegramAlertService telegramAlertService, ConfigService configService) {
         this.repository = repository;
         this.telegramAlertService = telegramAlertService;
+        this.configService = configService;
+    }
+
+    @jakarta.annotation.PostConstruct
+    public void initSecrets() {
+        this.authKey = configService.get("health.check.otp-auth.auth-key");
     }
 
     public void checkAndLog() {

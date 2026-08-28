@@ -15,15 +15,11 @@ import org.json.JSONObject;
 public class LocationService {
 
     private final UserLocationRepository repository;
-    // OpenCage API key for geocoding
-    private final String OPENCAGE_API_KEY = "6755c8da02424c11b3c93e75a8e2b189"; // put your key
+    private final ConfigService configService;
 
-    /**
-     * Constructor for LocationService
-     * @param repository UserLocationRepository instance
-     */
-    public LocationService(UserLocationRepository repository) {
+    public LocationService(UserLocationRepository repository, ConfigService configService) {
         this.repository = repository;
+        this.configService = configService;
     }
 
     /**
@@ -39,7 +35,7 @@ public class LocationService {
             RestTemplate restTemplate = new RestTemplate();
             String url = "https://api.opencagedata.com/geocode/v1/json?q="
                     + request.getLat() + "+" + request.getLon()
-                    + "&key=" + OPENCAGE_API_KEY;
+                    + "&key=" + configService.get("opencage.api.key");
 
             String resp = restTemplate.getForObject(url, String.class);
             JSONObject obj = new JSONObject(resp);
