@@ -1,11 +1,26 @@
 package com.tandem.landing_page.config;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
+
+    // Matches HealthCheckService's existing timeout convention for internal calls — an unbounded
+    // RestTemplate risks thread-pool exhaustion if the called service hangs.
+    private static final int INTERNAL_CALL_TIMEOUT_MS = 10_000;
+
+    @Bean
+    public RestTemplate restTemplate() {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(INTERNAL_CALL_TIMEOUT_MS);
+        factory.setReadTimeout(INTERNAL_CALL_TIMEOUT_MS);
+        return new RestTemplate(factory);
+    }
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {

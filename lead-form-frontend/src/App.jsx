@@ -54,6 +54,7 @@ import ChildSafety from "./pages/ChildSafety";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import RefundPolicy from "./pages/RefundPolicy";
+import AmbassadorPage from "./pages/AmbassadorPage";
 
 const GA_ID = "G-XTYRTQY6R7";
 
@@ -524,6 +525,9 @@ export default function App() {
 
         {/* Combined event+referral link — tracks both, redirects to store */}
         <Route path="/l/links" element={<CombinedRedirect />} />
+
+        {/* Ambassador magic-link page — wallet, referrals, payout history, leaderboard */}
+        <Route path="/a/:token" element={<AmbassadorPage />} />
 
         {/* Download redirect — sends user to App Store or Play Store based on UA */}
         <Route path="/download" element={<DownloadRedirect />} />

@@ -1,0 +1,242 @@
+- generic [active] [ref=f1e1]:
+  - banner [ref=f1e2]:
+    - navigation "Page Header" [ref=f1e3]:
+      - link "Google Play logo" [ref=f1e4] [cursor=pointer]:
+        - /url: /store/games
+        - generic [ref=f1e12]: google_logo Play
+      - navigation "Main" [ref=f1e14]:
+        - tablist [ref=f1e16]:
+          - generic [ref=f1e19]:
+            - tab "Games" [ref=f1e20] [cursor=pointer]
+            - tab "Apps" [selected] [ref=f1e22] [cursor=pointer]
+            - tab "Books" [ref=f1e24] [cursor=pointer]
+            - tab "Kids" [ref=f1e26] [cursor=pointer]
+      - generic [ref=f1e28]:
+        - button "Search" [ref=f1e30] [cursor=pointer]:
+          - generic [ref=f1e31]: search
+        - button "Help Center" [ref=f1e33] [cursor=pointer]:
+          - generic [ref=f1e34]: help_outline
+        - button "Open account menu" [ref=f1e39] [cursor=pointer]
+  - generic [ref=f1e45]:
+    - generic [ref=f1e48]:
+      - generic [ref=f1e53]:
+        - generic [ref=f1e56]:
+          - 'heading "Tandem : Events & Experiences" [level=1] [ref=f1e58]'
+          - link "Orbitandem Technologies Pvt. Ltd." [ref=f1e61] [cursor=pointer]:
+            - /url: /store/apps/developer?id=Orbitandem+Technologies+Pvt.+Ltd.
+        - region "Information badges" [ref=f1e63]:
+          - generic [ref=f1e65]:
+            - generic [ref=f1e66]: 100+
+            - generic [ref=f1e67]: Downloads
+      - generic [ref=f1e68]:
+        - button "Install" [ref=f1e76]
+        - generic [ref=f1e80]:
+          - button "Share" [ref=f1e84] [cursor=pointer]
+          - button "Add to wishlist" [ref=f1e91] [cursor=pointer]
+    - generic [ref=f1e96]:
+      - generic [ref=f1e97]:
+        - generic [ref=f1e98]:
+          - generic [ref=f1e101]:
+            - list [ref=f1e102]:
+              - listitem [ref=f1e103]:
+                - button "Screenshot image" [ref=f1e105] [cursor=pointer]
+              - listitem [ref=f1e106]:
+                - button "Screenshot image" [ref=f1e108] [cursor=pointer]
+              - listitem [ref=f1e109]:
+                - button "Screenshot image" [ref=f1e111] [cursor=pointer]
+              - listitem [ref=f1e112]:
+                - button "Screenshot image" [ref=f1e114] [cursor=pointer]
+              - listitem [ref=f1e115]:
+                - button "Screenshot image" [ref=f1e117] [cursor=pointer]
+              - listitem [ref=f1e118]:
+                - button "Screenshot image" [ref=f1e120] [cursor=pointer]
+              - listitem [ref=f1e121]:
+                - button "Screenshot image" [ref=f1e123] [cursor=pointer]
+              - listitem [ref=f1e124]:
+                - button "Screenshot image" [ref=f1e126] [cursor=pointer]
+              - listitem [ref=f1e127]:
+                - button "Screenshot image" [ref=f1e129] [cursor=pointer]
+              - listitem [ref=f1e130]:
+                - button "Screenshot image" [ref=f1e132] [cursor=pointer]
+              - listitem [ref=f1e133]:
+                - button "Screenshot image" [ref=f1e135] [cursor=pointer]
+              - listitem [ref=f1e136]:
+                - button "Screenshot image" [ref=f1e138] [cursor=pointer]
+              - listitem [ref=f1e139]:
+                - button "Screenshot image" [ref=f1e141] [cursor=pointer]
+              - listitem [ref=f1e142]:
+                - button "Screenshot image" [ref=f1e144] [cursor=pointer]
+              - listitem [ref=f1e145]:
+                - button "Screenshot image" [ref=f1e147] [cursor=pointer]
+              - listitem [ref=f1e148]:
+                - button "Screenshot image" [ref=f1e150] [cursor=pointer]
+              - listitem [ref=f1e151]:
+                - button "Screenshot image" [ref=f1e153] [cursor=pointer]
+              - listitem [ref=f1e154]:
+                - button "Screenshot image" [ref=f1e156] [cursor=pointer]
+              - listitem [ref=f1e157]:
+                - button "Screenshot image" [ref=f1e159] [cursor=pointer]
+              - listitem [ref=f1e160]:
+                - button "Screenshot image" [ref=f1e162] [cursor=pointer]
+              - listitem [ref=f1e163]:
+                - button "Screenshot image" [ref=f1e165] [cursor=pointer]
+              - listitem [ref=f1e166]:
+                - button "Screenshot image" [ref=f1e168] [cursor=pointer]
+              - listitem [ref=f1e169]:
+                - button "Screenshot image" [ref=f1e171] [cursor=pointer]
+              - listitem [ref=f1e172]:
+                - button "Screenshot image" [ref=f1e174] [cursor=pointer]
+            - button "Scroll Next" [ref=f1e176] [cursor=pointer]:
+              - generic [ref=f1e177]: chevron_right
+          - generic [ref=f1e181]:
+            - generic [ref=f1e183]:
+              - heading "About this app" [level=2] [ref=f1e185]
+              - button "See more information on About this app" [ref=f1e187] [cursor=pointer]:
+                - generic [ref=f1e188]: arrow_forward
+            - generic [ref=f1e189]:
+              - generic [ref=f1e190]: "Tandem is the ultimate social planning app that transforms group chat chaos into real-world adventures. Swipe on activities with friends, match instantly, and make plans in just a few taps. No more endless messaging threads or missed meetups. Tandem makes getting together joyful, spontaneous, and hassle-free.Key Features:Group Swiping: Discover and vote on the best activities in your city with your crew.Instant Matching: Our smart algorithm auto-selects the most popular plan—no back-and-forth needed.Spontaneous Planning: 12-hour event timers make last-minute meetups effortless.Wall of Moments: Share photos and stories from your hangouts, and relive memories together.Personalized Recommendations: Get curated suggestions based on what your friends actually love.Safe & Private: Your data is protected, and you control your circles and privacy.Join Tandem and make every meetup memorable!"
+              - generic [ref=f1e193]:
+                - generic [ref=f1e194]: Updated on
+                - generic [ref=f1e195]: Jul 17, 2026
+              - generic [ref=f1e198]:
+                - generic [ref=f1e200]: Social
+                - link "Social" [ref=f1e201] [cursor=pointer]:
+                  - /url: /store/apps/category/SOCIAL
+          - generic [ref=f1e203]:
+            - generic [ref=f1e205]:
+              - heading "Data safety" [level=2] [ref=f1e207]
+              - generic [ref=f1e208] [cursor=pointer]:
+                - generic [ref=f1e209]: arrow_forward
+                - link "See more information on Data safety" [ref=f1e210]:
+                  - /url: /store/apps/datasafety?id=com.tandemit.tandemit
+            - generic [ref=f1e211]:
+              - text: Safety starts with understanding how developers collect and share your data. Data privacy and security practices may vary based on your use, region, and age. The developer provided this information and may update it over time.
+              - generic [ref=f1e212]:
+                - generic [ref=f1e215]:
+                  - text: This app may share these data types with third parties
+                  - generic [ref=f1e216]: Location
+                - generic [ref=f1e219]:
+                  - text: This app may collect these data types
+                  - generic [ref=f1e220]: Location, Personal info and 5 others
+                - generic [ref=f1e221]: Data is encrypted in transit
+                - generic [ref=f1e224]: You can request that data be deleted
+                - generic [ref=f1e229]:
+                  - generic [ref=f1e231]: See details
+                  - link "See more details on data safety" [ref=f1e232] [cursor=pointer]:
+                    - /url: /store/apps/datasafety?id=com.tandemit.tandemit
+          - generic [ref=f1e234]:
+            - heading "What’s new" [level=2] [ref=f1e238]
+            - generic [ref=f1e239]: 1. Internal Bug fixes2. White screen issue fix
+        - link "Flag as inappropriate" [ref=f1e244] [cursor=pointer]:
+          - /url: https://support.google.com/googleplay/?p=report_content
+          - generic [ref=f1e245]: flag
+          - text: Flag as inappropriate
+      - generic [ref=f1e246]:
+        - generic [ref=f1e247]:
+          - img "Content rating" [ref=f1e248]
+          - generic [ref=f1e249]:
+            - generic [ref=f1e250]: Rated for 12+
+            - generic [ref=f1e251]: Parental Guidance Recommended
+            - generic [ref=f1e252]: Users Interact
+            - link "Learn more about content ratings" [ref=f1e253] [cursor=pointer]:
+              - /url: https://support.google.com/googleplay?p=appgame_ratings
+              - text: Learn more
+        - generic [ref=f1e257]:
+          - heading "App support" [level=2] [ref=f1e259]
+          - button "Expand" [ref=f1e261] [cursor=pointer]:
+            - generic [ref=f1e262]: expand_more
+        - generic [ref=f1e264]:
+          - generic [ref=f1e266]:
+            - heading "Similar apps" [level=2] [ref=f1e268]
+            - generic [ref=f1e270] [cursor=pointer]:
+              - generic [ref=f1e271]: arrow_forward
+              - link "See more information on Similar apps" [ref=f1e272]:
+                - /url: /store/apps/collection/cluster?gsr=SnJqGHkva2YrTHlDMEJlOXBjVTJOSk4yYUE9PcICUgoZChVjb20udGFuZGVtaXQudGFuZGVtaXQQBxgIMAE4AEopCAEQABodVGFuZGVtIDogRXZlbnRzICYgRXhwZXJpZW5jZXMgACgAMABQAFgBYACwEgA%3D:S:ANO1ljLj_-8
+          - generic [ref=f1e274]:
+            - link "Kalda LGBTQIA+ Mental Health Kalda" [ref=f1e276] [cursor=pointer]:
+              - /url: /store/apps/details?id=com.flutterflow.kalda
+              - generic [ref=f1e279]:
+                - generic [ref=f1e280]: Kalda LGBTQIA+ Mental Health
+                - generic [ref=f1e282]: Kalda
+            - link "GAFFL - Find A Travel Buddy GAFFL Rated 4.8 stars out of five stars" [ref=f1e285] [cursor=pointer]:
+              - /url: /store/apps/details?id=com.gogaffl.gaffl
+              - generic [ref=f1e288]:
+                - generic [ref=f1e289]: GAFFL - Find A Travel Buddy
+                - generic [ref=f1e291]: GAFFL
+                - generic "Rated 4.8 stars out of five stars" [ref=f1e294]:
+                  - generic [ref=f1e295]: "4.8"
+                  - generic [ref=f1e296]: star
+            - link "ChatBCC ChatBCC Rated 4.5 stars out of five stars" [ref=f1e299] [cursor=pointer]:
+              - /url: /store/apps/details?id=com.chatbcc
+              - generic [ref=f1e302]:
+                - generic [ref=f1e303]: ChatBCC
+                - generic [ref=f1e305]: ChatBCC
+                - generic "Rated 4.5 stars out of five stars" [ref=f1e308]:
+                  - generic [ref=f1e309]: "4.5"
+                  - generic [ref=f1e310]: star
+            - link "Flatmate Finders Australia Flatmate Finders Rated 4.4 stars out of five stars" [ref=f1e313] [cursor=pointer]:
+              - /url: /store/apps/details?id=com.FlatmateFinders
+              - generic [ref=f1e316]:
+                - generic [ref=f1e317]: Flatmate Finders Australia
+                - generic [ref=f1e319]: Flatmate Finders
+                - generic "Rated 4.4 stars out of five stars" [ref=f1e322]:
+                  - generic [ref=f1e323]: "4.4"
+                  - generic [ref=f1e324]: star
+            - 'link "TravelBunnies: Travel Friends Gaasre" [ref=f1e327] [cursor=pointer]':
+              - /url: /store/apps/details?id=com.travelbunnies.app
+              - generic [ref=f1e330]:
+                - generic [ref=f1e331]: "TravelBunnies: Travel Friends"
+                - generic [ref=f1e333]: Gaasre
+            - link "b2match B2Match Rated 3.5 stars out of five stars" [ref=f1e336] [cursor=pointer]:
+              - /url: /store/apps/details?id=com.b2match.app
+              - generic [ref=f1e339]:
+                - generic [ref=f1e340]: b2match
+                - generic [ref=f1e342]: B2Match
+                - generic "Rated 3.5 stars out of five stars" [ref=f1e345]:
+                  - generic [ref=f1e346]: "3.5"
+                  - generic [ref=f1e347]: star
+  - contentinfo [ref=f1e350]:
+    - generic [ref=f1e352]:
+      - generic [ref=f1e354]:
+        - text: Google Play
+        - link [ref=f1e356] [cursor=pointer]:
+          - /url: /store/pass/getstarted
+          - paragraph [ref=f1e357]: Play Pass
+        - link [ref=f1e359] [cursor=pointer]:
+          - /url: /store/points/enroll
+          - paragraph [ref=f1e360]: Play Points
+        - link [ref=f1e362] [cursor=pointer]:
+          - /url: https://play.google.com/about/giftcards
+          - paragraph [ref=f1e363]: Gift cards
+        - link [ref=f1e365] [cursor=pointer]:
+          - /url: /redeem
+          - paragraph [ref=f1e366]: Redeem
+        - link [ref=f1e368] [cursor=pointer]:
+          - /url: https://support.google.com/googleplay/answer/134336
+          - paragraph [ref=f1e369]: Refund policy
+      - generic [ref=f1e371]:
+        - text: Kids & family
+        - link [ref=f1e373] [cursor=pointer]:
+          - /url: https://support.google.com/googleplay?p=pff_parentguide
+          - paragraph [ref=f1e374]: Parent Guide
+        - link [ref=f1e376] [cursor=pointer]:
+          - /url: https://support.google.com/googleplay/answer/7007852
+          - paragraph [ref=f1e377]: Family sharing
+    - generic [ref=f1e378]:
+      - link [ref=f1e380] [cursor=pointer]:
+        - /url: https://play.google.com/intl/en-US_in/about/play-terms.html
+        - paragraph [ref=f1e381]: Terms of Service
+      - link [ref=f1e383] [cursor=pointer]:
+        - /url: https://policies.google.com/privacy
+        - paragraph [ref=f1e384]: Privacy
+      - link [ref=f1e386] [cursor=pointer]:
+        - /url: https://support.google.com/googleplay/?p=about_play
+        - paragraph [ref=f1e387]: About Google Play
+      - link [ref=f1e389] [cursor=pointer]:
+        - /url: http://developer.android.com/index.html
+        - paragraph [ref=f1e390]: Developers
+      - link [ref=f1e392] [cursor=pointer]:
+        - /url: https://store.google.com/?playredirect=true&utm_source=play&utm_medium=google_oo&utm_campaign=GS106288
+        - paragraph [ref=f1e393]: Google Store
+      - generic [ref=f1e394]: All prices include GST.
+      - generic [ref=f1e395]: India (English (United States))
