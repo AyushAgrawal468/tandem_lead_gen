@@ -62,6 +62,27 @@ const tdStyle = {
   color: "#BCBCBC",
 };
 
+const tabBar = {
+  display: "flex",
+  gap: "8px",
+  borderBottom: "1px solid #2a2a2a",
+  marginBottom: "24px",
+};
+
+function tabButtonStyle(active) {
+  return {
+    padding: "10px 18px",
+    fontSize: "15px",
+    fontWeight: "600",
+    fontFamily: "inherit",
+    background: "none",
+    border: "none",
+    borderBottom: active ? "2px solid #00FFC8" : "2px solid transparent",
+    color: active ? "#00FFC8" : "#BCBCBC",
+    cursor: "pointer",
+  };
+}
+
 function formatRupees(paise) {
   if (paise === undefined || paise === null) return "—";
   return "₹" + (paise / 100).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -70,6 +91,7 @@ function formatRupees(paise) {
 export default function AmbassadorPage() {
   const { token } = useParams();
   const [state, setState] = useState({ status: "loading", data: null });
+  const [tab, setTab] = useState("stats");
 
   useEffect(() => {
     let cancelled = false;
@@ -120,83 +142,94 @@ export default function AmbassadorPage() {
       <div style={container}>
         <h1 style={h1Style}>{programName}</h1>
 
-        <section>
-          <h2 style={sectionHeading}>Wallet</h2>
-          <p style={bodyText}>Confirmed balance: <strong style={strongStyle}>{formatRupees(wallet.confirmedBalancePaise)}</strong></p>
-          <p style={bodyText}>Pending qualification: <strong style={strongStyle}>{formatRupees(wallet.pendingQualificationPaise)}</strong></p>
-          <p style={bodyText}>Next payout: <strong style={strongStyle}>{wallet.nextPayoutDate}</strong></p>
-        </section>
+        <div style={tabBar}>
+          <button style={tabButtonStyle(tab === "stats")} onClick={() => setTab("stats")}>My Stats</button>
+          <button style={tabButtonStyle(tab === "leaderboard")} onClick={() => setTab("leaderboard")}>Leaderboard</button>
+        </div>
 
-        <section>
-          <h2 style={sectionHeading}>Your referrals</h2>
-          <div style={tableWrapper}>
-            <table style={tableStyle}>
-              <thead>
-                <tr>
-                  <th style={thStyle}>Referee</th>
-                  <th style={thStyle}>State</th>
-                  <th style={thStyle}>Detected</th>
-                  <th style={thStyle}>Reason</th>
-                  <th style={thStyle}>Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {conversions.map((c) => (
-                  <tr key={c.id}>
-                    <td style={tdStyle}>{c.refereeMaskedName} {c.refereeMaskedPhone}</td>
-                    <td style={tdStyle}>{c.state}</td>
-                    <td style={tdStyle}>{c.detectedAt}</td>
-                    <td style={tdStyle}>{c.reason || "—"}</td>
-                    <td style={tdStyle}>{c.amountPaise != null ? formatRupees(c.amountPaise) : "—"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
+        {tab === "stats" && (
+          <>
+            <section>
+              <h2 style={sectionHeading}>Wallet</h2>
+              <p style={bodyText}>Confirmed balance: <strong style={strongStyle}>{formatRupees(wallet.confirmedBalancePaise)}</strong></p>
+              <p style={bodyText}>Pending qualification: <strong style={strongStyle}>{formatRupees(wallet.pendingQualificationPaise)}</strong></p>
+              <p style={bodyText}>Next payout: <strong style={strongStyle}>{wallet.nextPayoutDate}</strong></p>
+            </section>
 
-        <section>
-          <h2 style={sectionHeading}>Payout history</h2>
-          <div style={tableWrapper}>
-            <table style={tableStyle}>
-              <thead>
-                <tr>
-                  <th style={thStyle}>Period</th>
-                  <th style={thStyle}>Amount</th>
-                  <th style={thStyle}>State</th>
-                  <th style={thStyle}>UTR</th>
-                </tr>
-              </thead>
-              <tbody>
-                {payoutHistory.map((p, i) => (
-                  <tr key={i}>
-                    <td style={tdStyle}>{p.periodStart} → {p.periodEnd}</td>
-                    <td style={tdStyle}>{formatRupees(p.netPaise)}</td>
-                    <td style={tdStyle}>{p.state}</td>
-                    <td style={tdStyle}>{p.utr || "—"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
+            <section>
+              <h2 style={sectionHeading}>Your referrals</h2>
+              <div style={tableWrapper}>
+                <table style={tableStyle}>
+                  <thead>
+                    <tr>
+                      <th style={thStyle}>Referee</th>
+                      <th style={thStyle}>State</th>
+                      <th style={thStyle}>Detected</th>
+                      <th style={thStyle}>Reason</th>
+                      <th style={thStyle}>Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {conversions.map((c) => (
+                      <tr key={c.id}>
+                        <td style={tdStyle}>{c.refereeMaskedName} {c.refereeMaskedPhone}</td>
+                        <td style={tdStyle}>{c.state}</td>
+                        <td style={tdStyle}>{c.detectedAt}</td>
+                        <td style={tdStyle}>{c.reason || "—"}</td>
+                        <td style={tdStyle}>{c.amountPaise != null ? formatRupees(c.amountPaise) : "—"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
 
-        <section>
-          <h2 style={sectionHeading}>Qualification rules</h2>
-          <p style={{ ...bodyText, fontStyle: "italic", color: "#969696" }}>
-            Version {qualificationRules.version}, effective {qualificationRules.effectiveSince}
-          </p>
-          <p style={bodyText}>{qualificationRules.text || "Rules not yet published."}</p>
-        </section>
+            <section>
+              <h2 style={sectionHeading}>Payout history</h2>
+              <div style={tableWrapper}>
+                <table style={tableStyle}>
+                  <thead>
+                    <tr>
+                      <th style={thStyle}>Period</th>
+                      <th style={thStyle}>Amount</th>
+                      <th style={thStyle}>State</th>
+                      <th style={thStyle}>UTR</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {payoutHistory.map((p, i) => (
+                      <tr key={i}>
+                        <td style={tdStyle}>{p.periodStart} → {p.periodEnd}</td>
+                        <td style={tdStyle}>{formatRupees(p.netPaise)}</td>
+                        <td style={tdStyle}>{p.state}</td>
+                        <td style={tdStyle}>{p.utr || "—"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
 
-        <section>
-          <h2 style={sectionHeading}>Campus leaderboard</h2>
-          <ol style={{ ...bodyText, paddingLeft: "20px" }}>
-            {leaderboard.map((row, i) => (
-              <li key={i} style={{ marginBottom: "6px" }}>{row.firstName || "—"} — {row.qualifiedCount} qualified</li>
-            ))}
-          </ol>
-        </section>
+            <section>
+              <h2 style={sectionHeading}>Qualification rules</h2>
+              <p style={{ ...bodyText, fontStyle: "italic", color: "#969696" }}>
+                Version {qualificationRules.version}, effective {qualificationRules.effectiveSince}
+              </p>
+              <p style={bodyText}>{qualificationRules.text || "Rules not yet published."}</p>
+            </section>
+          </>
+        )}
+
+        {tab === "leaderboard" && (
+          <section>
+            <h2 style={sectionHeading}>Campus leaderboard</h2>
+            <ol style={{ ...bodyText, paddingLeft: "20px" }}>
+              {leaderboard.map((row, i) => (
+                <li key={i} style={{ marginBottom: "6px" }}>{row.firstName || "—"} — {row.qualifiedCount} qualified</li>
+              ))}
+            </ol>
+          </section>
+        )}
       </div>
     </div>
   );
