@@ -2,6 +2,66 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { apiUrl } from "../lib/api";
 
+const pageWrapper = {
+  minHeight: "100vh",
+  background: "#111111",
+  color: "#F2F2F2",
+  fontFamily: '"Anek Latin", Helvetica, sans-serif',
+};
+
+const container = {
+  maxWidth: "860px",
+  margin: "0 auto",
+  padding: "clamp(24px, 5vw, 60px) clamp(16px, 4vw, 40px) 80px",
+};
+
+const h1Style = {
+  fontSize: "clamp(28px, 4vw, 42px)",
+  fontWeight: "700",
+  marginBottom: "36px",
+  color: "#F2F2F2",
+};
+
+const sectionHeading = {
+  marginTop: "36px",
+  marginBottom: "12px",
+  fontSize: "clamp(17px, 2.2vw, 22px)",
+  fontWeight: "700",
+  color: "#00FFC8",
+  letterSpacing: "0.01em",
+};
+
+const bodyText = {
+  fontSize: "clamp(14px, 1.8vw, 17px)",
+  lineHeight: "1.8",
+  color: "#BCBCBC",
+};
+
+const strongStyle = { color: "#F2F2F2" };
+
+const tableWrapper = { overflowX: "auto", marginTop: "8px" };
+
+const tableStyle = {
+  width: "100%",
+  borderCollapse: "collapse",
+  fontSize: "14px",
+  minWidth: "480px",
+};
+
+const thStyle = {
+  textAlign: "left",
+  padding: "10px",
+  borderBottom: "1px solid #2a2a2a",
+  color: "#F2F2F2",
+  whiteSpace: "nowrap",
+};
+
+const tdStyle = {
+  padding: "10px",
+  borderBottom: "1px solid #2a2a2a",
+  color: "#BCBCBC",
+};
+
 function formatRupees(paise) {
   if (paise === undefined || paise === null) return "—";
   return "₹" + (paise / 100).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -30,10 +90,18 @@ export default function AmbassadorPage() {
   }, [token]);
 
   if (state.status === "loading") {
-    return <div style={{ padding: 24 }}>Loading…</div>;
+    return (
+      <div style={{ ...pageWrapper, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <p style={bodyText}>Loading…</p>
+      </div>
+    );
   }
   if (state.status === "invalid") {
-    return <div style={{ padding: 24 }}>This link isn't valid.</div>;
+    return (
+      <div style={{ ...pageWrapper, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <p style={bodyText}>This link isn't valid.</p>
+      </div>
+    );
   }
 
   // Defensive defaults — the backend response is an untyped map; a partial response (e.g. a
@@ -48,69 +116,88 @@ export default function AmbassadorPage() {
   } = state.data || {};
 
   return (
-    <div style={{ padding: 24, maxWidth: 960, margin: "0 auto" }}>
-      <h1>{programName}</h1>
+    <div style={pageWrapper}>
+      <div style={container}>
+        <h1 style={h1Style}>{programName}</h1>
 
-      <section>
-        <h2>Wallet</h2>
-        <p>Confirmed balance: <strong>{formatRupees(wallet.confirmedBalancePaise)}</strong></p>
-        <p>Pending qualification: <strong>{formatRupees(wallet.pendingQualificationPaise)}</strong></p>
-        <p>Next payout: <strong>{wallet.nextPayoutDate}</strong></p>
-      </section>
+        <section>
+          <h2 style={sectionHeading}>Wallet</h2>
+          <p style={bodyText}>Confirmed balance: <strong style={strongStyle}>{formatRupees(wallet.confirmedBalancePaise)}</strong></p>
+          <p style={bodyText}>Pending qualification: <strong style={strongStyle}>{formatRupees(wallet.pendingQualificationPaise)}</strong></p>
+          <p style={bodyText}>Next payout: <strong style={strongStyle}>{wallet.nextPayoutDate}</strong></p>
+        </section>
 
-      <section>
-        <h2>Your referrals</h2>
-        <table>
-          <thead>
-            <tr><th>Referee</th><th>State</th><th>Detected</th><th>Reason</th><th>Amount</th></tr>
-          </thead>
-          <tbody>
-            {conversions.map((c) => (
-              <tr key={c.id}>
-                <td>{c.refereeMaskedName} {c.refereeMaskedPhone}</td>
-                <td>{c.state}</td>
-                <td>{c.detectedAt}</td>
-                <td>{c.reason || "—"}</td>
-                <td>{c.amountPaise != null ? formatRupees(c.amountPaise) : "—"}</td>
-              </tr>
+        <section>
+          <h2 style={sectionHeading}>Your referrals</h2>
+          <div style={tableWrapper}>
+            <table style={tableStyle}>
+              <thead>
+                <tr>
+                  <th style={thStyle}>Referee</th>
+                  <th style={thStyle}>State</th>
+                  <th style={thStyle}>Detected</th>
+                  <th style={thStyle}>Reason</th>
+                  <th style={thStyle}>Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {conversions.map((c) => (
+                  <tr key={c.id}>
+                    <td style={tdStyle}>{c.refereeMaskedName} {c.refereeMaskedPhone}</td>
+                    <td style={tdStyle}>{c.state}</td>
+                    <td style={tdStyle}>{c.detectedAt}</td>
+                    <td style={tdStyle}>{c.reason || "—"}</td>
+                    <td style={tdStyle}>{c.amountPaise != null ? formatRupees(c.amountPaise) : "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section>
+          <h2 style={sectionHeading}>Payout history</h2>
+          <div style={tableWrapper}>
+            <table style={tableStyle}>
+              <thead>
+                <tr>
+                  <th style={thStyle}>Period</th>
+                  <th style={thStyle}>Amount</th>
+                  <th style={thStyle}>State</th>
+                  <th style={thStyle}>UTR</th>
+                </tr>
+              </thead>
+              <tbody>
+                {payoutHistory.map((p, i) => (
+                  <tr key={i}>
+                    <td style={tdStyle}>{p.periodStart} → {p.periodEnd}</td>
+                    <td style={tdStyle}>{formatRupees(p.netPaise)}</td>
+                    <td style={tdStyle}>{p.state}</td>
+                    <td style={tdStyle}>{p.utr || "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section>
+          <h2 style={sectionHeading}>Qualification rules</h2>
+          <p style={{ ...bodyText, fontStyle: "italic", color: "#969696" }}>
+            Version {qualificationRules.version}, effective {qualificationRules.effectiveSince}
+          </p>
+          <p style={bodyText}>{qualificationRules.text || "Rules not yet published."}</p>
+        </section>
+
+        <section>
+          <h2 style={sectionHeading}>Campus leaderboard</h2>
+          <ol style={{ ...bodyText, paddingLeft: "20px" }}>
+            {leaderboard.map((row, i) => (
+              <li key={i} style={{ marginBottom: "6px" }}>{row.firstName || "—"} — {row.qualifiedCount} qualified</li>
             ))}
-          </tbody>
-        </table>
-      </section>
-
-      <section>
-        <h2>Payout history</h2>
-        <table>
-          <thead>
-            <tr><th>Period</th><th>Amount</th><th>State</th><th>UTR</th></tr>
-          </thead>
-          <tbody>
-            {payoutHistory.map((p, i) => (
-              <tr key={i}>
-                <td>{p.periodStart} → {p.periodEnd}</td>
-                <td>{formatRupees(p.netPaise)}</td>
-                <td>{p.state}</td>
-                <td>{p.utr || "—"}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
-
-      <section>
-        <h2>Qualification rules</h2>
-        <p><em>Version {qualificationRules.version}, effective {qualificationRules.effectiveSince}</em></p>
-        <p>{qualificationRules.text || "Rules not yet published."}</p>
-      </section>
-
-      <section>
-        <h2>Campus leaderboard</h2>
-        <ol>
-          {leaderboard.map((row, i) => (
-            <li key={i}>{row.firstName || "—"} — {row.qualifiedCount} qualified</li>
-          ))}
-        </ol>
-      </section>
+          </ol>
+        </section>
+      </div>
     </div>
   );
 }
