@@ -169,7 +169,8 @@ export default function SwipePage() {
   }, [step, session]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const sendOtp = () => run(async () => {
-    await call("/auth/send-otp", { method: "POST", body: { phone, countryCode: "91" } });
+    // ponytail: backend NPEs on a null appSignature (Android SMS hash, meaningless on web) — send "" until it's null-safe
+    await call("/auth/send-otp", { method: "POST", body: { phone, countryCode: "91", appSignature: "" } });
     setStep("otp");
   });
 
