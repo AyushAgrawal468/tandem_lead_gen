@@ -46,12 +46,19 @@ async function call(path, { token, method = "GET", body } = {}) {
   return data;
 }
 
-function DownloadPopup({ open }) {
+function DownloadPopup({ open, onClose }) {
   if (!open) return null;
   return (
     <div role="dialog" aria-modal="true" aria-labelledby="dl-title"
       style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2000, padding: "16px" }}>
-      <div style={{ background: C.card, borderRadius: "20px", padding: "28px 24px", maxWidth: "360px", width: "100%", textAlign: "center", border: `1px solid ${C.line}` }}>
+      <div style={{ position: "relative", background: C.card, borderRadius: "20px", padding: "28px 24px", maxWidth: "360px", width: "100%", textAlign: "center", border: `1px solid ${C.line}` }}>
+        <button onClick={onClose} aria-label="Close" autoFocus
+          style={{ position: "absolute", top: "12px", right: "12px", width: "36px", height: "36px", padding: 0, borderRadius: "50%", border: "none",
+            background: "transparent", color: C.low, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+            <path d="M6 6l12 12M18 6L6 18" />
+          </svg>
+        </button>
         <h2 id="dl-title" style={{ fontSize: "24px", fontWeight: 700, color: C.text, marginBottom: "8px" }}>Get the full experience</h2>
         <p style={{ color: C.low, fontSize: "15px", marginBottom: "20px", lineHeight: 1.5 }}>
           Download Tandem to keep discovering events and see which friends want to go too.
@@ -148,6 +155,7 @@ export default function SwipePage() {
   const [events, setEvents] = useState([]);
   const [remaining, setRemaining] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
+  const [limitReached, setLimitReached] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -189,6 +197,7 @@ export default function SwipePage() {
       body: { eventFilters: { location: city, category: picked } },
     });
     setRemaining(data.remainingSwipes);
+    setLimitReached(!!data.limitReached);
     setEvents(data.events || []);
     setStep("swipe");
     if (data.limitReached || !(data.events || []).length) setShowPopup(true);
@@ -197,7 +206,8 @@ export default function SwipePage() {
   const swipe = (action) => {
     const current = events[0];
     if (!current || busy) return;
-    if (action === "UP") { setShowPopup(true); return; } // inviting friends needs the app
+    // Inviting friends needs the app; past the cap cards are view-only, nothing is saved
+    if (action === "UP" || limitReached) { setShowPopup(true); return; }
     return run(async () => {
       const data = await call("/events/web/saveAction", {
         token: session.token, method: "POST",
@@ -206,6 +216,7 @@ export default function SwipePage() {
       const rest = events.slice(1);
       setEvents(rest);
       setRemaining(data.remainingSwipes);
+      setLimitReached(!!data.limitReached);
       if (data.limitReached || !rest.length) setShowPopup(true);
     });
   };
@@ -283,6 +294,13 @@ export default function SwipePage() {
               <h1 style={{ fontSize: "24px", fontWeight: 700 }}>Discover</h1>
               {remaining !== null && <span style={{ color: C.low, fontSize: "14px" }}>{remaining} swipes left</span>}
             </div>
+            {!events[0] && (
+              <div style={{ textAlign: "center", padding: "48px 16px", background: C.card, borderRadius: "16px", border: `1px solid ${C.line}` }}>
+                <p style={{ color: C.text, fontSize: "18px", fontWeight: 700, marginBottom: "6px" }}>No more events here</p>
+                <p style={{ color: C.low, fontSize: "15px", marginBottom: "20px" }}>Get the app to keep discovering.</p>
+                <button onClick={() => setShowPopup(true)} style={btn()}>Get the app</button>
+              </div>
+            )}
             {events[0] && <EventCard key={events[0].event?.eventId} details={events[0]} onSwipe={swipe} disabled={busy} />}
             {/* Mobile: swipe only (like the app). Desktop: buttons too. */}
             {events[0] && (
@@ -314,7 +332,7 @@ export default function SwipePage() {
 
         {error && <p role="alert" style={{ color: C.fail, marginTop: "16px", fontSize: "14px" }}>{error}</p>}
       </main>
-      <DownloadPopup open={showPopup} />
+      <DownloadPopup open={showPopup} onClose={() => setShowPopup(false)} />
     </div>
   );
 }
