@@ -13,7 +13,7 @@ This is the **Tandem lead generation** monorepo with two sub-projects:
 
 Production URL: `https://tandem.it.com`
 
-**Production web server:** nginx 1.24 (not Apache). The frontend build is served as static files from `/var/www/leadform/`. The landing backend runs as the `tandem` service on the same host.
+**Production web server:** CloudFront (TLS) → nginx 1.24 on port 80 (not Apache). Live config: `/etc/nginx/sites-enabled/leadform`, copied in `deploy/nginx/leadform`. The frontend build is served as static files from `/var/www/leadform/` (`try_files $uri /index.html`). `/api/` is proxied to the landing backend (`tandem` service, port 8080) on the same host. Because of CloudFront, nginx's `$remote_addr` is a CloudFront edge IP, not the visitor's IP.
 
 **Related repos:**
 - App backend: `../tandemitcom/tandem_main` (`tandem-core`, `event-service`, `api-gateway`; nginx config for the API host in `ngnix/sites-enabled/`). **Do not use `../tandem_main`**: it's a stale September 2025 copy with no `tandem-core` and no web endpoints.
@@ -117,7 +117,7 @@ There is no Spring `/download` endpoint. `/download` is the React route `Downloa
 **Combined event+referral link flow:** `/l/links?event-id=<id>&referral-code=<code>` React route (`CombinedRedirect.jsx`) — used when a shareable link carries both an event and a referral. `CombinedRedirect.jsx` calls `POST /api/links/click` with both IDs as query params (`referralCode`, `eventId`) and device fingerprint in the body, then redirects to the store. Hit stored in `combined_link_hits` table. On app cold start, `POST /api/links/attribute` checks `combined_link_hits` first (with resolved deduplication), then falls back to legacy `referral_hits`. Returns `{ matched, referralCode, eventId }`. Note: `referralCode` is optional (nullable); `eventId` is required (saved as `""` if absent).
 
 **Universal Links / App Links setup:**
-- `.well-known/assetlinks.json` and `.well-known/apple-app-site-association` are served by **nginx** with `Content-Type: application/json` (see `ngnix/sites-enabled/api-tandem` in tandem_main), not by landing_page. There is no `WellKnownController`. Any new SPA fallback rule must not catch `/.well-known/*`.
+- `.well-known/assetlinks.json` and `.well-known/apple-app-site-association` are static files served by nginx on the website host, from `/var/www/html/.well-known/` via `alias` with `Content-Type: application/json` (see `deploy/nginx/leadform`), not by landing_page. The API host has its own copies (`ngnix/sites-enabled/api-tandem` in tandem_main). There is no `WellKnownController`. Any new SPA fallback rule must not catch `/.well-known/*`.
 - Android: `assetlinks.json` live with 3 SHA-256 fingerprints (`C7:07…`, `8E:49…`, `D1:39…`), package `com.tandemit.tandemit`. `AndroidManifest.xml` has verified https intent filters for `tandem.it.com` and `api.tandem.it.com`, plus a `tandem://` custom scheme.
 - iOS: AASA live (Team ID `MF5NQJQ727`, Bundle ID `com.tandemit.tandemit`). Associated Domains `applinks:tandem.it.com` is in the entitlements, and the app parses `/e/` and `/l/links` (`lib/routes/app_router.dart`). iOS has **no** `tandem://` scheme.
 - Both use `paths: ["*"]` to cover all current and future deep link paths.
