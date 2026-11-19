@@ -7,6 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,5 +41,21 @@ public class ConfigService {
         String value = cache.get(key);
         if (value == null) throw new IllegalStateException("Missing config key in app_config table: " + key);
         return value;
+    }
+
+    /** Constant-time check of a caller-supplied secret. A missing config row never matches (so deleting the row revokes it). */
+    public boolean matches(String key, String candidate) {
+        String expected = cache.get(key);
+        if (expected == null || candidate == null || candidate.isBlank()) return false;
+        return MessageDigest.isEqual(expected.getBytes(StandardCharsets.UTF_8), candidate.getBytes(StandardCharsets.UTF_8));
+    }
+
+    /**
+     * Server-to-server auth for the /attribute endpoints (only tandem-core calls them).
+     * ponytail: old X-API-KEY accepted during switchover; revoke it by deleting the app.security.api-key row + restart.
+     */
+    public boolean isAttributionAuthorized(String attributionSecret, String legacyApiKey) {
+        return matches("app.security.attribution-secret", attributionSecret)
+                || matches("app.security.api-key", legacyApiKey);
     }
 }

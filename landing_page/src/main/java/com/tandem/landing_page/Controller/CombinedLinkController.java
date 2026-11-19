@@ -31,18 +31,12 @@ public class CombinedLinkController {
     @PostMapping("/click")
     public ResponseEntity<?> trackClick(
             @RequestHeader(value = "User-Agent", required = false) String userAgent,
-            @RequestHeader(value = "X-API-KEY", required = false) String apiKey,
             @RequestParam(required = false) String referralCode,
             @RequestParam(required = false) String eventId,
             @RequestBody(required = false) ReferralClickRequest body,
             HttpServletRequest request
     ) {
-        if (apiKey == null || apiKey.isBlank() || !configService.get("app.security.api-key").equals(apiKey)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
-                    "success", false,
-                    "message", "Unauthorized: Missing or invalid X-API-KEY"
-            ));
-        }
+        // Public click endpoint: no key (it shipped in the JS bundle). Rate-limited per visitor IP in nginx.
 
         String ip = request.getHeader("X-Forwarded-For");
         if (ip == null || ip.isBlank()) {
@@ -70,13 +64,14 @@ public class CombinedLinkController {
      */
     @PostMapping("/attribute")
     public ResponseEntity<?> attributeInstall(
+            @RequestHeader(value = "X-Attribution-Secret", required = false) String attributionSecret,
             @RequestHeader(value = "X-API-KEY", required = false) String apiKey,
             @RequestBody AttributionRequest req
     ) {
-        if (apiKey == null || apiKey.isBlank() || !configService.get("app.security.api-key").equals(apiKey)) {
+        if (!configService.isAttributionAuthorized(attributionSecret, apiKey)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
                     "success", false,
-                    "message", "Unauthorized: Missing or invalid X-API-KEY"
+                    "message", "Unauthorized"
             ));
         }
 
