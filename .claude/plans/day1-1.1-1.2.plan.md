@@ -17,33 +17,47 @@
 | tandem-core `/auth/attribute` calls `https://tandem.it.com/api/links/attribute` (through CloudFront `/api/*`) with `X-API-KEY`, whose **value is the hardcoded default** in `@Value` | tandem-core `AuthController.java:50, 279, 298` |
 | Staging talks to the prod app backend with flagged test accounts | D10 |
 
-## 1.1 Staging
+## 1.1 Staging → demo server (revised Nov 19)
 
-**Doc deviation (must not follow literally):** the doc says "the dev database profile". On this box the dev profile *is* the production DB. Staging gets its own database and profile.
+**Decision (D10, revised):** a separate demo website server at `demo.tandem.it.com`, talking to the existing **demo app backend** `demo-api.tandem.it.com`. Production servers, data and users are never touched; no flagged test accounts on prod are needed.
+
+Facts: `demo-api.tandem.it.com` is live (`/healthz` → 200, behind CloudFront). The API nginx sends `Access-Control-Allow-Origin *`, so the demo site can call it. The frontend's app-backend URL is a build variable (`VITE_TANDEM_API_BASE`, default `https://api.tandem.it.com`).
+
+### Checks before building (demo-api)
+1. Which EC2 runs demo-api, and which branch is deployed there. It needs the current tandem_main code (web endpoints), and later each day's backend changes.
+2. Enough upcoming events in its Mongo for Bengaluru and Mumbai (≥ 40 each) to fill a deck.
+3. OTP on demo: is `SEND_OTP` off in its `general_configurations` (no MSG91 cost), or do test numbers get real SMS?
+4. demo-api's tandem-core must call the **demo** landing backend for attribution: set `landing-page.url` (env `LANDING_PAGE_URL`) to `https://demo.tandem.it.com` and give it its own `LANDING_ATTRIBUTION_SECRET`.
 
 ### Tasks
-1. **DNS (Route 53)**: hosted zone `tandem.it.com` → create record `staging`, type A, value `3.108.69.213`, TTL 300. Not an alias to CloudFront.
-2. **Security group `main-app-sg`**: port 80 is **already open to the internet** (checked Nov 19: `curl http://3.108.69.213/` → 200), so certbot's HTTP challenge works. Port 443 is closed: add inbound `HTTPS 443 0.0.0.0/0` (+ `::/0`).
-3. **Database**: `CREATE DATABASE leads_db_staging;` then copy only `app_config` rows from prod (`pg_dump -t app_config leads_db | psql leads_db_staging`). Tables auto-create (`ddl-auto=update`). No prod schema touched.
-4. **Profile**: new `landing_page/src/main/resources/application-staging.properties`, with only the datasource URL → `leads_db_staging`.
-5. **Service**: `/etc/systemd/system/tandem-staging.service`, running a separate checkout `/home/ubuntu/tandem_lead_gen_staging` on the day's branch: `java -Xmx256m -jar … --server.port=8081 --spring.profiles.active=staging`. `-Xmx256m` keeps the 4 GB box safe next to prod + Postgres.
-6. **nginx**: new `deploy/nginx/staging`:
-   - `listen 443 ssl` (certbot-managed), `server_name staging.tandem.it.com`
-   - `root /var/www/leadform-staging`, same `try_files` as prod (switches to `/spa.html` in 1.6)
-   - `/api/` → `localhost:8081`
-   - `add_header X-Robots-Tag "noindex, nofollow" always;`
-   - No basic auth: it breaks testing inside Instagram/WhatsApp in-app browsers. noindex + an unpublished hostname is enough.
-7. **certbot**: `sudo certbot --nginx -d staging.tandem.it.com`.
-8. **Deploy script**: `deploy/deploy-staging.sh`: `git -C …_staging pull`, build the jar, restart `tandem-staging`, `npm run build`, `rsync dist/ /var/www/leadform-staging/`.
-9. **Test accounts** (D10): list the flagged test phone numbers + their notification-off state in the plan, and use only those on staging.
+| # | Step | Detail |
+|---|---|---|
+| 1 | Launch EC2 | t4g.small (ARM, Ubuntu 24.04), Mumbai, own security group: 80 + 443 open, 22 from your IP only. Elastic IP |
+| 2 | Install stack | Java 21, Maven, Node 20, nginx, PostgreSQL 16 (reuse `t4g-migration.md` steps 1-2) |
+| 3 | Database | `CREATE DATABASE leads_db;` on the demo box, seed `app_config` (demo values: own attribution secret, OpenCage key, Telegram) |
+| 4 | Code | Clone `tandem_lead_gen` to `/home/ubuntu/tandem_lead_gen`, check out the day's branch, build the jar |
+| 5 | Service | `tandem.service` on 8080, same as prod (it's its own box, so no port juggling) |
+| 6 | Frontend | `VITE_TANDEM_API_BASE=https://demo-api.tandem.it.com npm run build` → `/var/www/leadform` |
+| 7 | nginx | Copy `deploy/nginx/leadform` with `server_name demo.tandem.it.com` + `X-Robots-Tag: noindex` |
+| 8 | DNS + HTTPS | **Recommended:** a CloudFront distribution in front (same 3 behaviours as prod), so the CloudFront-specific parts of 1.2, 1.6 and 3.5 are tested before prod. Route 53 `demo` → that distribution |
+| 9 | Deploy script | `deploy/deploy-demo.sh`: pull branch, build jar, restart, build frontend with the demo API base, copy to `/var/www/leadform` |
 
 ### Done when
-- `curl -I https://staging.tandem.it.com/` → 200, `X-Robots-Tag: noindex`
-- `curl https://staging.tandem.it.com/api/...` hits port 8081 (check the `tandem-staging` log), and a test click lands in `leads_db_staging`, not `leads_db`
-- Prod untouched: `systemctl status tandem` unchanged, `curl -I https://tandem.it.com/` still 200
+- `https://demo.tandem.it.com/` serves the site with `X-Robots-Tag: noindex`
+- `/swipe` on demo logs in with OTP against demo-api, and swipes land in demo-api's database, not prod
+- A test click lands in the demo box's `leads_db`
+- Production unchanged
 
-### Known gap
-Staging bypasses CloudFront, so query-string forwarding (N3a) and real-IP headers aren't tested there. One check on prod with a test link before launch (already in the Day 0 plan).
+### Progress (Nov 19): cloned from prod instead of a fresh install
+- AMI `leadgen-prod-copy-2026-11-19` of LEADGEN-t4g (no reboot) → **DEMO-LEADGEN-t4g** `i-0d2af07b2822faca8`, t4g.micro, SG `demo-leadgen-sg` (22 my IP, 80 any)
+- Elastic IP `43.204.129.65` moved from the stopped Eureka box; Route 53 `eureka` record deleted. `http://43.204.129.65/` → 200
+- **Prod website box is a t4g.micro (1 GB), not t4g.medium**: launch-load risk, decide on resize before the reels
+- **Wildcard `*.tandem.it.com` → 3.108.69.213 (prod)**: `demo.tandem.it.com` hits prod until its own record exists
+- Next on the copy: Telegram + health check off, wipe copied user/click data, demo `app_config` secrets, branch, `server_name demo.tandem.it.com`, frontend built with `VITE_TANDEM_API_BASE=https://demo-api.tandem.it.com`, CloudFront + `demo` record
+
+### Undo from earlier today
+- Route 53 `staging` record: delete (unused)
+- `main-app-sg` port 443: close again (prod origin only needs 80 from CloudFront)
 
 ## 1.2 Lock down the API key and attribution
 

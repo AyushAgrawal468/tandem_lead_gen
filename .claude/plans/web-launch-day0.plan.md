@@ -90,7 +90,7 @@
 | D6 | DOWN handling | **Recommender as is**: bans the event + suppresses the category; DOWN expires after 60 days | `TandemRecommender.java:208`, `DOWN_VALIDITY_DAYS = 60` | None |
 | D7 | Which swipes are hidden in the personal feed | **As is**: RIGHT 7 d, LEFT 21 d, DOWN 60 d, UP by hours. The browser's seen-ID set covers the rest | `EventUtils.java:52-61` | None |
 | D8 | "Open Tandem" | **As the app is today**: Android `tandem://` via `intent://` with a fallback URL; iOS → App Store link (no scheme on iOS) | `AndroidManifest.xml:87-92`, `Info.plist` | 2.6: state the per-platform behaviour |
-| D10 | Staging data | **Staging uses production `api.tandem.it.com`** with flagged test accounts only: notifications off, excluded from analytics, reset between runs (1.5 test reset) | Ayush, Nov 19 | 1.1: staging block points at the prod app backend; landing backend on staging still gets its own port + dev DB profile |
+| D10 | Staging data | **Separate demo website server (`demo.tandem.it.com`) using the demo app backend `demo-api.tandem.it.com`.** No prod test accounts | Ayush, Nov 19 (revised) | 1.1 rewritten for a demo server |
 | D9 | Prerendering | **Playwright primary**, `spa.html` fallback (Shreyas, Nov 18) | — | Already applied |
 
 Numbers the doc sets that **change** the code (decided in the doc, not open): `WEB_SWIPE_LIMIT` 7 → 35; phone ask at the 3rd right or 8th swipe; soft prompts at 10 and 25; 5 exempt invite swipes a day.
