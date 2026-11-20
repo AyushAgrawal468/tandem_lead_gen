@@ -18,7 +18,9 @@ server {
       }
 
       # 1.2: server-to-server attribution, no click limit. Must stay above the click regex ([^/]+ also matches "attribute").
-      location ~ ^/api/(referral|event-link|links)/attribute$ {
+      # Regexes below also match ";…" and trailing "/" variants: Spring treats /api/leads;x and
+      # /api/leads/ as /api/leads, so an exact-match rule could be bypassed.
+      location ~ ^/api/(referral|event-link|links)/attribute(;.*|/)?$ {
           proxy_pass http://localhost:8080;
           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
           proxy_set_header X-Real-IP       $remote_addr;
@@ -26,7 +28,7 @@ server {
       }
 
       # 1.2: public link clicks are keyless, so rate-limit them per real visitor IP ($client_ip, conf.d/client-ip.conf)
-      location ~ ^/api/(referral/[^/]+|event-link/[^/]+|links/click)$ {
+      location ~ ^/api/(referral/[^/;]+|event-link/[^/;]+|links/click)(;.*|/)?$ {
           limit_req zone=clicks burst=20 nodelay;
           limit_req_status 429;
           proxy_pass http://localhost:8080;
@@ -36,7 +38,7 @@ server {
       }
 
       # 1.3: waitlist and location saves, per real visitor IP. Generous: carrier IPs are shared
-      location ~ ^/api/(leads|location)$ {
+      location ~ ^/api/(leads|location)(;.*|/)?$ {
           limit_req zone=forms burst=20 nodelay;
           limit_req_status 429;
           proxy_pass http://localhost:8080;
