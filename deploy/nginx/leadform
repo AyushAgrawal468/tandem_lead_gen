@@ -18,6 +18,13 @@ server {
       }
 
       # 1.2: server-to-server attribution, no click limit. Must stay above the click regex ([^/]+ also matches "attribute").
+      # Spring strips ";…" from any path segment (/api;x/leads == /api/leads), which would slip past
+      # the rate-limit regexes. No page or API here uses ";", so refuse it before routing ($uri is
+      # already %-decoded, so %3B is caught too). Regex locations match in file order: keep this first.
+      location ~ ";" {
+          return 400;
+      }
+
       # Regexes below also match ";…" and trailing "/" variants: Spring treats /api/leads;x and
       # /api/leads/ as /api/leads, so an exact-match rule could be bypassed.
       location ~ ^/api/(referral|event-link|links)/attribute(;.*|/)?$ {
