@@ -138,7 +138,7 @@ Still open (no code to follow): traps 1-4 definition, reel date, approved screen
 | 1.3 | sendOtp cooldown/hourly/global cap + Telegram alert; sendOtp honours the verify block; `tries_left`; nginx OTP zone; landing limits | 4 |
 | 1.4 | Delete GET referral; Ambassador allowlist; `/eureka` 403; CORS on 6 controllers | 2 |
 | 1.5 | Public feed + gateway permit + cache (4); DOWN (0.5); inviteRef + exempt count (3); referral credit + `is_new_user` + code at verify (2); sender push (1.5); accepted check (0.5); match payload (1.5); sender lookup (0.5); summary fields (0.5); test reset (1) | 15 |
-| 1.6 | **Playwright prerender (primary):** after `npm run build`, copy `dist/index.html` → `dist/spa.html` first, then a Playwright script loads `/`, `/swipe`, `/bengaluru`, `/mumbai`, `/faq` and writes `dist/<route>/index.html`. nginx: `root /var/www/leadform; try_files $uri $uri/index.html /spa.html;`. Keep the previous build's hashed assets for a day; regenerate sitemap and robots | 4 |
+| 1.6 | **Playwright prerender (primary):** after `npm run build`, copy `dist/index.html` → `dist/spa.html` first, then a Playwright script loads `/`, `/swipe`, `/bengaluru`, `/mumbai`, `/faq` and writes `dist/<route>/index.html`. nginx: `root /var/www/leadform; try_files $uri $uri/index.html /spa.html;`. Keep the previous build's hashed assets for a day; regenerate sitemap and robots . **Snapshot rules (Shreyas's traps 1-4, Nov 20):** (1) homepage snapshot never overwrites `spa.html`; (2) intro animations off while snapshotting, so no text is saved invisible; (3) no live event cards in saved pages; (4) full title and description tags on every page before saving | 4 |
 
 ### Day 2: Journey 1 (`/swipe`)
 | # | Task | Est. h |
