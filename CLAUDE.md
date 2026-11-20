@@ -95,14 +95,15 @@ Standard Spring Boot layered architecture: `Controller → Service → Repositor
 |---|---|---|---|
 | `POST` | `/api/leads` | None | Submit waitlist lead (name, email, mobile, sessionId) |
 | `POST` | `/api/location` | None | Save user geolocation (lat, lon, accuracy, sessionId) |
-| `POST` | `/api/referral/{code}` | `X-API-KEY` header | Record a referral click with device fingerprint |
-| `GET` | `/api/referral/{code}` | None | Fetch most recent referral hit for a code |
-| `POST` | `/api/referral/attribute` | `X-API-KEY` header | Deferred attribution: match an app install to a referral click |
-| `POST` | `/api/event-link/{eventId}` | `X-API-KEY` header | Record an event share link click with device fingerprint |
-| `POST` | `/api/event-link/attribute` | `X-API-KEY` header | Deferred attribution: match an app install to an event link click; returns `eventId` |
-| `POST` | `/api/links/click` | `X-API-KEY` header | Record a combined event+referral link click (`?referralCode=&eventId=`); stored in `combined_link_hits` |
-| `POST` | `/api/links/attribute` | `X-API-KEY` header | Unified deferred attribution: checks `combined_link_hits` first, falls back to `referral_hits`; returns `{ matched, referralCode, eventId }` |
-| `GET` | `/api/ambassador/page` | None | Ambassador page data for `/a/:token` (proxied from the app backend) |
+| `POST` | `/api/referral/{code}` | None (nginx rate limit) | Record a referral click with device fingerprint |
+| `POST` | `/api/referral/attribute` | `X-Attribution-Secret` (old `X-API-KEY` until its `app_config` row is deleted) | Deferred attribution: match an app install to a referral click |
+| `POST` | `/api/event-link/{eventId}` | None (nginx rate limit) | Record an event share link click with device fingerprint |
+| `POST` | `/api/event-link/attribute` | `X-Attribution-Secret` (as above) | Deferred attribution: match an app install to an event link click; returns `eventId` |
+| `POST` | `/api/links/click` | None (nginx rate limit) | Record a combined event+referral link click (`?referralCode=&eventId=`); stored in `combined_link_hits` |
+| `POST` | `/api/links/attribute` | `X-Attribution-Secret` (as above) | Unified deferred attribution: checks `combined_link_hits` first, falls back to `referral_hits`; returns `{ matched, referralCode, eventId }` |
+| `GET` | `/api/ambassador/page` | None | Ambassador page data for `/a/:token`, proxied from the app backend; only allowlisted fields are returned (`AmbassadorPageService.ALLOWED`) |
+
+`GET /api/referral/{code}` was deleted in launch task 1.4 (it exposed the last clicker's IP and user agent).
 
 There is no Spring `/download` endpoint. `/download` is the React route `DownloadRedirect.jsx`.
 
@@ -132,5 +133,5 @@ There is no Spring `/download` endpoint. `/download` is the React route `Downloa
 - **`application-atul.properties`** — another dev override with a different DB password
 - **`application-prod.properties`** — empty placeholder; production env vars must be set externally
 - Database: `spring.jpa.hibernate.ddl-auto=update` — schema auto-migrates on startup (no Flyway/Liquibase)
-- **CORS:** `WebConfig` restricts `/api/**` to `http://localhost:5173` and `https://tandem.it.com`. `LeadController`, `LocationController`, `ReferralHitController`, `EventLinkController`, `CombinedLinkController` and `AmbassadorPageController` all override this with `@CrossOrigin(origins = "*")` (to be removed in launch task 1.4). The `/download` mapping in `WebConfig` is dead: no Spring endpoint serves it.
+- **CORS:** `WebConfig` is the only CORS policy for `/api/**`: `http://localhost:5173`, `https://tandem.it.com`, `https://www.tandem.it.com`, `https://demo.tandem.it.com`. Don't add `@CrossOrigin` to controllers (all removed in launch task 1.4). The `/download` mapping in `WebConfig` is dead: no Spring endpoint serves it.
 - **Timezone:** All entity `@PrePersist` hooks use `LocalDateTime.now()` (JVM default timezone). Attribution services query with `LocalDateTime.now(ZoneOffset.UTC)`. These are consistent only when the JVM runs in UTC — do not change the server timezone without updating the entities to use `LocalDateTime.now(ZoneOffset.UTC)`.

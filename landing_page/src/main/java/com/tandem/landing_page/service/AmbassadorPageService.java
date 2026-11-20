@@ -11,7 +11,10 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Service
 public class AmbassadorPageService {
@@ -38,7 +41,7 @@ public class AmbassadorPageService {
             ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(headers), Map.class);
             @SuppressWarnings("unchecked")
             Map<String, Object> body = response.getBody();
-            return body;
+            return allowlist(body);
         } catch (Exception e) {
             // Broad catch is deliberate: RestClientException (network/HTTP failures) and
             // IllegalStateException (ConfigService.get() on a missing app_config key) must both
@@ -46,5 +49,36 @@ public class AmbassadorPageService {
             log.warn("Ambassador page-data fetch failed for token lookup: {}", e.getMessage());
             return null;
         }
+    }
+
+    /** Only the fields AmbassadorPage.jsx renders reach the browser; anything else the app backend adds stays server-side (handoff 1.4). */
+    private static final Map<String, Set<String>> ALLOWED = Map.of(
+            "wallet", Set.of("confirmedBalancePaise", "pendingQualificationPaise", "nextPayoutDate"),
+            "conversions", Set.of("id", "refereeMaskedName", "refereeMaskedPhone", "state", "detectedAt", "reason", "amountPaise"),
+            "payoutHistory", Set.of("periodStart", "periodEnd", "netPaise", "state", "utr"),
+            "qualificationRules", Set.of("version", "effectiveSince", "text"),
+            "leaderboard", Set.of("firstName", "qualifiedCount"));
+
+    static Map<String, Object> allowlist(Map<String, Object> body) {
+        if (body == null) return null;
+        Map<String, Object> out = new LinkedHashMap<>();
+        if (body.get("programName") instanceof String name) out.put("programName", name);
+        ALLOWED.forEach((key, fields) -> {
+            Object value = body.get(key);
+            if (value instanceof Map<?, ?> map) {
+                out.put(key, pick(map, fields));
+            } else if (value instanceof List<?> list) {
+                out.put(key, list.stream().filter(Map.class::isInstance).map(m -> pick((Map<?, ?>) m, fields)).toList());
+            }
+        });
+        return out;
+    }
+
+    private static Map<String, Object> pick(Map<?, ?> source, Set<String> fields) {
+        Map<String, Object> out = new LinkedHashMap<>();
+        for (String f : fields) {
+            if (source.containsKey(f)) out.put(f, source.get(f));
+        }
+        return out;
     }
 }

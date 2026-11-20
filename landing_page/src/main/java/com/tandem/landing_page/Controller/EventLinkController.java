@@ -13,7 +13,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/event-link")
-@CrossOrigin(origins = "*")
 public class EventLinkController {
 
     private final EventLinkService eventLinkService;

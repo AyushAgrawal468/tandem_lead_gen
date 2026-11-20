@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/leads")
-@CrossOrigin(origins = "*")
 @Validated
 public class LeadController {
 

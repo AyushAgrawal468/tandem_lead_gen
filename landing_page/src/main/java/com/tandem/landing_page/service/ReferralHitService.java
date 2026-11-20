@@ -66,11 +66,6 @@ public class ReferralHitService {
         repository.save(hit);
     }
 
-    public ReferralHit getReferalHitsByReferralCode(String referralCode) {
-        Optional<ReferralHit> referralHits = repository.findFirstByCodeOrderByCreatedAtDesc(referralCode);
-        return referralHits.orElse(null);
-    }
-
     public AttributionResponse attribute(AttributionRequest req) {
         if (req.getIp() == null || req.getIp().isBlank()) {
             return new AttributionResponse(false, null);

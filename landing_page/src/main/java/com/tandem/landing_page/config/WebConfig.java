@@ -26,7 +26,9 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         System.out.println("CORS config loaded");
         registry.addMapping("/api/**")
-                .allowedOrigins("http://localhost:5173", "https://tandem.it.com")
+                // The only CORS policy for /api/** (controller-level @CrossOrigin("*") removed in 1.4)
+                .allowedOrigins("http://localhost:5173", "https://tandem.it.com", "https://www.tandem.it.com",
+                        "https://demo.tandem.it.com")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(false);

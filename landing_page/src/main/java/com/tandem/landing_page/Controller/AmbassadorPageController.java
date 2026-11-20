@@ -10,7 +10,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/ambassador")
-@CrossOrigin(origins = "*")
 public class AmbassadorPageController {
 
     private final AmbassadorPageService pageService;

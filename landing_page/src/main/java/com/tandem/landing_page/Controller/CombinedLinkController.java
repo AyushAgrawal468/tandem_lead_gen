@@ -13,7 +13,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/links")
-@CrossOrigin(origins = "*")
 public class CombinedLinkController {
 
     private final CombinedLinkService combinedLinkService;

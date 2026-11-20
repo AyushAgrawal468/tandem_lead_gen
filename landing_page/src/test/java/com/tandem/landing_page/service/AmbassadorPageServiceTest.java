@@ -7,6 +7,7 @@ import org.springframework.http.*;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -29,8 +30,13 @@ class AmbassadorPageServiceTest {
     }
 
     @Test
-    void attachesInternalAuthHeaderAndReturnsBodyOnSuccess() {
-        Map<String, Object> body = Map.of("ambassadorId", "abc");
+    void returnsOnlyAllowlistedFields() {
+        Map<String, Object> body = Map.of(
+                "programName", "Campus Ambassadors",
+                "ambassadorId", "abc",                                     // not rendered → dropped
+                "wallet", Map.of("confirmedBalancePaise", 5000, "bankAccount", "XXXX1234"),
+                "conversions", List.of(Map.of("id", "c1", "state", "QUALIFIED", "refereeUserId", "u-9", "refereePhone", "9800000000")),
+                "leaderboard", List.of(Map.of("firstName", "Riya", "qualifiedCount", 3, "phone", "9811111111")));
         when(restTemplate.exchange(
                 eq("https://tandem-main.internal/internal/ambassador/page-data?token=tok123"),
                 eq(HttpMethod.GET),
@@ -40,7 +46,11 @@ class AmbassadorPageServiceTest {
 
         Map<String, Object> result = service.fetchPageData("tok123");
 
-        assertEquals(body, result);
+        assertEquals(Map.of(
+                "programName", "Campus Ambassadors",
+                "wallet", Map.of("confirmedBalancePaise", 5000),
+                "conversions", List.of(Map.of("id", "c1", "state", "QUALIFIED")),
+                "leaderboard", List.of(Map.of("firstName", "Riya", "qualifiedCount", 3))), result);
     }
 
     @Test
@@ -81,6 +91,6 @@ class AmbassadorPageServiceTest {
 
         Map<String, Object> result = service.fetchPageData("tok with&special#chars");
 
-        assertEquals(body, result);
+        assertNotNull(result);
     }
 }
