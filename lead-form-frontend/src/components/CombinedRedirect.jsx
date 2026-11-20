@@ -33,7 +33,6 @@ export default function CombinedRedirect() {
         await fetch(apiUrl(`/api/links/click${query}`), {
           method: "POST",
           headers: {
-            "X-API-KEY": "tandem_live_7KpQ2mX9vN4aR1cD8fH6jL3sZ0yW5uT2bE9gP1",
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
