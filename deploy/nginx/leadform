@@ -13,8 +13,22 @@ server {
 
       add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
 
+      # 1.6: prerendered pages first (dist/<route>/index.html), then the untouched SPA shell.
+      # spa.html, never index.html: the homepage snapshot lives in index.html.
+      # HTML is never cached, so a deploy shows up at once. (add_header in a location drops the
+      # server-level one, hence HSTS repeated.)
       location / {
-          try_files $uri /index.html;
+          try_files $uri $uri/index.html /spa.html;
+          add_header Cache-Control "no-cache" always;
+          add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+      }
+
+      # Vite's hashed bundles never change once built: cache for a year (CloudFront + browsers).
+      # Deploys copy over without deleting, so last build's files stay for tabs opened before it.
+      location /assets/ {
+          try_files $uri =404;
+          add_header Cache-Control "public, max-age=31536000, immutable" always;
+          add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
       }
 
       # 1.2: server-to-server attribution, no click limit. Must stay above the click regex ([^/]+ also matches "attribute").

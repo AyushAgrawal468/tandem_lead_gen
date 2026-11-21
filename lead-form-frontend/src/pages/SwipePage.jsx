@@ -226,7 +226,10 @@ export default function SwipePage() {
 
   return (
     <div style={{ minHeight: "100vh", background: C.bg, color: C.text, fontFamily: font }}>
-      <Helmet><title>Discover events · Tandem</title></Helmet>
+      <Helmet>
+        <title>Swipe on things to do near you | Tandem</title>
+        <meta name="description" content="See what's on in your city, swipe right on what you'd do, and get matched with friends who want the same plan." />
+      </Helmet>
       <main style={{ maxWidth: "420px", margin: "0 auto", padding: "32px 16px 48px" }}>
         <Link to="/" style={{ color: C.green, fontWeight: 700, fontSize: "20px", textDecoration: "none" }}>tandem</Link>
 
