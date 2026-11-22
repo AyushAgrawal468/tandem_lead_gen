@@ -5,6 +5,8 @@ import QrCardBg from "../assets/qr-card-bg.svg";
 import QrCode from "../assets/qr-code.svg";
 import TLogo from "../assets/t-logo.svg";
 import { formatEventDate } from "../lib/formatEventDate";
+import { initialCity } from "../lib/city";
+import CityPicker from "../components/CityPicker";
 
 // Login + event APIs live on the app backend, not the landing backend behind apiUrl()
 const API = (import.meta.env.VITE_TANDEM_API_BASE || "https://api.tandem.it.com").replace(/\/$/, "");
@@ -148,8 +150,7 @@ export default function SwipePage() {
   const [step, setStep] = useState(() => (loadSession() ? "prefs" : "phone"));
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
-  const [cities, setCities] = useState(() => loadSession()?.cities || []);
-  const [city, setCity] = useState("");
+  const [city, setCity] = useState(initialCity);
   const [prefGroups, setPrefGroups] = useState([]);
   const [picked, setPicked] = useState([]);
   const [events, setEvents] = useState([]);
@@ -185,10 +186,10 @@ export default function SwipePage() {
   const verifyOtp = () => run(async () => {
     const data = await call("/auth/verify-otp", { method: "POST", body: { phone, countryCode: "91", otp, platform: "WEB" } });
     const s = {
-      token: data.access_token, userId: data.user_id, cities: data.supported_cities || [],
+      token: data.access_token, userId: data.user_id,
       expiresAt: Date.now() + ((data.expires_in || 600) - 30) * 1000,
     };
-    saveSession(s); setSession(s); setCities(s.cities); setStep("prefs");
+    saveSession(s); setSession(s); setStep("prefs");
   });
 
   const loadFeed = () => run(async () => {
@@ -202,6 +203,9 @@ export default function SwipePage() {
     setStep("swipe");
     if (data.limitReached || !(data.events || []).length) setShowPopup(true);
   });
+
+  // Switching city from the header chip mid-deck reloads the deck for that city
+  useEffect(() => { if (step === "swipe") loadFeed(); }, [city]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const swipe = (action) => {
     const current = events[0];
@@ -231,7 +235,10 @@ export default function SwipePage() {
         <meta name="description" content="See what's on in your city, swipe right on what you'd do, and get matched with friends who want the same plan." />
       </Helmet>
       <main style={{ maxWidth: "420px", margin: "0 auto", padding: "32px 16px 48px" }}>
-        <Link to="/" style={{ color: C.green, fontWeight: 700, fontSize: "20px", textDecoration: "none" }}>tandem</Link>
+        <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
+          <Link to="/" style={{ color: C.green, fontWeight: 700, fontSize: "20px", textDecoration: "none" }}>tandem</Link>
+          <CityPicker city={city} onChange={setCity} />
+        </header>
 
         {step === "phone" && (
           <section style={{ marginTop: "40px" }}>
@@ -261,11 +268,6 @@ export default function SwipePage() {
         {step === "prefs" && (
           <section style={{ marginTop: "32px" }}>
             <h1 style={{ fontSize: "26px", fontWeight: 700, marginBottom: "20px" }}>What are you into?</h1>
-            <label htmlFor="city" style={{ display: "block", color: C.low, fontSize: "14px", marginBottom: "6px" }}>City</label>
-            <select id="city" value={city} onChange={(e) => setCity(e.target.value)} style={{ ...input, marginBottom: "20px" }}>
-              <option value="">Select your city</option>
-              {cities.map((c) => <option key={c} value={c}>{c}</option>)}
-            </select>
             {prefGroups.map((g) => (
               <div key={g.code || g.name} style={{ marginBottom: "16px" }}>
                 <p style={{ color: C.low, fontSize: "14px", marginBottom: "8px" }}>{g.icon} {g.name}</p>
@@ -284,7 +286,7 @@ export default function SwipePage() {
               </div>
             ))}
             <div style={{ position: "sticky", bottom: "16px", marginTop: "24px" }}>
-              <button onClick={loadFeed} disabled={!city || !picked.length || busy} style={btn(city && picked.length && !busy)}>
+              <button onClick={loadFeed} disabled={!picked.length || busy} style={btn(picked.length && !busy)}>
                 {busy ? "Loading…" : "Show my events"}
               </button>
             </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, lazy, Suspense } from "react";
+import React, { useState, useEffect, lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, useLocation, useNavigationType } from "react-router-dom";
 
 function ScrollToTop() {
@@ -40,9 +40,7 @@ function ScrollToTop() {
   return null;
 }
 import { Helmet } from "react-helmet";
-import { apiUrl } from "./lib/api";
 
-import LocationConsent from "./components/LocationConsent";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import ReferralRedirect from "./components/ReferralRedirect";
@@ -160,23 +158,8 @@ function useSectionEngagement(sectionIds, minimumVisible = 0.5) {
   }, [sectionIds.join("|"), minimumVisible]);
 }
 
-// Generate a fresh session id on every page load/refresh
-let runtimeSessionId = null;
-function getSessionId() {
-  if (!runtimeSessionId) {
-    runtimeSessionId =
-      Math.random().toString(36).substring(2) + Date.now().toString(36);
-    try {
-      localStorage.setItem("sessionId", runtimeSessionId);
-      sessionStorage.setItem("sessionId", runtimeSessionId);
-    } catch (_) {}
-  }
-  return runtimeSessionId;
-}
-
 function LandingPage() {
   const navType = useNavigationType();
-  const [showConsent, setShowConsent] = useState(false);
   const [timerData, setTimerData] = useState(null);
 
   useEffect(() => {
@@ -236,12 +219,6 @@ function LandingPage() {
     };
   }, [deferSections]);
 
-  const logGuardsRef = useRef({
-    usedStoredLog: false,
-    consentPrecheckLog: false,
-  });
-  const consentTimerRef = useRef(null);
-
   useEffect(() => {
     let isMounted = true;
     const FIXED_START_TIME =1769763813000 ;
@@ -270,109 +247,6 @@ function LandingPage() {
 
   useSectionEngagement(["hero", "features", "waitlist", "blogs", "faq", "footer"]);
 
-  const postLocation = (loc) => {
-    const sessionId = getSessionId();
-    fetch(apiUrl("api/location"), {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        lat: loc.lat,
-        lon: loc.lon,
-        accuracy: loc.accuracy,
-        ts: loc.ts,
-        userId: 1,
-        sessionId: sessionId,
-      }),
-    })
-      .then(async (res) => {
-        if (!res.ok) {
-          const text = await res.text().catch(() => "");
-          throw new Error(
-            `HTTP ${res.status} ${res.statusText} ${text ? "- " + text : ""}`
-          );
-        }
-        return res.json();
-      })
-      .then((data) => console.log("✅ Saved to backend:", data))
-      .catch((err) => console.error("❌ Error sending location:", err));
-  };
-
-  useEffect(() => {
-    const getCookie = (name) => {
-      return document.cookie
-        .split("; ")
-        .map((kv) => kv.split("="))
-        .reduce(
-          (acc, [k, v]) => (k === name ? decodeURIComponent(v || "") : acc),
-          ""
-        );
-    };
-
-    const locationConsent = getCookie("locationConsent");
-    const userLocation = getCookie("userLocation");
-    const handled = (() => {
-      try {
-        return sessionStorage.getItem("locationHandled") === "true";
-      } catch {
-        return false;
-      }
-    })();
-
-    if ((locationConsent === "true" && userLocation) || handled) {
-      if (!logGuardsRef.current.consentPrecheckLog) {
-        console.log("📍 Location consent already granted, using stored location");
-        logGuardsRef.current.consentPrecheckLog = true;
-      }
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      const recheckConsent = getCookie("locationConsent");
-      let recheckHandled = false;
-      try {
-        recheckHandled = sessionStorage.getItem("locationHandled") === "true";
-      } catch {}
-      if (recheckConsent !== "true" && !recheckHandled) {
-        setShowConsent(true);
-      }
-    }, 800);
-
-    consentTimerRef.current = timer;
-
-    return () => {
-      if (consentTimerRef.current) {
-        clearTimeout(consentTimerRef.current);
-        consentTimerRef.current = null;
-      }
-    };
-  }, []);
-
-  const handleConsent = (allowed, sessionId, locationData, isFromStoredData = false) => {
-    setShowConsent(false);
-    try {
-      sessionStorage.setItem("locationHandled", "true");
-    } catch {}
-
-    if (consentTimerRef.current) {
-      clearTimeout(consentTimerRef.current);
-      consentTimerRef.current = null;
-    }
-
-    if (allowed && locationData) {
-      if (!isFromStoredData) {
-        const loc = {
-          lat: locationData.latitude,
-          lon: locationData.longitude,
-          accuracy: locationData.accuracy || null,
-          city: null,
-          source: "device",
-          ts: locationData.timestamp,
-        };
-        postLocation(loc);
-      }
-    }
-  };
-
   return (
     <div className="min-h-screen bg-bg-color text-texthigh font-body-r">
       <Helmet>
@@ -397,8 +271,6 @@ function LandingPage() {
           `}</script>
         </Helmet>
       )}
-
-      <LocationConsent visible={showConsent} onConsent={handleConsent} sessionId={getSessionId()} />
 
       <Navbar />
 
