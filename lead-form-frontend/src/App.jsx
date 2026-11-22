@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
-import { BrowserRouter, Routes, Route, useLocation, useNavigationType } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet, useLocation, useNavigationType } from "react-router-dom";
+import { Helmet } from "react-helmet";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -55,6 +56,16 @@ import FaqPage from "./pages/FaqPage";
 import NotFound from "./pages/NotFound";
 import CityPage from "./pages/CityPage";
 
+// Handoff 3.3: personal links (someone's invite, referral or ambassador wallet) stay out of search results
+function NoIndex() {
+  return (
+    <>
+      <Helmet><meta name="robots" content="noindex" /></Helmet>
+      <Outlet />
+    </>
+  );
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -66,17 +77,19 @@ export default function App() {
         <Route path="/bengaluru" element={<CityPage key="bengaluru" slug="bengaluru" />} />
         <Route path="/mumbai" element={<CityPage key="mumbai" slug="mumbai" />} />
 
-        {/* Referral Redirect Page (no UI) */}
-        <Route path="/r" element={<ReferralRedirect />} />
+        <Route element={<NoIndex />}>
+          {/* Referral Redirect Page (no UI) */}
+          <Route path="/r" element={<ReferralRedirect />} />
 
-        {/* Event share deep link — redirects to store; app opens event after install */}
-        <Route path="/e/:eventId" element={<EventRedirect />} />
+          {/* Event share deep link — redirects to store; app opens event after install */}
+          <Route path="/e/:eventId" element={<EventRedirect />} />
 
-        {/* Combined event+referral link — tracks both, redirects to store */}
-        <Route path="/l/links" element={<CombinedRedirect />} />
+          {/* Combined event+referral link — tracks both, redirects to store */}
+          <Route path="/l/links" element={<CombinedRedirect />} />
 
-        {/* Ambassador magic-link page — wallet, referrals, payout history, leaderboard */}
-        <Route path="/a/:token" element={<AmbassadorPage />} />
+          {/* Ambassador magic-link page — wallet, referrals, payout history, leaderboard */}
+          <Route path="/a/:token" element={<AmbassadorPage />} />
+        </Route>
 
         {/* Journey 1: cards first, phone step, 35 web swipes */}
         <Route path="/swipe" element={<SwipePage />} />
