@@ -10,3 +10,9 @@ export const STORE_LINK_CHECK_MS = 2500;
 // Swipe gesture (design brief section 5)
 export const SWIPE_PX = 100;
 export const SWIPE_VELOCITY = 0.5; // px per ms
+
+// Creator names for the /swipe heading "Saw {creator}'s reel? ...", keyed by utm_campaign (handoff 3.1).
+// Add each reel's campaign here when its tagged link goes out.
+export const CREATORS = {
+  sukalyan_reel1: "Sukalyan",
+};

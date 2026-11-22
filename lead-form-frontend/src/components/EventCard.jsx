@@ -24,7 +24,7 @@ function Poster({ card, style }) {
 }
 
 // Poster is 3:4, but shrinks on short screens (in-app browsers) so the buttons stay on screen
-const POSTER_H = "min(calc((min(100vw, 420px) - 56px) * 4 / 3), calc(100dvh - 445px))";
+const POSTER_H = "min(calc((min(100vw, 420px) - 56px) * 4 / 3), calc(100dvh - 490px))";
 
 // Round mint button = "Send to a friend" (design brief: the card's round Tandem button on the web)
 export function ShareButton({ onShare, size = 40 }) {

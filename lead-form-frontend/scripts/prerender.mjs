@@ -16,7 +16,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const DIST = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'dist')
-const ROUTES = (process.env.PRERENDER_ROUTES || '/,/swipe').split(',').map((r) => r.trim()).filter(Boolean)
+const ROUTES = (process.env.PRERENDER_ROUTES || '/,/swipe,/faq').split(',').map((r) => r.trim()).filter(Boolean)
 const ALLOW_WARNINGS = process.argv.includes('--allow-warnings')
 const READY_TIMEOUT_MS = 4000
 
@@ -78,7 +78,8 @@ for (const route of ROUTES) {
     if (hidden.length) issues.push(`text at opacity 0: ${hidden.slice(0, 5).map((t) => JSON.stringify(t)).join(', ')}${hidden.length > 5 ? ` (+${hidden.length - 5})` : ''}`)
 
     // Rule 5 + no double-loading: strip runtime-injected scripts/iframes and per-visitor state
-    for (const s of document.querySelectorAll('script[data-react-helmet], script[src]')) {
+    // JSON-LD stays: it's data for crawlers (rule 4), not code, and Helmet replaces it in the browser
+    for (const s of document.querySelectorAll('script[data-react-helmet]:not([type="application/ld+json"]), script[src]')) {
       if (s.hasAttribute('data-react-helmet') || !shipped.includes(s.getAttribute('src'))) s.remove()
     }
     document.querySelectorAll('iframe').forEach((f) => f.remove())

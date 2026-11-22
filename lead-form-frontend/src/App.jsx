@@ -1,4 +1,4 @@
-import React, { useState, useEffect, lazy, Suspense } from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter, Routes, Route, useLocation, useNavigationType } from "react-router-dom";
 
 function ScrollToTop() {
@@ -39,10 +39,6 @@ function ScrollToTop() {
 
   return null;
 }
-import { Helmet } from "react-helmet";
-
-import Navbar from "./components/Navbar";
-import Hero from "./components/Hero";
 import ReferralRedirect from "./components/ReferralRedirect";
 import DownloadRedirect from "./components/DownloadRedirect";
 import EventRedirect from "./components/EventRedirect";
@@ -54,341 +50,18 @@ import TermsAndConditions from "./pages/TermsAndConditions";
 import RefundPolicy from "./pages/RefundPolicy";
 import AmbassadorPage from "./pages/AmbassadorPage";
 import SwipePage from "./pages/SwipePage";
-
-const GA_ID = "G-XTYRTQY6R7";
-
-const Features = lazy(() => import("./components/Features"));
-// APP LAUNCHED: Waitlist hidden — uncomment to re-enable
-// const Waitlist = lazy(() => import("./components/Waitlist"));
-const Blog = lazy(() => import("./components/Blog"));
-const FAQ = lazy(() => import("./components/FAQ"));
-const DownloadSection = lazy(() => import("./components/DownloadSection"));
-const Footer = lazy(() => import("./components/Footer"));
-
-function useSectionEngagement(sectionIds, minimumVisible = 0.5) {
-  useEffect(() => {
-    if (typeof window === "undefined" || !window.IntersectionObserver) return;
-
-    const clarityAvailable = () =>
-      typeof window !== "undefined" && typeof window.clarity === "function";
-
-    const run = () => {
-      const state = new Map();
-      sectionIds.forEach((id) =>
-        state.set(id, { visible: false, enterTs: 0, totalMs: 0 })
-      );
-
-      const sendEvent = (name, data) => {
-        if (clarityAvailable()) {
-          try {
-            window.clarity("event", name, data);
-          } catch (_) {}
-        }
-      };
-
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            const id = entry.target.id;
-            if (!state.has(id)) return;
-
-            const rec = state.get(id);
-            const visibleNow = entry.intersectionRatio >= minimumVisible;
-            const now = performance.now();
-
-            if (visibleNow && !rec.visible) {
-              rec.visible = true;
-              rec.enterTs = now;
-              sendEvent("section_enter", { id });
-            } else if (!visibleNow && rec.visible) {
-              rec.visible = false;
-              const delta = now - rec.enterTs;
-              rec.totalMs += delta;
-              sendEvent("section_exit", {
-                id,
-                sessionTimeMs: Math.round(delta),
-                cumulativeTimeMs: Math.round(rec.totalMs),
-              });
-            }
-          });
-        },
-        { threshold: [minimumVisible] }
-      );
-
-      sectionIds.forEach((id) => {
-        const el = document.getElementById(id);
-        if (el) observer.observe(el);
-      });
-
-      const onBeforeUnload = () => {
-        const now = performance.now();
-        state.forEach((rec, id) => {
-          if (rec.visible) {
-            const delta = now - rec.enterTs;
-            rec.totalMs += delta;
-            rec.visible = false;
-            sendEvent("section_exit", {
-              id,
-              sessionTimeMs: Math.round(delta),
-              cumulativeTimeMs: Math.round(rec.totalMs),
-              unload: true,
-            });
-          }
-          sendEvent("section_total", {
-            id,
-            totalTimeMs: Math.round(rec.totalMs),
-          });
-        });
-      };
-
-      window.addEventListener("beforeunload", onBeforeUnload);
-      return () => {
-        window.removeEventListener("beforeunload", onBeforeUnload);
-        observer.disconnect();
-      };
-    };
-
-    const idleId = window.requestIdleCallback
-      ? window.requestIdleCallback(run, { timeout: 2000 })
-      : setTimeout(run, 400);
-
-    return () => {
-      if (window.cancelIdleCallback && idleId) window.cancelIdleCallback(idleId);
-    };
-  }, [sectionIds.join("|"), minimumVisible]);
-}
-
-function LandingPage() {
-  const navType = useNavigationType();
-  const [timerData, setTimerData] = useState(null);
-
-  useEffect(() => {
-    if (typeof window === "undefined" || typeof document === "undefined") return;
-
-    const upgradeImg = (img) => {
-      if (!(img instanceof HTMLImageElement)) return;
-      if (!img.hasAttribute("loading")) img.setAttribute("loading", "lazy");
-      img.setAttribute("decoding", "async");
-      if (img.getAttribute("fetchpriority") === "high")
-        img.removeAttribute("fetchpriority");
-    };
-
-    document.querySelectorAll("img").forEach(upgradeImg);
-
-    const mo = new MutationObserver((mutations) => {
-      for (const m of mutations) {
-        m.addedNodes &&
-          m.addedNodes.forEach((node) => {
-            if (node instanceof HTMLImageElement) upgradeImg(node);
-            else if (node && node.querySelectorAll) {
-              node.querySelectorAll("img").forEach(upgradeImg);
-            }
-          });
-      }
-    });
-
-    mo.observe(document.documentElement, { childList: true, subtree: true });
-    return () => mo.disconnect();
-  }, []);
-
-  const [deferSections, setDeferSections] = useState(() => {
-    // Only skip deferral on genuine back-navigation (saved scroll position exists).
-    // On first-ever visit navType is also "POP", so we check sessionStorage too.
-    if (navType !== "POP") return false;
-    try { return !!sessionStorage.getItem("scrollY:/"); } catch { return false; }
-  });
-  useEffect(() => {
-    if (deferSections) return;
-    const reveal = () => setDeferSections(true);
-    window.addEventListener("scroll", reveal, { once: true, passive: true });
-
-    const idle = (cb) =>
-      window.requestIdleCallback
-        ? window.requestIdleCallback(cb, { timeout: 1800 })
-        : setTimeout(cb, 300);
-
-    const idleId = idle(() => setDeferSections(true));
-
-    return () => {
-      window.removeEventListener("scroll", reveal);
-      if (window.cancelIdleCallback && typeof idleId === "number") {
-        try {
-          window.cancelIdleCallback(idleId);
-        } catch {}
-      }
-    };
-  }, [deferSections]);
-
-  useEffect(() => {
-    let isMounted = true;
-    const FIXED_START_TIME =1769763813000 ;
-    const COUNTDOWN_DURATION_MS = 15 * 24 * 60 * 60 * 1000;
-    const END_TIME = FIXED_START_TIME + COUNTDOWN_DURATION_MS;
-
-    const computeCountdown = () => {
-      const now = Date.now();
-      const remainingMs = Math.max(END_TIME - now, 0);
-      const timerObj = {
-        startTime: FIXED_START_TIME,
-        endTime: END_TIME,
-        remainingSeconds: remainingMs,
-      };
-      if (isMounted) setTimerData(timerObj);
-    };
-
-    computeCountdown();
-    const interval = setInterval(computeCountdown, 1000);
-
-    return () => {
-      isMounted = false;
-      clearInterval(interval);
-    };
-  }, []);
-
-  useSectionEngagement(["hero", "features", "waitlist", "blogs", "faq", "footer"]);
-
-  return (
-    <div className="min-h-screen bg-bg-color text-texthigh font-body-r">
-      <Helmet>
-        <title>Tandem - Group Planning Made Simple</title>
-        <meta
-          name="description"
-          content="Stop wasting 23 messages per hangout. Tandem gets your friends together 2x more often."
-        />
-      </Helmet>
-
-      {GA_ID && (
-        <Helmet>
-          <script
-            async
-            src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
-          ></script>
-          <script>{`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', '${GA_ID}');
-          `}</script>
-        </Helmet>
-      )}
-
-      <Navbar />
-
-      <Hero
-        timerData={timerData}
-        startTime={timerData?.startTime}
-        endTime={timerData?.endTime}
-        remainingSeconds={timerData?.remainingSeconds}
-      />
-
-      <div
-        className="cv-lazy"
-        style={{
-          containIntrinsicSize: "320px",
-          minHeight: deferSections ? undefined : "320px",
-        }}
-      >
-        <Suspense
-          fallback={
-            <div className="w-full py-24 text-center text-white/60">
-              Loading features…
-            </div>
-          }
-        >
-          {deferSections && <Features />}
-        </Suspense>
-      </div>
-
-      {/* APP LAUNCHED: Waitlist hidden — uncomment to re-enable
-      <div style={{ minHeight: deferSections ? undefined : "400px" }}>
-        <Suspense
-          fallback={
-            <div className="w-full py-16 text-center text-white/60">
-              Loading waitlist…
-            </div>
-          }
-        >
-          {deferSections && <Waitlist />}
-        </Suspense>
-      </div>
-      */}
-
-      <div
-        className="cv-lazy"
-        style={{
-          containIntrinsicSize: "380px",
-          minHeight: deferSections ? undefined : "380px",
-        }}
-      >
-        <Suspense
-          fallback={
-            <div className="w-full py-16 text-center text-white/60">
-              Loading blog…
-            </div>
-          }
-        >
-          {deferSections && <Blog />}
-        </Suspense>
-      </div>
-
-      <div
-        className="cv-lazy"
-        style={{
-          containIntrinsicSize: "260px",
-          minHeight: deferSections ? undefined : "260px",
-        }}
-      >
-        <Suspense
-          fallback={
-            <div className="w-full py-16 text-center text-white/60">
-              Loading FAQ…
-            </div>
-          }
-        >
-          {deferSections && <FAQ />}
-        </Suspense>
-      </div>
-
-      <div
-        className="cv-lazy"
-        style={{
-          containIntrinsicSize: "340px",
-          minHeight: deferSections ? undefined : "340px",
-        }}
-      >
-        <Suspense fallback={<div className="w-full py-16" />}>
-          {deferSections && <DownloadSection />}
-        </Suspense>
-      </div>
-
-      <div
-        className="cv-lazy"
-        style={{
-          containIntrinsicSize: "220px",
-          minHeight: deferSections ? undefined : "220px",
-        }}
-      >
-        <Suspense
-          fallback={
-            <div className="w-full py-16 text-center text-white/60">
-              Loading footer…
-            </div>
-          }
-        >
-          {deferSections && <Footer />}
-        </Suspense>
-      </div>
-    </div>
-  );
-}
+import HomePage from "./pages/HomePage";
+import FaqPage from "./pages/FaqPage";
+import NotFound from "./pages/NotFound";
 
 export default function App() {
   return (
     <BrowserRouter>
       <ScrollToTop />
       <Routes>
-        {/* Landing Page */}
-        <Route path="/" element={<LandingPage />} />
+        {/* Homepage (Journey 3): promise + live deck, then crawlable answers */}
+        <Route path="/" element={<HomePage />} />
+        <Route path="/faq" element={<FaqPage />} />
 
         {/* Referral Redirect Page (no UI) */}
         <Route path="/r" element={<ReferralRedirect />} />
@@ -402,7 +75,7 @@ export default function App() {
         {/* Ambassador magic-link page — wallet, referrals, payout history, leaderboard */}
         <Route path="/a/:token" element={<AmbassadorPage />} />
 
-        {/* Web swipe teaser — phone login, 7 swipes, then download popup */}
+        {/* Journey 1: cards first, phone step, 35 web swipes */}
         <Route path="/swipe" element={<SwipePage />} />
 
         {/* Download redirect — sends user to App Store or Play Store based on UA */}
@@ -419,6 +92,9 @@ export default function App() {
         {/* Legal Pages */}
         <Route path="/legal/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/legal/terms-and-conditions" element={<TermsAndConditions />} />
+
+        {/* Everything else: 404 with noindex (nginx serves unknown routes with a 200) */}
+        <Route path="*" element={<NotFound />} />
         
 
       </Routes>

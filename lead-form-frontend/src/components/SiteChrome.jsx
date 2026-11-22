@@ -1,0 +1,55 @@
+import React from "react";
+import { Link } from "react-router-dom";
+import StoreButtons from "../assets/store-buttons.svg";
+import CityPicker from "./CityPicker";
+import { T, font } from "../lib/card";
+
+const APP_STORE = "https://apps.apple.com/in/app/tandem-events-experiences/id6756263621";
+const PLAY = "https://play.google.com/store/apps/details?id=com.tandemit.tandemit";
+const CONTACT = "support@tandem.app"; // same address as the account-deletion page
+
+/** Official App Store + Google Play badges (store-buttons.svg is 560x50: App Store 0-272, Play 288-560). */
+export function StoreBadges({ width = 336 }) {
+  return (
+    <div style={{ position: "relative", width: "100%", maxWidth: `${width}px` }}>
+      <img src={StoreButtons} alt="Download on the App Store and get it on Google Play" draggable={false} style={{ display: "block", width: "100%", height: "auto" }} />
+      <a href={APP_STORE} target="_blank" rel="noopener noreferrer" aria-label="Download on the App Store"
+        style={{ position: "absolute", top: 0, left: 0, width: "48.5%", height: "100%", borderRadius: "24px" }} />
+      <a href={PLAY} target="_blank" rel="noopener noreferrer" aria-label="Get it on Google Play"
+        style={{ position: "absolute", top: 0, right: 0, width: "48.5%", height: "100%", borderRadius: "24px" }} />
+    </div>
+  );
+}
+
+/** Design screens 1 and 36: wordmark, city chip (pages with a deck), FAQ link. */
+export function SiteHeader({ city, onCity }) {
+  return (
+    <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", fontFamily: font }}>
+      <Link to="/" style={{ color: T.green, fontWeight: 700, fontSize: "20px", textDecoration: "none" }}>tandem</Link>
+      <nav style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+        <Link to="/faq" style={{ color: T.mid, fontSize: "14px", textDecoration: "none" }}>FAQ</Link>
+        {onCity && <CityPicker city={city} onChange={onCity} />}
+      </nav>
+    </header>
+  );
+}
+
+/** Design screen 42: store badges, FAQ, Privacy Policy, Terms, contact. */
+export function SiteFooter() {
+  const link = { color: T.mid, fontSize: "14px", textDecoration: "none" };
+  return (
+    <footer style={{ borderTop: `1px solid ${T.surface2}`, marginTop: "48px", padding: "32px 16px calc(32px + env(safe-area-inset-bottom))", fontFamily: font }}>
+      <div style={{ maxWidth: "960px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "20px" }}>
+        <p style={{ color: T.high, fontSize: "16px", fontWeight: 700, margin: 0 }}>Get Tandem on iPhone and Android.</p>
+        <StoreBadges />
+        <nav aria-label="Footer" style={{ display: "flex", flexWrap: "wrap", gap: "12px 24px" }}>
+          <Link to="/faq" style={link}>FAQ</Link>
+          <Link to="/legal/privacy-policy" style={link}>Privacy Policy</Link>
+          <Link to="/legal/terms-and-conditions" style={link}>Terms</Link>
+          <a href={`mailto:${CONTACT}`} style={link}>Contact</a>
+        </nav>
+        <p style={{ color: T.low, fontSize: "12px", margin: 0 }}>Questions? <Link to="/faq" style={{ color: T.green, textDecoration: "none" }}>Read the FAQ</Link>.</p>
+      </div>
+    </footer>
+  );
+}

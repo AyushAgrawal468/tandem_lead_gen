@@ -1,11 +1,11 @@
 import React, { useRef } from "react";
 import QrCardBg from "../assets/qr-card-bg.svg";
 import QrCode from "../assets/qr-code.svg";
-import StoreButtons from "../assets/store-buttons.svg";
 import { T, font } from "../lib/card";
 import { openTandemUrl, whenStuck } from "../lib/app";
 import { useSheetKeys } from "../lib/useSheetKeys";
 import { track } from "../lib/analytics";
+import { StoreBadges } from "./SiteChrome";
 
 // Handoff 2.6: app prompts. Copy from "Every screen and its copy".
 const pill = (main) => ({
@@ -46,14 +46,7 @@ export function DesktopAppPrompt({ onClose }) {
           <img src={QrCode} alt="QR code to download Tandem"
             style={{ position: "absolute", top: "14px", left: "50%", transform: "translateX(-50%)", width: "108px", height: "108px", objectFit: "contain" }} />
         </div>
-        {/* store-buttons.svg is 560x50: App Store 0-272, Google Play 288-560 */}
-        <div style={{ position: "relative", width: "100%", maxWidth: "336px", margin: "0 auto" }}>
-          <img src={StoreButtons} alt="Download on the App Store and Google Play" draggable={false} style={{ display: "block", width: "100%", height: "auto" }} />
-          <a href="https://apps.apple.com/in/app/tandem-events-experiences/id6756263621" target="_blank" rel="noopener noreferrer" aria-label="Download on the App Store"
-            style={{ position: "absolute", top: 0, left: 0, width: "48.5%", height: "100%", borderRadius: "24px" }} />
-          <a href="https://play.google.com/store/apps/details?id=com.tandemit.tandemit" target="_blank" rel="noopener noreferrer" aria-label="Get it on Google Play"
-            style={{ position: "absolute", top: 0, right: 0, width: "48.5%", height: "100%", borderRadius: "24px" }} />
-        </div>
+        <div style={{ display: "flex", justifyContent: "center" }}><StoreBadges /></div>
       </div>
     </div>
   );

@@ -13,10 +13,11 @@ const SITE_URL_RAW = process.env.SITE_URL || process.env.VITE_SITE_URL || 'https
 const SITE_URL = SITE_URL_RAW.replace(/\/$/, '')
 
 // Define your routes here. SPA anchors (like #features) are not part of sitemaps.
-// Indexed routes only (handoff SEO table). /bengaluru, /mumbai, /faq join on day 3 (3.1, 3.2).
+// Indexed routes only (handoff SEO table). /bengaluru and /mumbai join with 3.2.
 const links = [
   { url: '/', changefreq: 'weekly', priority: 1.0 },
   { url: '/swipe', changefreq: 'daily', priority: 0.9 },
+  { url: '/faq', changefreq: 'monthly', priority: 0.6 },
 ]
 
 async function main() {

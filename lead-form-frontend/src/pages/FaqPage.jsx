@@ -1,0 +1,31 @@
+import React from "react";
+import Seo from "../components/Seo";
+import { SiteHeader, SiteFooter } from "../components/SiteChrome";
+import { QA, STEPS, FAQ_ORDER, faqJsonLd } from "../lib/faq";
+import { T, font } from "../lib/card";
+
+/** /faq (handoff 3.1 / design screen 38): each question an H2, answered in its first sentence, no accordions. */
+export default function FaqPage() {
+  return (
+    <div style={{ minHeight: "100dvh", background: T.bg, color: T.high, fontFamily: font }}>
+      <Seo title="Tandem FAQ: how matching, pricing and privacy work" path="/faq" jsonLd={faqJsonLd(FAQ_ORDER)}
+        description="How Tandem works, what it costs, which cities it's in, and what your friends can and can't see." />
+      <main style={{ maxWidth: "720px", margin: "0 auto", padding: "16px 16px 0" }}>
+        <SiteHeader />
+        <h1 className="text-[28px] md:text-[36px]" style={{ fontWeight: 700, lineHeight: 1.15, margin: "32px 0 8px" }}>Tandem FAQ</h1>
+        {FAQ_ORDER.map((k) => (
+          <section key={k} style={{ marginTop: "36px" }}>
+            <h2 style={{ fontSize: "22px", fontWeight: 700, lineHeight: 1.2, margin: "0 0 8px" }}>{QA[k][0]}</h2>
+            <p style={{ color: T.mid, fontSize: "16px", lineHeight: 1.5, margin: 0 }}>{QA[k][1]}</p>
+            {k === "how" && (
+              <ol style={{ color: T.mid, fontSize: "16px", lineHeight: 1.5, margin: "8px 0 0", paddingLeft: "20px" }}>
+                {STEPS.map(([title, text]) => <li key={title}><strong style={{ color: T.high }}>{title}</strong> {text}</li>)}
+              </ol>
+            )}
+          </section>
+        ))}
+      </main>
+      <SiteFooter />
+    </div>
+  );
+}
