@@ -6,15 +6,16 @@ import QrCode from "../assets/qr-code.svg";
 import { initialCity } from "../lib/city";
 import { WEB_SWIPE_LIMIT, PHONE_ASK_RIGHTS, PHONE_ASK_SWIPES } from "../lib/funnel";
 import CityPicker from "../components/CityPicker";
+import PhoneSheet from "../components/PhoneSheet";
+import { call, AuthError } from "../lib/tandemApi";
 import { SwipeCard, CardFace, EventDetails } from "../components/EventCard";
 import { fromPublic, fromPersonal, T, font } from "../lib/card";
 
-// Login + event APIs live on the app backend, not the landing backend behind apiUrl()
-const API = (import.meta.env.VITE_TANDEM_API_BASE || "https://api.tandem.it.com").replace(/\/$/, "");
 const SESSION_KEY = "webSwipeSession";
 const SWIPES_KEY = "webSwipes"; // swipes made before OTP, replayed in order after verifying
 const SEEN_KEY = "webSeen"; // every card shown, so no card appears twice
 const SEEN_MAX = 500;
+const ASKED_KEY = "webPhoneAsked";
 // Snapshot rule 3: the prerendered HTML holds the heading and a fixed-height placeholder, never live cards
 const PRERENDER = typeof window !== "undefined" && new URLSearchParams(window.location.search).has("prerender");
 
@@ -22,31 +23,12 @@ const btn = (active = true) => ({
   width: "100%", minHeight: "48px", padding: "14px", borderRadius: "999px", border: "none", fontFamily: font, fontWeight: 700,
   fontSize: "16px", cursor: active ? "pointer" : "default", background: T.high, color: T.bg, opacity: active ? 1 : 0.4,
 });
-const input = {
-  width: "100%", padding: "14px", borderRadius: "8px", border: "none", background: T.surface2,
-  color: T.high, fontFamily: font, fontSize: "16px", outline: "none", boxSizing: "border-box",
-};
-
 const readJson = (key, fallback) => { try { return JSON.parse(localStorage.getItem(key) || "null") ?? fallback; } catch { return fallback; } };
 const writeJson = (key, v) => { try { v == null ? localStorage.removeItem(key) : localStorage.setItem(key, JSON.stringify(v)); } catch { /* storage blocked */ } };
 
 function loadSession() {
   const s = readJson(SESSION_KEY, null);
   return s && s.expiresAt > Date.now() ? s : null;
-}
-
-class AuthError extends Error {}
-
-async function call(path, { token, method = "GET", body } = {}) {
-  const res = await fetch(`${API}${path}`, {
-    method,
-    headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-    body: body === undefined ? undefined : JSON.stringify(body),
-  });
-  if (res.status === 401) throw new AuthError("Session expired");
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.status || `Request failed (${res.status})`);
-  return data;
 }
 
 function DownloadPopup({ open, onClose }) {
@@ -108,21 +90,28 @@ export default function SwipePage() {
   const [local, setLocal] = useState(() => readJson(SWIPES_KEY, []));
   const [remaining, setRemaining] = useState(null); // server count after OTP
   const [details, setDetails] = useState(null);
-  const [phoneStep, setPhoneStep] = useState(null); // null | "phone" | "otp" (interim until 2.3's sheet)
-  const [phone, setPhone] = useState("");
-  const [otp, setOtp] = useState("");
+  const [phoneAsk, setPhoneAsk] = useState(null); // null | "normal" | "picky" | "save"
   const [showPopup, setShowPopup] = useState(false);
-  const [busy, setBusy] = useState(false);
+  const [toast, setToast] = useState(null);
   const [error, setError] = useState("");
+  const [totalUpcoming, setTotalUpcoming] = useState(null);
   const deckRef = useRef(null);
   const pendingAction = useRef(null);
   const loading = useRef(false);
+  const replaying = useRef(false);
 
   const used = session && remaining !== null ? WEB_SWIPE_LIMIT - remaining : local.length;
   const capped = used >= WEB_SWIPE_LIMIT;
   const top = queue[0];
 
   const signOut = (msg) => { writeJson(SESSION_KEY, null); setSession(null); setError(msg); };
+
+  // One toast at a time, 3 s (design screen 5)
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 3000);
+    return () => clearTimeout(t);
+  }, [toast]);
 
   // Before OTP: public feed page by page. After OTP: the personal web feed (knows past swipes).
   const loadMore = useCallback(async (reset) => {
@@ -144,6 +133,7 @@ export default function SwipePage() {
           const data = await call(`/events/public/feed?city=${encodeURIComponent(city)}${next ? `&cursor=${encodeURIComponent(next)}` : ""}`);
           cards.push(...(data.events || []).map(fromPublic).filter((c) => c.id && !seen.has(c.id)));
           next = data.next_cursor ?? null;
+          if (data.total_upcoming != null) setTotalUpcoming(data.total_upcoming);
         }
         add(cards);
         setCursor(next);
@@ -180,9 +170,10 @@ export default function SwipePage() {
       const list = [...local, { eventId: card.id, action, at: Date.now() }];
       writeJson(SWIPES_KEY, list); setLocal(list);
       const rights = list.filter((s) => s.action === "RIGHT").length;
-      // ponytail: interim one-time phone ask; 2.3 replaces it with the real sheet, copy and replay rules
-      if (!readJson("webPhoneAsked", false) && ((action === "RIGHT" && rights === PHONE_ASK_RIGHTS) || (list.length === PHONE_ASK_SWIPES && rights < PHONE_ASK_RIGHTS))) {
-        writeJson("webPhoneAsked", true); setPhoneStep("phone");
+      // Ask once: 3rd right swipe, or 8th swipe with fewer than 3 rights. After Not now, only the hard stop asks again.
+      if (!readJson(ASKED_KEY, false) && ((action === "RIGHT" && rights === PHONE_ASK_RIGHTS) || (list.length === PHONE_ASK_SWIPES && rights < PHONE_ASK_RIGHTS))) {
+        writeJson(ASKED_KEY, true);
+        setPhoneAsk(rights >= PHONE_ASK_RIGHTS ? "normal" : "picky");
       }
       return;
     }
@@ -190,9 +181,48 @@ export default function SwipePage() {
       const data = await call("/events/web/saveAction", { token: session.token, method: "POST", body: { eventId: card.id, action } });
       setRemaining(data.remainingSwipes);
     } catch (err) {
-      if (err instanceof AuthError) signOut("Session expired, please log in again.");
-      else setError("Couldn't save that swipe.");
+      if (err instanceof AuthError) { signOut("Session expired, please log in again."); return; }
+      // Keep it in the browser list; the replay below retries it
+      const list = [...readJson(SWIPES_KEY, []), { eventId: card.id, action, at: Date.now() }];
+      writeJson(SWIPES_KEY, list); setLocal(list);
+      setToast("Couldn't save that swipe. Trying again.");
+      setTimeout(() => replay(session), 5000);
     }
+  };
+
+  // Handoff 2.4: send every browser swipe to the server in order, then the server counts. A failure
+  // keeps the unsent rest in localStorage for the next try. Returns how many were saved.
+  const replay = async (s) => {
+    if (replaying.current) return 0;
+    replaying.current = true;
+    let list = readJson(SWIPES_KEY, []), saved = 0;
+    try {
+      while (list.length) {
+        const r = await call("/events/web/saveAction", { token: s.token, method: "POST", body: { eventId: list[0].eventId, action: list[0].action } });
+        saved++; list = list.slice(1); writeJson(SWIPES_KEY, list.length ? list : null);
+        setRemaining(r.remainingSwipes);
+        if (r.limitReached) { list = []; writeJson(SWIPES_KEY, null); }
+      }
+    } catch (err) {
+      if (err instanceof AuthError) signOut("Session expired, please log in again.");
+    } finally { replaying.current = false; setLocal(list); }
+    return saved;
+  };
+
+  // A returning logged-in visitor with unsent swipes (an earlier failure) sends them now
+  useEffect(() => { if (session && readJson(SWIPES_KEY, []).length) replay(session); }, [session?.token]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const onVerified = async (data) => {
+    const s = { token: data.access_token, userId: data.user_id, expiresAt: Date.now() + ((data.expires_in || 600) - 30) * 1000 };
+    setPhoneAsk(null);
+    const saved = await replay(s);
+    writeJson(SESSION_KEY, s); setSession(s);
+    setToast(saved ? `You're in. ${saved} swipes saved. Get the app to see which friends want the same.` : "You're in. Swipe right on anything you'd do.");
+  };
+
+  const closePhoneAsk = () => {
+    if (phoneAsk !== "save") setToast("No problem. Keep swiping. Your swipes stay on this phone for now.");
+    setPhoneAsk(null);
   };
 
   // Buttons and arrow keys: on the details page, close it first, then the card flies off
@@ -222,7 +252,7 @@ export default function SwipePage() {
 
   useEffect(() => {
     const onKey = (e) => {
-      if (phoneStep || showPopup || e.target.closest?.("input, textarea") || document.getElementById("city-title")) return;
+      if (phoneAsk || showPopup || e.target.closest?.("input, textarea") || document.getElementById("city-title")) return;
       const a = { ArrowRight: "RIGHT", ArrowLeft: "LEFT", ArrowDown: "DOWN" }[e.key];
       if (a) { e.preventDefault(); act(a); }
     };
@@ -230,30 +260,7 @@ export default function SwipePage() {
     return () => window.removeEventListener("keydown", onKey);
   });
 
-  const run = async (fn) => {
-    setBusy(true); setError("");
-    try { await fn(); } catch (err) { setError(err.message || "Something went wrong"); } finally { setBusy(false); }
-  };
-
-  const sendOtp = () => run(async () => {
-    // ponytail: backend NPEs on a null appSignature (Android SMS hash, meaningless on web) — send "" until it's null-safe
-    await call("/auth/send-otp", { method: "POST", body: { phone, countryCode: "91", appSignature: "" } });
-    setPhoneStep("otp");
-  });
-
-  const verifyOtp = () => run(async () => {
-    const data = await call("/auth/verify-otp", { method: "POST", body: { phone, countryCode: "91", otp, platform: "WEB" } });
-    const s = { token: data.access_token, userId: data.user_id, expiresAt: Date.now() + ((data.expires_in || 600) - 30) * 1000 };
-    // Replay the browser's swipes in order (handoff 2.4), then the server counts from here
-    for (const sw of local) {
-      const r = await call("/events/web/saveAction", { token: s.token, method: "POST", body: { eventId: sw.eventId, action: sw.action } });
-      if (r.limitReached) break;
-    }
-    writeJson(SWIPES_KEY, null); setLocal([]);
-    writeJson(SESSION_KEY, s); setSession(s); setPhoneStep(null);
-  });
-
-  const validPhone = /^[6-9]\d{9}$/.test(phone);
+  const left = totalUpcoming == null ? 0 : Math.max(0, totalUpcoming - used);
   const panel = { textAlign: "center", padding: "48px 16px", background: T.surface1, borderRadius: "16px" };
 
   return (
@@ -275,9 +282,16 @@ export default function SwipePage() {
           <div style={{ position: "relative" }}>
             {capped ? (
               <div style={panel}>
-                <p style={{ fontSize: "22px", fontWeight: 700, marginBottom: "6px" }}>Keep going in the app</p>
-                <p style={{ color: T.mid, fontSize: "16px", marginBottom: "20px" }}>You've used your {WEB_SWIPE_LIMIT} web swipes. Download Tandem to keep going.</p>
+                <p style={{ fontSize: "22px", fontWeight: 700, marginBottom: "6px" }}>
+                  {left >= 20 ? `${left} more plans in ${city} are waiting in the app.` : "Keep going in the app"}
+                </p>
+                <p style={{ color: T.mid, fontSize: "16px", marginBottom: "20px" }}>
+                  {session
+                    ? `You've used your ${WEB_SWIPE_LIMIT} web swipes, and they're saved. Download Tandem and allow contacts to see which friends want the same.`
+                    : `You've used your ${WEB_SWIPE_LIMIT} web swipes. Download Tandem to keep going, or save these swipes with your number first.`}
+                </p>
                 <button onClick={() => setShowPopup(true)} style={btn()}>Download now</button>
+                {!session && <button onClick={() => setPhoneAsk("save")} style={{ ...btn(), background: T.surface2, color: T.high, marginTop: "10px" }}>Save my swipes first</button>}
               </div>
             ) : top ? (
               <>
@@ -334,34 +348,15 @@ export default function SwipePage() {
           actions={<div style={{ maxWidth: "420px", margin: "0 auto" }}><ActionButtons onAct={act} disabled={capped} /></div>} />
       )}
 
-      {phoneStep && (
-        <div onClick={() => setPhoneStep(null)}
-          style={{ position: "fixed", inset: 0, zIndex: 1800, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
-          <div role="dialog" aria-modal="true" aria-labelledby="phone-title" onClick={(e) => e.stopPropagation()}
-            style={{ background: T.surface1, width: "100%", maxWidth: "420px", borderRadius: "20px 20px 0 0", padding: "24px 16px calc(24px + env(safe-area-inset-bottom))" }}>
-            {phoneStep === "phone" ? (
-              <>
-                <h2 id="phone-title" style={{ fontSize: "22px", fontWeight: 700, marginBottom: "6px" }}>Save your picks</h2>
-                <p style={{ color: T.mid, fontSize: "16px", marginBottom: "16px" }}>Add your number to save them. Your swipes come with you when you get the app.</p>
-                <div style={{ display: "flex", gap: "8px", marginBottom: "16px" }}>
-                  <span style={{ ...input, width: "auto", color: T.low }}>+91</span>
-                  <input aria-label="Phone number" inputMode="numeric" autoComplete="tel-national" maxLength={10} value={phone} autoFocus
-                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))} style={input} placeholder="10-digit number" />
-                </div>
-                <button onClick={sendOtp} disabled={!validPhone || busy} style={btn(validPhone && !busy)}>{busy ? "Sending…" : "Send code"}</button>
-              </>
-            ) : (
-              <>
-                <h2 id="phone-title" style={{ fontSize: "22px", fontWeight: 700, marginBottom: "6px" }}>Enter the code</h2>
-                <p style={{ color: T.mid, fontSize: "16px", marginBottom: "16px" }}>Sent to +91 {phone}.</p>
-                <input aria-label="Code" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={otp} autoFocus
-                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))} style={{ ...input, marginBottom: "16px", letterSpacing: "4px" }} />
-                <button onClick={verifyOtp} disabled={otp.length < 4 || busy} style={btn(otp.length >= 4 && !busy)}>{busy ? "Verifying…" : "Verify"}</button>
-              </>
-            )}
-            <button onClick={() => setPhoneStep(null)} style={{ ...btn(), background: T.surface2, color: T.high, marginTop: "10px" }}>Not now</button>
-          </div>
-        </div>
+      {toast && (
+        <div role="status" className="toast-in" style={{ position: "fixed", left: 0, right: 0, margin: "0 auto", bottom: "calc(150px + env(safe-area-inset-bottom))",
+          zIndex: 1700, width: "calc(100% - 32px)", maxWidth: "388px", background: T.surface1, color: T.high, borderRadius: "12px", padding: "12px 14px",
+          fontSize: "14px", lineHeight: 1.5, boxShadow: "0 8px 24px rgba(0,0,0,0.5)" }}>{toast}</div>
+      )}
+
+      {phoneAsk && (
+        <PhoneSheet variant={phoneAsk} rights={PHONE_ASK_RIGHTS} onClose={closePhoneAsk} onVerified={onVerified}
+          onGetApp={() => { setPhoneAsk(null); setShowPopup(true); }} />
       )}
 
       <DownloadPopup open={showPopup} onClose={() => setShowPopup(false)} />

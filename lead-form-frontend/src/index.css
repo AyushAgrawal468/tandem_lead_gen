@@ -428,3 +428,17 @@ button.waitlist-join-btn:focus {
     to { opacity: 1; }
   }
 }
+
+/* Phone sheet (design brief section 5): slides up on phones, scales in on desktop; wrong code shakes */
+.sheet-in { animation: sheetUp 0.25s cubic-bezier(0.2, 0.8, 0.2, 1); }
+@media (min-width: 768px) { .sheet-in { animation: sheetPop 0.2s cubic-bezier(0.2, 0.8, 0.2, 1); } }
+@keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes sheetPop { from { transform: scale(0.96); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.otp-shake { animation: otpShake 0.3s linear; }
+@keyframes otpShake { 0%, 100% { transform: translateX(0); } 16%, 50%, 83% { transform: translateX(-6px); } 33%, 66% { transform: translateX(6px); } }
+.toast-in { animation: toastIn 0.2s cubic-bezier(0.2, 0.8, 0.2, 1); }
+@keyframes toastIn { from { transform: translateY(8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .sheet-in, .toast-in { animation: deckIn 0.2s; }
+  .otp-shake { animation: none; }
+}
