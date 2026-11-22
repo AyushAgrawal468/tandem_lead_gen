@@ -32,3 +32,20 @@ export const faqJsonLd = (keys) => ({
   "@type": "FAQPage",
   mainEntity: keys.map((k) => ({ "@type": "Question", name: QA[k][0], acceptedAnswer: { "@type": "Answer", text: QA[k][1] } })),
 });
+
+// City pages (handoff 3.2). Title and intro are the handoff's; description is written for the meta tag.
+// lat/lng match event-service CityGeoCache.
+export const CITY_PAGES = {
+  bengaluru: {
+    city: "Bengaluru", lat: 12.9716, lng: 77.5946,
+    title: "Things to do in Bengaluru with friends this weekend | Tandem",
+    description: "Gigs, stand-up, brewery quizzes, sunrise rides and food walks in Bengaluru. Swipe on what you'd do and get matched with friends who want the same plan.",
+    intro: "Bengaluru has more going on every weekend than any group chat can keep up with: gigs, stand-up, brewery quizzes, sunrise rides, food walks and workshops. Tandem puts it all in one deck. Swipe right on what you'd actually do, and when a friend wants the same plan, you'll both know.",
+  },
+  mumbai: {
+    city: "Mumbai", lat: 19.076, lng: 72.8777,
+    title: "Things to do in Mumbai with friends this weekend | Tandem",
+    description: "Open mics, gigs, food trails, treks and late-night shows in Mumbai. Swipe on what you'd do and get matched with friends who want the same plan.",
+    intro: "From open mics and gigs to food trails, treks and late-night shows, Mumbai never runs out of plans. Getting friends to agree on one is the hard part. Swipe on what's on, and Tandem matches you with friends who want the same thing.",
+  },
+};

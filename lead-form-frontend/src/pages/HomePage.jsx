@@ -39,6 +39,23 @@ function Section({ q, children }) {
   );
 }
 
+/** "How does Tandem work?" with the three steps; also on the city pages (3.2). */
+export function HowItWorks() {
+  return (
+    <Section q="how">
+      <ol style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: "20px", maxWidth: "640px" }}>
+        {STEPS.map(([title, text], i) => (
+          <li key={title} style={{ display: "flex", gap: "14px", alignItems: "flex-start" }}>
+            <span aria-hidden="true" style={{ flexShrink: 0, width: "36px", height: "36px", borderRadius: "50%", background: T.green, color: T.bg,
+              fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center" }}>{i + 1}</span>
+            <p style={body}><strong style={{ color: T.high }}>{title}</strong> {text}</p>
+          </li>
+        ))}
+      </ol>
+    </Section>
+  );
+}
+
 /**
  * Journey 3 homepage (handoff 3.1 / design screen 36): the promise and the live deck above the fold,
  * then real-text answers crawlers read. Swiping here runs the full Journey 1 flow.
@@ -71,17 +88,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        <Section q="how">
-          <ol style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: "20px", maxWidth: "640px" }}>
-            {STEPS.map(([title, text], i) => (
-              <li key={title} style={{ display: "flex", gap: "14px", alignItems: "flex-start" }}>
-                <span aria-hidden="true" style={{ flexShrink: 0, width: "36px", height: "36px", borderRadius: "50%", background: T.green, color: T.bg,
-                  fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center" }}>{i + 1}</span>
-                <p style={body}><strong style={{ color: T.high }}>{title}</strong> {text}</p>
-              </li>
-            ))}
-          </ol>
-        </Section>
+        <HowItWorks />
         <Section q="groupChat" />
         <Section q="free" />
         <Section q="cities" />

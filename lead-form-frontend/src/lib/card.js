@@ -1,4 +1,5 @@
 import { formatEventDate, formatTime } from "./formatEventDate";
+import { matchCity } from "./city";
 
 // Design brief tokens (section 2)
 export const T = {
@@ -24,13 +25,16 @@ function dayFrom(iso) {
   return `${p.weekday} ${p.day} ${p.month}`;
 }
 
+// Many scraped events store only the city in location ("mumbai"); the card shows an area, so drop it then
+const areaOf = (location) => (location && !matchCity(location) ? location : null);
+
 const descText = (list, extra) => [...(Array.isArray(list) ? list : []), extra].filter((s) => s && String(s).trim()).join("\n\n");
 
 /** Public feed (GET /events/public/feed) card → deck card. */
 export function fromPublic(e) {
   return {
     id: e.eventId, title: e.title, poster: e.poster || e.imageUrl,
-    day: e.displayDate || dayFrom(e.startsAt), time: formatTime(e.eventTime), area: e.location,
+    day: e.displayDate || dayFrom(e.startsAt), time: formatTime(e.eventTime), area: areaOf(e.location),
     price: priceText(e.price, e.displayPrice), description: descText(e.description, e.additionalDescription),
   };
 }
@@ -40,7 +44,7 @@ export function fromPersonal(d) {
   const e = d.event || {};
   return {
     id: e.eventId, title: e.title, poster: e.additionalData?.poster || e.imageUrl,
-    day: formatEventDate(e.eventDate, e.eventTime), time: null, area: e.location,
+    day: formatEventDate(e.eventDate, e.eventTime), time: null, area: areaOf(e.location),
     price: priceText(e.price), description: descText(e.description, e.additionalDescription),
   };
 }

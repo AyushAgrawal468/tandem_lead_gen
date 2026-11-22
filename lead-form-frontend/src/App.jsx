@@ -53,6 +53,7 @@ import SwipePage from "./pages/SwipePage";
 import HomePage from "./pages/HomePage";
 import FaqPage from "./pages/FaqPage";
 import NotFound from "./pages/NotFound";
+import CityPage from "./pages/CityPage";
 
 export default function App() {
   return (
@@ -62,6 +63,8 @@ export default function App() {
         {/* Homepage (Journey 3): promise + live deck, then crawlable answers */}
         <Route path="/" element={<HomePage />} />
         <Route path="/faq" element={<FaqPage />} />
+        <Route path="/bengaluru" element={<CityPage key="bengaluru" slug="bengaluru" />} />
+        <Route path="/mumbai" element={<CityPage key="mumbai" slug="mumbai" />} />
 
         {/* Referral Redirect Page (no UI) */}
         <Route path="/r" element={<ReferralRedirect />} />

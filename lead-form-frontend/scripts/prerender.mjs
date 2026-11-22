@@ -16,7 +16,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const DIST = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'dist')
-const ROUTES = (process.env.PRERENDER_ROUTES || '/,/swipe,/faq').split(',').map((r) => r.trim()).filter(Boolean)
+const ROUTES = (process.env.PRERENDER_ROUTES || '/,/swipe,/faq,/bengaluru,/mumbai').split(',').map((r) => r.trim()).filter(Boolean)
 const ALLOW_WARNINGS = process.argv.includes('--allow-warnings')
 const READY_TIMEOUT_MS = 4000
 
