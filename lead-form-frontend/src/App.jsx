@@ -40,10 +40,7 @@ function ScrollToTop() {
 
   return null;
 }
-import ReferralRedirect from "./components/ReferralRedirect";
 import DownloadRedirect from "./components/DownloadRedirect";
-import EventRedirect from "./components/EventRedirect";
-import CombinedRedirect from "./components/CombinedRedirect";
 import AccountDeletion from "./pages/AccountDeletion";
 import ChildSafety from "./pages/ChildSafety";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
@@ -55,6 +52,7 @@ import HomePage from "./pages/HomePage";
 import FaqPage from "./pages/FaqPage";
 import NotFound from "./pages/NotFound";
 import CityPage from "./pages/CityPage";
+import LinkPage from "./pages/LinkPage";
 
 // Handoff 3.3: personal links (someone's invite, referral or ambassador wallet) stay out of search results
 function NoIndex() {
@@ -78,14 +76,11 @@ export default function App() {
         <Route path="/mumbai" element={<CityPage key="mumbai" slug="mumbai" />} />
 
         <Route element={<NoIndex />}>
-          {/* Referral Redirect Page (no UI) */}
-          <Route path="/r" element={<ReferralRedirect />} />
-
-          {/* Event share deep link — redirects to store; app opens event after install */}
-          <Route path="/e/:eventId" element={<EventRedirect />} />
-
-          {/* Combined event+referral link — tracks both, redirects to store */}
-          <Route path="/l/links" element={<CombinedRedirect />} />
+          {/* Journey 2 (3.4): one shared link page for invites, event links and referral links.
+              If the app is installed, Universal/App Links open it before any of these load. */}
+          <Route path="/l/links" element={<LinkPage />} />
+          <Route path="/e/:eventId" element={<LinkPage />} />
+          <Route path="/r" element={<LinkPage />} />
 
           {/* Ambassador magic-link page — wallet, referrals, payout history, leaderboard */}
           <Route path="/a/:token" element={<AmbassadorPage />} />

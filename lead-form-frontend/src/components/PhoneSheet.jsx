@@ -18,9 +18,12 @@ const textBtn = { background: "none", border: "none", padding: "4px 0", color: T
 
 // Copy from the handoff's "Every screen and its copy"
 const ASK = {
-  normal: (rights) => ["Save your picks", `You're in for ${rights} plans. Add your number to save them. Your swipes come with you when you get the app.`],
+  normal: ({ rights }) => ["Save your picks", `You're in for ${rights} plans. Add your number to save them. Your swipes come with you when you get the app.`],
   picky: () => ["Picky. We like that.", "Add your number to save your swipes and get better picks."],
   save: () => ["Save your picks", "Add your number to save them. Your swipes come with you when you get the app."],
+  // Journey 2 (shared link page, 3.4)
+  invite: ({ sender }) => [`Tell ${sender} you're in`, `Add your number to say yes. ${sender} sees it in Tandem.`],
+  event: () => ["Save this plan", "Add your number to save it. Get the app to see which friends want to go."],
 };
 
 const masked = (p) => `${p.slice(0, 2)}••••${p.slice(-4)}`;
@@ -29,7 +32,7 @@ const masked = (p) => `${p.slice(0, 2)}••••${p.slice(-4)}`;
  * Handoff 2.3 / design screens 7-11: phone ask, code entry, phone blocked, code not arriving.
  * Bottom sheet on phones, centred modal on desktop. Not now, Escape and a backdrop tap all close it.
  */
-export default function PhoneSheet({ variant = "normal", rights = 3, onClose, onVerified, onGetApp, onStuck }) {
+export default function PhoneSheet({ variant = "normal", rights = 3, sender = "Your friend", onClose, onVerified, onGetApp, onStuck }) {
   const [screen, setScreen] = useState("phone"); // phone | code | blocked | slow
   const [phone, setPhone] = useState("");
   const [touched, setTouched] = useState(false);
@@ -98,7 +101,7 @@ export default function PhoneSheet({ variant = "normal", rights = 3, onClose, on
   };
 
   const [title, body] =
-    screen === "phone" ? (ASK[variant] || ASK.normal)(rights)
+    screen === "phone" ? (ASK[variant] || ASK.normal)({ rights, sender })
     : screen === "code" ? ["Enter the code", `We sent a 4-digit code to ${masked(phone)}.`]
     : screen === "blocked" ? ["Too many tries", "Try again in 30 minutes, or get the app and sign in there."]
     : ["Code not arriving?", "SMS can be slow. Get the app and sign in there instead."];

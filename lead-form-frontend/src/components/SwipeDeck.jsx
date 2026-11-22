@@ -8,10 +8,10 @@ import SendSheet from "./SendSheet";
 import { shareLink, shareText, canNativeShare } from "../lib/share";
 import { track, identify } from "../lib/analytics";
 import { call, AuthError } from "../lib/tandemApi";
+import { SESSION_KEY, readJson, writeJson, loadSession, sessionFrom, creditReferral } from "../lib/session";
 import { SwipeCard, CardFace, EventDetails } from "./EventCard";
 import { fromPublic, fromPersonal, T, font } from "../lib/card";
 
-const SESSION_KEY = "webSwipeSession";
 const SWIPES_KEY = "webSwipes"; // swipes made before OTP, replayed in order after verifying
 const SEEN_KEY = "webSeen"; // every card shown, so no card appears twice
 const SEEN_MAX = 500;
@@ -25,13 +25,6 @@ const btn = (active = true) => ({
   width: "100%", minHeight: "48px", padding: "14px", borderRadius: "999px", border: "none", fontFamily: font, fontWeight: 700,
   fontSize: "16px", cursor: active ? "pointer" : "default", background: T.high, color: T.bg, opacity: active ? 1 : 0.4,
 });
-const readJson = (key, fallback) => { try { return JSON.parse(localStorage.getItem(key) || "null") ?? fallback; } catch { return fallback; } };
-const writeJson = (key, v) => { try { v == null ? localStorage.removeItem(key) : localStorage.setItem(key, JSON.stringify(v)); } catch { /* storage blocked */ } };
-
-function loadSession() {
-  const s = readJson(SESSION_KEY, null);
-  return s && s.expiresAt > Date.now() ? s : null;
-}
 
 // Not now / Never / I'm in (handoff "Swipe directions on the web"); arrow keys on desktop
 const ACTIONS = [
@@ -229,14 +222,14 @@ export default function SwipeDeck({ city }) {
   useEffect(() => { if (session && readJson(SWIPES_KEY, []).length) replay(session); }, [session?.token]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onVerified = async (data) => {
-    const s = { token: data.access_token, userId: data.user_id, referralCode: data.referral_code || null,
-      expiresAt: Date.now() + ((data.expires_in || 600) - 30) * 1000 };
+    const s = sessionFrom(data);
     setPhoneAsk(null);
     identify(s.userId);
     track("otp_verified", { variant: phoneAsk });
     const lastRight = [...readJson(SWIPES_KEY, [])].reverse().find((sw) => sw.action === "RIGHT" && sw.card)?.card;
     const saved = await replay(s);
     writeJson(SESSION_KEY, s); setSession(s);
+    if (await creditReferral(s)) track("referral_credited", { from: "deck" }); // a friend's /r link from earlier
     setToast(saved ? `You're in. ${saved} swipes saved. Get the app to see which friends want the same.` : "You're in. Swipe right on anything you'd do.");
     // Handoff 2.5: once per user, after the You're in toast, offer to send their latest "I'm in"
     if (lastRight && !readJson(SHARE_PROMPTED_KEY, false)) {
