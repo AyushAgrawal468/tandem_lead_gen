@@ -27,7 +27,7 @@ function Poster({ card, style }) {
 const POSTER_H = "min(calc((min(100vw, 420px) - 56px) * 4 / 3), calc(100dvh - 490px))";
 
 // Round mint button = "Send to a friend" (design brief: the card's round Tandem button on the web)
-export function ShareButton({ onShare, size = 40 }) {
+export function ShareButton({ onShare, size = 44 }) {
   return (
     <button onClick={(e) => { e.stopPropagation(); onShare(); }} aria-label="Send to a friend"
       style={{ flexShrink: 0, width: `${size}px`, height: `${size}px`, padding: 0, borderRadius: "50%", border: "none", cursor: "pointer",

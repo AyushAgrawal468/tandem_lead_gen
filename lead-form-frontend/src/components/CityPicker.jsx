@@ -5,7 +5,7 @@ import { SUPPORTED_CITIES, matchCity, rememberCity, cityFromGps } from "../lib/c
 const T = { surface1: "#252525", surface2: "#414141", purple: "#8349FF", text: "#F2F2F2", low: "#969696", fail: "#F3543F" };
 const font = '"Anek Latin", Helvetica, sans-serif';
 const chip = (on) => ({
-  display: "inline-flex", alignItems: "center", gap: "6px", padding: "8px 14px", minHeight: "36px", borderRadius: "999px", border: "none",
+  display: "inline-flex", alignItems: "center", gap: "6px", padding: "8px 14px", minHeight: "40px", borderRadius: "999px", border: "none",
   fontFamily: font, fontSize: "14px", cursor: "pointer", background: on ? T.purple : T.surface2, color: on ? "#fff" : T.text,
 });
 const pin = (
@@ -60,7 +60,7 @@ export default function CityPicker({ city, onChange }) {
             style={{ background: T.surface1, width: "100%", maxWidth: "420px", padding: "24px 16px 28px", fontFamily: font }}>
             <h2 id="city-title" style={{ fontSize: "22px", fontWeight: 700, color: T.text, marginBottom: "16px" }}>Pick your city</h2>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-              <button onClick={nearMe} disabled={locating} autoFocus style={chip(false)}>
+              <button onClick={nearMe} disabled={locating} autoFocus style={{ ...chip(false), border: `1px solid ${T.low}` }}>
                 <span style={{ color: T.purple, display: "inline-flex" }}>{pin}</span>{locating ? "Finding you…" : "Near me"}
               </button>
               {SUPPORTED_CITIES.map((c) => (

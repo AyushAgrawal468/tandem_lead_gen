@@ -25,7 +25,7 @@ export function StoreBadges({ width = 336 }) {
 export function SiteHeader({ city, onCity }) {
   return (
     <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", fontFamily: font }}>
-      <Link to="/" style={{ color: T.green, fontWeight: 700, fontSize: "20px", textDecoration: "none" }}>tandem</Link>
+      <Link to="/" style={{ color: T.green, fontWeight: 700, fontSize: "22px", textDecoration: "none" }}>tandem</Link>
       <nav style={{ display: "flex", alignItems: "center", gap: "16px" }}>
         <Link to="/faq" style={{ color: T.mid, fontSize: "14px", textDecoration: "none" }}>FAQ</Link>
         {onCity && <CityPicker city={city} onChange={onCity} />}
@@ -38,17 +38,21 @@ export function SiteHeader({ city, onCity }) {
 export function SiteFooter() {
   const link = { color: T.mid, fontSize: "14px", textDecoration: "none" };
   return (
-    <footer style={{ borderTop: `1px solid ${T.surface2}`, marginTop: "48px", padding: "32px 16px calc(32px + env(safe-area-inset-bottom))", fontFamily: font }}>
-      <div style={{ maxWidth: "960px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "20px" }}>
-        <p style={{ color: T.high, fontSize: "16px", fontWeight: 700, margin: 0 }}>Get Tandem on iPhone and Android.</p>
-        <StoreBadges />
-        <nav aria-label="Footer" style={{ display: "flex", flexWrap: "wrap", gap: "12px 24px" }}>
-          <Link to="/faq" style={link}>FAQ</Link>
-          <Link to="/legal/privacy-policy" style={link}>Privacy Policy</Link>
-          <Link to="/legal/terms-and-conditions" style={link}>Terms</Link>
-          <a href={`mailto:${CONTACT}`} style={link}>Contact</a>
-        </nav>
-        <p style={{ color: T.low, fontSize: "12px", margin: 0 }}>Questions? <Link to="/faq" style={{ color: T.green, textDecoration: "none" }}>Read the FAQ</Link>.</p>
+    <footer style={{ borderTop: `1px solid ${T.surface2}`, marginTop: "80px", padding: "40px 0 calc(48px + env(safe-area-inset-bottom))", fontFamily: font }}>
+      <div className="px-4 md:px-6" style={{ maxWidth: "1120px", margin: "0 auto", display: "flex", flexWrap: "wrap", gap: "24px 48px", alignItems: "center", justifyContent: "space-between" }}>
+        <div>
+          <p style={{ color: T.high, fontSize: "18px", fontWeight: 700, margin: "0 0 14px" }}>Get Tandem on iPhone and Android.</p>
+          <StoreBadges />
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+          <nav aria-label="Footer" style={{ display: "flex", flexWrap: "wrap", gap: "12px 28px" }}>
+            <Link to="/faq" style={link}>FAQ</Link>
+            <Link to="/legal/privacy-policy" style={link}>Privacy Policy</Link>
+            <Link to="/legal/terms-and-conditions" style={link}>Terms</Link>
+            <a href={`mailto:${CONTACT}`} style={link}>Contact</a>
+          </nav>
+          <p style={{ color: T.low, fontSize: "12px", margin: 0 }}>Questions? <Link to="/faq" style={{ color: T.green, textDecoration: "none" }}>Read the FAQ</Link>.</p>
+        </div>
       </div>
     </footer>
   );

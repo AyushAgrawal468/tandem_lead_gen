@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet";
 import SwipeDeck from "../components/SwipeDeck";
 import Seo, { SITE } from "../components/Seo";
 import { SiteHeader, SiteFooter } from "../components/SiteChrome";
-import { initialCity } from "../lib/city";
+import { initialCity, SUPPORTED_CITIES } from "../lib/city";
 import { STEPS, QA } from "../lib/faq";
 import { T, font } from "../lib/card";
 
@@ -26,33 +26,37 @@ const JSON_LD = {
   ],
 };
 
-const h2 = "text-[28px] md:text-[36px]";
-const h2Style = { fontWeight: 700, lineHeight: 1.15, margin: "0 0 12px" };
-const body = { color: T.mid, fontSize: "16px", lineHeight: 1.5, margin: 0, maxWidth: "640px" };
+const body = { color: T.mid, fontSize: "16px", lineHeight: 1.5, margin: 0 };
+// Section labels use Yellow on the background (design brief)
+const label = { margin: "0 0 8px", fontSize: "14px", fontWeight: 700, letterSpacing: "1px", color: "#C1F546" };
 
-function Section({ q, children }) {
+/** One answer in the homepage grid: an H2 question answered in its first sentence. */
+function Answer({ q, children }) {
   return (
-    <section style={{ marginTop: "56px" }}>
-      <h2 className={h2} style={h2Style}>{QA[q][0]}</h2>
+    <section>
+      <h2 className="text-[24px] md:text-[28px]" style={{ fontWeight: 700, lineHeight: 1.15, margin: "0 0 12px" }}>{QA[q][0]}</h2>
       {children || <p style={body}>{QA[q][1]}</p>}
     </section>
   );
 }
 
-/** "How does Tandem work?" with the three steps; also on the city pages (3.2). */
+/** "How does Tandem work?" as three step cards (design screen 36); also on the city pages (3.2). */
 export function HowItWorks() {
   return (
-    <Section q="how">
-      <ol style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: "20px", maxWidth: "640px" }}>
+    <section style={{ marginTop: "64px" }}>
+      <p style={label}>HOW IT WORKS</p>
+      <h2 className="text-[28px] md:text-[36px]" style={{ fontWeight: 700, lineHeight: 1.15, margin: "0 0 28px" }}>{QA.how[0]}</h2>
+      <ol style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "20px" }}>
         {STEPS.map(([title, text], i) => (
-          <li key={title} style={{ display: "flex", gap: "14px", alignItems: "flex-start" }}>
-            <span aria-hidden="true" style={{ flexShrink: 0, width: "36px", height: "36px", borderRadius: "50%", background: T.green, color: T.bg,
+          <li key={title} style={{ background: T.surface1, borderRadius: "16px", padding: "24px" }}>
+            <span aria-hidden="true" style={{ width: "40px", height: "40px", borderRadius: "50%", background: T.green, color: T.bg,
               fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center" }}>{i + 1}</span>
-            <p style={body}><strong style={{ color: T.high }}>{title}</strong> {text}</p>
+            <h3 style={{ margin: "16px 0 6px", fontSize: "20px", fontWeight: 700 }}>{title.replace(/\.$/, "")}</h3>
+            <p style={body}>{text}</p>
           </li>
         ))}
       </ol>
-    </Section>
+    </section>
   );
 }
 
@@ -71,7 +75,7 @@ export default function HomePage() {
         <script>{`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA_ID}');`}</script>
       </Helmet>
 
-      <main style={{ maxWidth: "1040px", margin: "0 auto", padding: "16px 16px 0" }}>
+      <main className="px-4 md:px-6" style={{ maxWidth: "1120px", margin: "0 auto", paddingTop: "16px" }}>
         <SiteHeader city={city} onCity={setCity} />
 
         <div className="md:grid md:grid-cols-2 md:gap-12 md:items-start" style={{ marginTop: "24px" }}>
@@ -79,7 +83,7 @@ export default function HomePage() {
             <h1 className="text-[40px] md:text-[56px]" style={{ fontWeight: 700, lineHeight: 1.1, margin: 0 }}>
               Swipe on things to do. Match with friends who want the same.
             </h1>
-            <p style={{ ...body, margin: "16px 0 0" }}>
+            <p className="text-[16px] md:text-[18px]" style={{ ...body, fontSize: undefined, margin: "20px 0 0", maxWidth: "520px" }}>
               No more "let's plan something" that never happens. Swipe on what you'd actually do, and the app matches you with friends who want the same.
             </p>
           </div>
@@ -89,10 +93,16 @@ export default function HomePage() {
         </div>
 
         <HowItWorks />
-        <Section q="groupChat" />
-        <Section q="free" />
-        <Section q="cities" />
-        <Section q="privacy" />
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "40px 64px", marginTop: "72px" }}>
+          <Answer q="groupChat" />
+          <Answer q="free" />
+          <Answer q="cities">
+            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexWrap: "wrap", gap: "8px" }}>
+              {SUPPORTED_CITIES.map((c) => <li key={c} style={{ padding: "8px 14px", borderRadius: "999px", background: T.surface2, fontSize: "14px" }}>{c}</li>)}
+            </ul>
+          </Answer>
+          <Answer q="privacy" />
+        </div>
       </main>
 
       <SiteFooter />

@@ -300,6 +300,17 @@ export default function SwipeDeck({ city }) {
 
   const left = totalUpcoming == null ? 0 : Math.max(0, totalUpcoming - used);
   const panel = { textAlign: "center", padding: "48px 16px", background: T.surface1, borderRadius: "16px" };
+  const stopTitle = { fontSize: "28px", lineHeight: 1.15, fontWeight: 700, margin: "0 0 8px" };
+  // Hard stop and return visit: a fanned stack of cards behind the message
+  const fan = (
+    <div aria-hidden="true" style={{ position: "relative", height: "220px", margin: "8px 0 28px" }}>
+      <div style={{ position: "absolute", left: "50%", top: "16px", width: "140px", height: "186px", marginLeft: "-70px", borderRadius: "14px", background: T.surface1, transform: "rotate(-12deg) translateX(-66px)" }} />
+      <div style={{ position: "absolute", left: "50%", top: "16px", width: "140px", height: "186px", marginLeft: "-70px", borderRadius: "14px", background: "#2E2E2E", transform: "rotate(12deg) translateX(66px)" }} />
+      <div style={{ position: "absolute", left: "50%", top: 0, width: "150px", height: "200px", marginLeft: "-75px", borderRadius: "14px", background: "#3A1D8F", overflow: "hidden" }}>
+        <div style={{ position: "absolute", top: "-28px", right: "-28px", width: "100px", height: "100px", borderRadius: "50%", background: T.green }} />
+      </div>
+    </div>
+  );
 
   return (
     <div style={{ color: T.high, fontFamily: font }}>
@@ -307,18 +318,20 @@ export default function SwipeDeck({ city }) {
           <div style={{ position: "relative" }}>
             {capped ? (
               session && returnVisit ? (
-              <div style={panel}>
-                <p style={{ fontSize: "22px", fontWeight: 700, marginBottom: "6px" }}>Welcome back</p>
-                <p style={{ color: T.mid, fontSize: "16px", marginBottom: "20px" }}>Your swipes are saved. Get the app to keep going and see who's in.</p>
+              <div>
+                {fan}
+                <p style={stopTitle}>Welcome back</p>
+                <p style={{ color: T.mid, fontSize: "16px", lineHeight: 1.5, margin: "0 0 24px" }}>Your swipes are saved. Get the app to keep going and see who's in.</p>
                 <button onClick={() => getApp("return_visit")} style={btn()}>Get the app</button>
                 <OpenTandemLink onStuck={() => setStuck(true)} />
               </div>
               ) : (
-              <div style={panel}>
-                <p style={{ fontSize: "22px", fontWeight: 700, marginBottom: "6px" }}>
+              <div>
+                {fan}
+                <p style={stopTitle}>
                   {left >= 20 ? `${left} more plans in ${city} are waiting in the app.` : "Keep going in the app"}
                 </p>
-                <p style={{ color: T.mid, fontSize: "16px", marginBottom: "20px" }}>
+                <p style={{ color: T.mid, fontSize: "16px", lineHeight: 1.5, margin: "0 0 24px" }}>
                   {session
                     ? `You've used your ${WEB_SWIPE_LIMIT} web swipes, and they're saved. Download Tandem and allow contacts to see which friends want the same.`
                     : `You've used your ${WEB_SWIPE_LIMIT} web swipes. Download Tandem to keep going, or save these swipes with your number first.`}
