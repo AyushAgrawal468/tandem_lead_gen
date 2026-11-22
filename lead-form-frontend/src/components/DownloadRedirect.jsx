@@ -1,15 +1,15 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { storeUrl, whenStuck } from "../lib/app";
+import { OpenInBrowser } from "./AppPrompts";
 
-const PLAY_STORE = "https://play.google.com/store/apps/details?id=com.tandemit.tandemit";
-const APP_STORE = "https://apps.apple.com/in/app/tandem-events-experiences/id6756263621";
-
+// Every app prompt goes through /download (handoff 2.6): the store link carries the visitor's campaign
+// (Play referrer, App Store ct/pt). In iOS in-app browsers a stuck store link shows "Open in browser".
 export default function DownloadRedirect() {
+  const [stuck, setStuck] = useState(false);
   useEffect(() => {
-    const ua = navigator.userAgent.toLowerCase();
-    const target =
-      ua.includes("iphone") || ua.includes("ipad") ? APP_STORE : PLAY_STORE;
-    window.location.replace(target);
+    whenStuck(() => setStuck(true));
+    window.location.replace(storeUrl());
   }, []);
 
-  return null;
+  return stuck ? <OpenInBrowser onClose={() => setStuck(false)} /> : null;
 }

@@ -4,6 +4,7 @@ import { OTPInput, REGEXP_ONLY_DIGITS } from "input-otp";
 import { call } from "../lib/tandemApi";
 import { T, font } from "../lib/card";
 import { useSheetKeys } from "../lib/useSheetKeys";
+import { OpenTandemLink } from "./AppPrompts";
 
 const RESEND_SECONDS = 30;
 const CODE_LENGTH = 4;
@@ -27,7 +28,7 @@ const masked = (p) => `${p.slice(0, 2)}••••${p.slice(-4)}`;
  * Handoff 2.3 / design screens 7-11: phone ask, code entry, phone blocked, code not arriving.
  * Bottom sheet on phones, centred modal on desktop. Not now, Escape and a backdrop tap all close it.
  */
-export default function PhoneSheet({ variant = "normal", rights = 3, onClose, onVerified, onGetApp }) {
+export default function PhoneSheet({ variant = "normal", rights = 3, onClose, onVerified, onGetApp, onStuck }) {
   const [screen, setScreen] = useState("phone"); // phone | code | blocked | slow
   const [phone, setPhone] = useState("");
   const [touched, setTouched] = useState(false);
@@ -161,12 +162,18 @@ export default function PhoneSheet({ variant = "normal", rights = 3, onClose, on
           </>
         )}
 
-        {screen === "blocked" && <button onClick={onGetApp} style={pill(true)} autoFocus>Get the app</button>}
+        {screen === "blocked" && (
+          <>
+            <button onClick={onGetApp} style={pill(true)} autoFocus>Get the app</button>
+            <OpenTandemLink onStuck={onStuck} />
+          </>
+        )}
 
         {screen === "slow" && (
           <>
             <button onClick={onGetApp} style={pill(true)} autoFocus>Get the app</button>
             <button onClick={() => { setScreen("code"); setError(""); }} style={{ ...pill(false), marginTop: "10px" }}>Keep waiting</button>
+            <OpenTandemLink onStuck={onStuck} />
           </>
         )}
 
