@@ -412,3 +412,19 @@ button.waitlist-join-btn:focus {
   }
 }
 
+
+/* Web swipe deck (design brief section 5): card fades in, details page slides in from the right */
+@keyframes deckIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes detailsIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  @keyframes detailsIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+}

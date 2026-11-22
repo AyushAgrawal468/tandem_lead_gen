@@ -16,7 +16,7 @@ function formatDay(text) {
 }
 
 // "5:00 PM" -> "5 PM", "5:30 PM" -> "5:30 PM"; takes the start of "5:00 PM to 11:00 PM"
-function formatTime(text) {
+export function formatTime(text) {
   const m = (text || "").match(/(\d{1,2})(?::(\d{2}))?\s*([AP]M)/i);
   if (!m) return null;
   return `${+m[1]}${m[2] && m[2] !== "00" ? `:${m[2]}` : ""} ${m[3].toUpperCase()}`;
