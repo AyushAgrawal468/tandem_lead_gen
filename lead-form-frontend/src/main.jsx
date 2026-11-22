@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
+import { initAnalytics } from './lib/analytics'
 
 // Robust mobile viewport height fix: sets --vh to 1% of the visual viewport height
 function setViewportVars() {
@@ -19,6 +20,9 @@ if (typeof window !== 'undefined') {
     window.visualViewport.addEventListener('resize', setViewportVars, { passive: true })
   }
 }
+
+// Handoff 2.7: first-touch UTM tags, Sentry and PostHog before the first render, so no visit is lost
+initAnalytics()
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

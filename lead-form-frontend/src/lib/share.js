@@ -1,17 +1,6 @@
+import { firstTouch } from "./analytics";
+
 // Handoff 2.5: "Send to a friend" shares a link, never phone numbers.
-const FIRST_TOUCH_KEY = "firstTouchCampaign";
-
-/** Keep the first utm_campaign this browser arrived with, so a friend's install traces back to the reel. */
-export function rememberFirstTouch() {
-  try {
-    const c = new URLSearchParams(window.location.search).get("utm_campaign");
-    if (c && !localStorage.getItem(FIRST_TOUCH_KEY)) localStorage.setItem(FIRST_TOUCH_KEY, c);
-  } catch { /* storage blocked */ }
-}
-
-function firstTouch() {
-  try { return localStorage.getItem(FIRST_TOUCH_KEY) || "organic"; } catch { return "organic"; }
-}
 
 /** /l/links share link. Before verifying there's no referral code yet; the friend still lands on the event. */
 export function shareLink(eventId, referralCode) {
@@ -19,7 +8,8 @@ export function shareLink(eventId, referralCode) {
   if (referralCode) p.set("referral-code", referralCode);
   p.set("utm_source", "invite");
   p.set("utm_medium", "share");
-  p.set("utm_campaign", firstTouch());
+  // The sharer's first-touch campaign, so a friend's install traces back to the reel
+  p.set("utm_campaign", firstTouch().utm_campaign || "organic");
   return `${window.location.origin}/l/links?${p}`;
 }
 

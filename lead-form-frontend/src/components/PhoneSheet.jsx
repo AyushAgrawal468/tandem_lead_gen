@@ -5,6 +5,7 @@ import { call } from "../lib/tandemApi";
 import { T, font } from "../lib/card";
 import { useSheetKeys } from "../lib/useSheetKeys";
 import { OpenTandemLink } from "./AppPrompts";
+import { track } from "../lib/analytics";
 
 const RESEND_SECONDS = 30;
 const CODE_LENGTH = 4;
@@ -53,7 +54,7 @@ export default function PhoneSheet({ variant = "normal", rights = 3, onClose, on
   useSheetKeys(box, onClose);
 
   const sendErrors = (err) => {
-    if (err.data?.code === "BLOCKED") setScreen("blocked");
+    if (err.data?.code === "BLOCKED") { setScreen("blocked"); track("app_prompt_shown", { type: "phone_blocked" }); }
     else if (err.status === 429 || err.status === 503) setError("Hang on a sec. Too many requests. Try again in a minute.");
     else setError("Couldn't send the code. Try again.");
   };
@@ -64,15 +65,17 @@ export default function PhoneSheet({ variant = "normal", rights = 3, onClose, on
     try {
       // ponytail: backend NPEs on a null appSignature (Android SMS hash, meaningless on web), so send ""
       await call("/auth/send-otp", { method: "POST", body: { phone, countryCode: "91", appSignature: "" } });
+      track("otp_requested", { variant });
       setCode(""); setResendAt(Date.now() + RESEND_SECONDS * 1000); setNow(Date.now()); setScreen("code");
     } catch (err) { sendErrors(err); } finally { setBusy(false); }
   };
 
   const resend = async () => {
-    if (resends >= 1) { setScreen("slow"); return; } // 2nd tap: "Code not arriving?"
+    if (resends >= 1) { setScreen("slow"); track("app_prompt_shown", { type: "code_not_arriving" }); return; } // 2nd tap: "Code not arriving?"
     setResends(1); setError("");
     try {
       await call("/auth/send-otp", { method: "POST", body: { phone, countryCode: "91", appSignature: "" } });
+      track("otp_requested", { variant, resend: true });
       setResendAt(Date.now() + RESEND_SECONDS * 1000); setNow(Date.now());
     } catch (err) { sendErrors(err); }
   };
@@ -85,7 +88,7 @@ export default function PhoneSheet({ variant = "normal", rights = 3, onClose, on
       onVerified(data);
     } catch (err) {
       const d = err.data || {};
-      if (d.code === "BLOCKED" || d.statusId === "BLOCKED") setScreen("blocked");
+      if (d.code === "BLOCKED" || d.statusId === "BLOCKED") { setScreen("blocked"); track("app_prompt_shown", { type: "phone_blocked" }); }
       else if (d.code === "WRONG_CODE") {
         const n = d.tries_left;
         setError(n === 1 ? "That code didn't work. 1 try left." : `That code didn't work. ${n} tries left.`);

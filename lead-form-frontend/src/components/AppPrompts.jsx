@@ -5,6 +5,7 @@ import StoreButtons from "../assets/store-buttons.svg";
 import { T, font } from "../lib/card";
 import { openTandemUrl, whenStuck } from "../lib/app";
 import { useSheetKeys } from "../lib/useSheetKeys";
+import { track } from "../lib/analytics";
 
 // Handoff 2.6: app prompts. Copy from "Every screen and its copy".
 const pill = (main) => ({
@@ -20,7 +21,7 @@ export function OpenTandemLink({ onStuck }) {
   return (
     <p style={{ textAlign: "center", fontSize: "14px", color: T.mid, margin: "14px 0 0" }}>
       Already have it?{" "}
-      <a href={href} onClick={() => whenStuck(onStuck)} style={{ color: T.green, textDecoration: "none", fontWeight: 700 }}>Open Tandem</a>
+      <a href={href} onClick={() => { track("open_tandem_tapped"); whenStuck(onStuck); }} style={{ color: T.green, textDecoration: "none", fontWeight: 700 }}>Open Tandem</a>
     </p>
   );
 }

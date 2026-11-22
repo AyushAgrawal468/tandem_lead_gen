@@ -1,4 +1,5 @@
 import { STORE_LINK_CHECK_MS } from "./funnel";
+import { firstTouch } from "./analytics";
 
 // Handoff 2.6 / D8: one helper for store links and "Open Tandem".
 const PLAY = "https://play.google.com/store/apps/details?id=com.tandemit.tandemit";
@@ -13,12 +14,11 @@ export const isPhone = () => isIOS() || isAndroid();
 // Instagram and Facebook in-app browsers, where store links often stay stuck inside the app
 const isInAppBrowser = () => /Instagram|FBAN|FBAV/i.test(ua());
 
-/** The visitor's UTM tags: the current URL first, else the first-touch campaign saved on arrival. */
+/** The visitor's UTM tags: the current URL first, else the first touch saved at boot. */
 function utm() {
   const q = typeof window === "undefined" ? new URLSearchParams() : new URLSearchParams(window.location.search);
-  let firstTouch = null;
-  try { firstTouch = localStorage.getItem("firstTouchCampaign"); } catch { /* storage blocked */ }
-  return { source: q.get("utm_source") || "web", campaign: q.get("utm_campaign") || firstTouch || "organic" };
+  const ft = firstTouch();
+  return { source: q.get("utm_source") || ft.utm_source || "web", campaign: q.get("utm_campaign") || ft.utm_campaign || "organic" };
 }
 
 /** Store link for this phone, carrying the campaign (Play referrer; App Store ct + pt). */

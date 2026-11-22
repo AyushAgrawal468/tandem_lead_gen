@@ -2,6 +2,7 @@ import React, { useRef } from "react";
 import { T, font, metaLine } from "../lib/card";
 import { useSheetKeys } from "../lib/useSheetKeys";
 import { shareLink, shareText, whatsappUrl } from "../lib/share";
+import { track } from "../lib/analytics";
 
 const pill = (main) => ({
   display: "block", width: "100%", boxSizing: "border-box", textAlign: "center", textDecoration: "none", minHeight: "48px", padding: "14px",
@@ -20,6 +21,7 @@ export default function SendSheet({ card, referralCode, onClose, onSent }) {
   const text = shareText(card, link);
 
   const copy = async () => {
+    track("share_tapped", { eventId: card.id, channel: "copy_link", verified: !!referralCode });
     try { await navigator.clipboard.writeText(link); onSent("Link copied."); } catch { onSent("Couldn't copy the link."); }
   };
 
@@ -41,7 +43,7 @@ export default function SendSheet({ card, referralCode, onClose, onSent }) {
         <h2 id="send-title" className="text-[22px] md:text-[24px]" style={{ fontWeight: 700, lineHeight: 1.2, margin: "0 0 6px" }}>Know someone who'd go to {card.title}?</h2>
         <p style={{ color: T.mid, fontSize: "16px", lineHeight: 1.5, margin: "0 0 16px" }}>Send it to them. If they're in, it's a plan.</p>
         <a href={whatsappUrl(text)} target="_blank" rel="noopener noreferrer" autoFocus style={pill(true)}
-          onClick={() => onSent("Sent. When they say they're in, you'll see it in the app.")}>Send on WhatsApp</a>
+          onClick={() => { track("share_tapped", { eventId: card.id, channel: "whatsapp", verified: !!referralCode }); onSent("Sent. When they say they're in, you'll see it in the app."); }}>Send on WhatsApp</a>
         <button onClick={copy} className="hidden md:block" style={{ ...pill(false), marginTop: "10px" }}>Copy link</button>
         <button onClick={onClose} style={{ ...pill(false), marginTop: "10px" }}>Not now</button>
       </div>

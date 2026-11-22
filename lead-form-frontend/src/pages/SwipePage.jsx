@@ -8,7 +8,8 @@ import { DesktopAppPrompt, OpenInBrowser, OpenTandemLink, SoftPrompt, MatchScree
 import CityPicker from "../components/CityPicker";
 import PhoneSheet from "../components/PhoneSheet";
 import SendSheet from "../components/SendSheet";
-import { rememberFirstTouch, shareLink, shareText, canNativeShare } from "../lib/share";
+import { shareLink, shareText, canNativeShare } from "../lib/share";
+import { track, identify } from "../lib/analytics";
 import { call, AuthError } from "../lib/tandemApi";
 import { SwipeCard, CardFace, EventDetails } from "../components/EventCard";
 import { fromPublic, fromPersonal, T, font } from "../lib/card";
@@ -91,8 +92,6 @@ export default function SwipePage() {
 
   const signOut = (msg) => { writeJson(SESSION_KEY, null); setSession(null); setError(msg); };
 
-  useEffect(() => { rememberFirstTouch(); }, []);
-
   // One toast at a time, 3 s (design screen 5)
   useEffect(() => {
     if (!toast) return;
@@ -146,28 +145,39 @@ export default function SwipePage() {
   // A card counts as seen once it's on top
   useEffect(() => {
     if (!top) return;
+    track("card_viewed", { eventId: top.id, city, verified: !!session });
     const seen = readJson(SEEN_KEY, []);
     if (!seen.includes(top.id)) writeJson(SEEN_KEY, [...seen, top.id].slice(-SEEN_MAX));
   }, [top?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Every app prompt: phones go through /download (keeps the UTM tags), desktop gets the QR prompt
-  const getApp = () => {
+  const getApp = (from) => {
+    track("install_cta_clicked", { from });
     if (isPhone()) navigate(`/download${window.location.search}`);
-    else setShowPopup(true);
+    else { setShowPopup(true); track("app_prompt_shown", { type: "desktop_qr", from }); }
   };
 
   // Soft prompts at 10 and 25 counted swipes, once each; the next swipe dismisses the banner
   const afterCount = (n) => {
     const shown = readJson(SOFT_SHOWN_KEY, []);
-    if (SOFT_PROMPTS.includes(n) && !shown.includes(n)) { writeJson(SOFT_SHOWN_KEY, [...shown, n]); setSoftAt(n); }
+    if (SOFT_PROMPTS.includes(n) && !shown.includes(n)) { writeJson(SOFT_SHOWN_KEY, [...shown, n]); setSoftAt(n); track("app_prompt_shown", { type: `soft_${n}` }); }
     else setSoftAt(null);
   };
+
+  const endOfDeck = feed === "ready" && !top && !capped;
+  useEffect(() => { if (endOfDeck) track("end_of_deck", { city }); }, [endOfDeck]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!capped || PRERENDER) return;
+    track("cap_reached", { verified: !!session });
+    track("app_prompt_shown", { type: session && returnVisit ? "return_visit" : "hard_stop" });
+  }, [capped]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Called once the card has flown off
   const onAction = async (action) => {
     const card = queue[0];
     if (!card) return;
     setQueue((q) => q.slice(1));
+    track("swiped", { direction: action.toLowerCase(), eventId: card.id, city, verified: !!session });
     if (!session) {
       const list = [...local, { eventId: card.id, action, at: Date.now(), card: { id: card.id, title: card.title, day: card.day, time: card.time, area: card.area, poster: card.poster } }];
       writeJson(SWIPES_KEY, list); setLocal(list);
@@ -184,7 +194,7 @@ export default function SwipePage() {
       const data = await call("/events/web/saveAction", { token: session.token, method: "POST", body: { eventId: card.id, action } });
       setRemaining(data.remainingSwipes);
       afterCount(WEB_SWIPE_LIMIT - data.remainingSwipes);
-      if (data.match) setMatch({ match: data.match, card }); // rare on the web: matching needs contacts
+      if (data.match) { setMatch({ match: data.match, card }); track("match_shown", { eventId: card.id }); } // rare on the web: matching needs contacts
     } catch (err) {
       if (err instanceof AuthError) { signOut("Session expired, please log in again."); return; }
       // Keep it in the browser list; the replay below retries it
@@ -221,6 +231,8 @@ export default function SwipePage() {
     const s = { token: data.access_token, userId: data.user_id, referralCode: data.referral_code || null,
       expiresAt: Date.now() + ((data.expires_in || 600) - 30) * 1000 };
     setPhoneAsk(null);
+    identify(s.userId);
+    track("otp_verified", { variant: phoneAsk });
     const lastRight = [...readJson(SWIPES_KEY, [])].reverse().find((sw) => sw.action === "RIGHT" && sw.card)?.card;
     const saved = await replay(s);
     writeJson(SESSION_KEY, s); setSession(s);
@@ -237,6 +249,7 @@ export default function SwipePage() {
   const share = async (card) => {
     if (!canNativeShare()) { setSendCard(card); return; }
     const link = shareLink(card.id, session?.referralCode);
+    track("share_tapped", { eventId: card.id, channel: "native", verified: !!session });
     try {
       await navigator.share({ text: shareText(card, link) });
       setToast("Sent. When they say they're in, you'll see it in the app.");
@@ -244,6 +257,7 @@ export default function SwipePage() {
   };
 
   const closePhoneAsk = () => {
+    track("otp_skipped", { variant: phoneAsk });
     if (phoneAsk !== "save") setToast("No problem. Keep swiping. Your swipes stay on this phone for now.");
     setPhoneAsk(null);
   };
@@ -308,7 +322,7 @@ export default function SwipePage() {
               <div style={panel}>
                 <p style={{ fontSize: "22px", fontWeight: 700, marginBottom: "6px" }}>Welcome back</p>
                 <p style={{ color: T.mid, fontSize: "16px", marginBottom: "20px" }}>Your swipes are saved. Get the app to keep going and see who's in.</p>
-                <button onClick={getApp} style={btn()}>Get the app</button>
+                <button onClick={() => getApp("return_visit")} style={btn()}>Get the app</button>
                 <OpenTandemLink onStuck={() => setStuck(true)} />
               </div>
               ) : (
@@ -321,7 +335,7 @@ export default function SwipePage() {
                     ? `You've used your ${WEB_SWIPE_LIMIT} web swipes, and they're saved. Download Tandem and allow contacts to see which friends want the same.`
                     : `You've used your ${WEB_SWIPE_LIMIT} web swipes. Download Tandem to keep going, or save these swipes with your number first.`}
                 </p>
-                <button onClick={getApp} style={btn()}>Download now</button>
+                <button onClick={() => getApp("hard_stop")} style={btn()}>Download now</button>
                 {!session && <button onClick={() => setPhoneAsk("save")} style={{ ...btn(), background: T.surface2, color: T.high, marginTop: "10px" }}>Save my swipes first</button>}
                 <OpenTandemLink onStuck={() => setStuck(true)} />
               </div>
@@ -352,7 +366,7 @@ export default function SwipePage() {
               <div style={{ ...panel, background: "transparent", border: `2px dashed ${T.surface2}` }}>
                 <p style={{ fontSize: "22px", fontWeight: 700, marginBottom: "6px" }}>That's everything on in {city} right now</p>
                 <p style={{ color: T.mid, fontSize: "16px", marginBottom: "20px" }}>New plans land every day. In the app, you see them first, and which friends are in.</p>
-                <button onClick={getApp} style={btn()}>Get the app</button>
+                <button onClick={() => getApp("end_of_deck")} style={btn()}>Get the app</button>
               </div>
             )}
           </div>
@@ -360,7 +374,7 @@ export default function SwipePage() {
           {top && !capped && (
             <>
               {softAt && !phoneAsk && !sendCard && !match && (
-                <SoftPrompt at={softAt} onGetApp={() => { setSoftAt(null); getApp(); }} onLater={() => setSoftAt(null)} />
+                <SoftPrompt at={softAt} onGetApp={() => { setSoftAt(null); getApp(`soft_${softAt}`); }} onLater={() => setSoftAt(null)} />
               )}
               <p style={{ color: T.low, fontSize: "12px", textAlign: "center", margin: "12px 0" }}>Right if you're in. Left for not now. Down for never.</p>
               <ActionButtons onAct={act} />
@@ -397,11 +411,11 @@ export default function SwipePage() {
 
       {phoneAsk && (
         <PhoneSheet variant={phoneAsk} rights={PHONE_ASK_RIGHTS} onClose={closePhoneAsk} onVerified={onVerified}
-          onGetApp={() => { setPhoneAsk(null); getApp(); }} onStuck={() => setStuck(true)} />
+          onGetApp={() => { setPhoneAsk(null); getApp("phone_sheet"); }} onStuck={() => setStuck(true)} />
       )}
 
       {match && (
-        <MatchScreen match={match.match} card={match.card} onGetApp={() => { setMatch(null); getApp(); }}
+        <MatchScreen match={match.match} card={match.card} onGetApp={() => { setMatch(null); getApp("match"); }}
           onKeepSwiping={() => setMatch(null)} onStuck={() => setStuck(true)} />
       )}
 
