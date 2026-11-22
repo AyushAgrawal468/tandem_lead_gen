@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { OTPInput, REGEXP_ONLY_DIGITS } from "input-otp";
 import { call } from "../lib/tandemApi";
 import { T, font } from "../lib/card";
+import { useSheetKeys } from "../lib/useSheetKeys";
 
 const RESEND_SECONDS = 30;
 const CODE_LENGTH = 4;
@@ -48,20 +49,7 @@ export default function PhoneSheet({ variant = "normal", rights = 3, onClose, on
     return () => clearInterval(t);
   }, [screen, wait]);
 
-  // Focus stays inside the sheet; Escape closes it like Not now
-  useEffect(() => {
-    const onKey = (e) => {
-      if (e.key === "Escape") { onClose(); return; }
-      if (e.key !== "Tab" || !box.current) return;
-      const f = [...box.current.querySelectorAll("button:not([disabled]), input, a[href]")];
-      if (!f.length) return;
-      const [first, last] = [f[0], f[f.length - 1]];
-      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  useSheetKeys(box, onClose);
 
   const sendErrors = (err) => {
     if (err.data?.code === "BLOCKED") setScreen("blocked");

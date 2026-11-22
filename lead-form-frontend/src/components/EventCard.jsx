@@ -26,17 +26,33 @@ function Poster({ card, style }) {
 // Poster is 3:4, but shrinks on short screens (in-app browsers) so the buttons stay on screen
 const POSTER_H = "min(calc((min(100vw, 420px) - 56px) * 4 / 3), calc(100dvh - 445px))";
 
-export function CardFace({ card }) {
+// Round mint button = "Send to a friend" (design brief: the card's round Tandem button on the web)
+export function ShareButton({ onShare, size = 40 }) {
+  return (
+    <button onClick={(e) => { e.stopPropagation(); onShare(); }} aria-label="Send to a friend"
+      style={{ flexShrink: 0, width: `${size}px`, height: `${size}px`, padding: 0, borderRadius: "50%", border: "none", cursor: "pointer",
+        background: T.green, color: T.bg, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 0 12px rgba(0,255,200,0.35)" }}>
+      <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+      </svg>
+    </button>
+  );
+}
+
+export function CardFace({ card, onShare }) {
   return (
     <div data-event-card="" style={{ background: T.surface1, borderRadius: "16px", overflow: "hidden", boxShadow: "0 8px 24px rgba(0,0,0,0.4)" }}>
       <div style={{ padding: "12px 12px 0" }}>
         <Poster card={card} style={{ height: POSTER_H, minHeight: "240px" }} />
       </div>
-      <div style={{ padding: "12px 14px 16px" }}>
+      <div style={{ padding: "12px 14px 16px", display: "flex", alignItems: "flex-end", gap: "12px" }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
         <h2 className="text-[18px] md:text-[20px]" style={{ fontWeight: 700, color: T.high, lineHeight: 1.25, margin: 0,
           display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{card.title}</h2>
         {metaLine(card) && <p style={{ color: T.low, fontSize: "14px", lineHeight: 1.5, margin: "4px 0 0" }}>{metaLine(card)}</p>}
         {card.price && <p style={{ color: T.green, fontSize: "14px", lineHeight: 1.5, margin: "2px 0 0" }}>{card.price}</p>}
+        </div>
+        {onShare && <ShareButton onShare={onShare} />}
       </div>
     </div>
   );
@@ -57,7 +73,7 @@ const reducedMotion = () => typeof window !== "undefined" && window.matchMedia?.
  * Draggable for touch and mouse. Up drags spring back: the web has no up swipe. A tap opens details.
  * The parent calls ref.fly(action) for buttons and arrow keys; onAction fires once the card is off.
  */
-export const SwipeCard = forwardRef(function SwipeCard({ card, onAction, onOpen }, ref) {
+export const SwipeCard = forwardRef(function SwipeCard({ card, onAction, onOpen, onShare }, ref) {
   const el = useRef(null);
   const labels = useRef({});
   const flying = useRef(false);
@@ -103,7 +119,10 @@ export const SwipeCard = forwardRef(function SwipeCard({ card, onAction, onOpen 
         showLabels(0, 0);
         gsap.to(el.current, { x: 0, y: 0, rotation: 0, duration: reducedMotion() ? 0 : 0.2, ease: "power2.out" });
       },
-      onClick() { if (!flying.current) onOpen?.(); },
+      onClick() {
+        // The share button sits on the card; its tap must not open the details page too
+        if (!flying.current && !this.pointerEvent?.target?.closest?.("button")) onOpen?.();
+      },
     });
     return () => d.kill();
   }, { scope: el });
@@ -120,14 +139,14 @@ export const SwipeCard = forwardRef(function SwipeCard({ card, onAction, onOpen 
           {l.text}
         </span>
       ))}
-      <CardFace card={card} />
+      <CardFace card={card} onShare={onShare} />
     </div>
   );
 });
 
 // ---------- event details page (design screen 43) ----------
 
-export function EventDetails({ card, onBack, actions }) {
+export function EventDetails({ card, onBack, actions, onShare }) {
   return (
     <div role="dialog" aria-modal="true" aria-label={card.title}
       style={{ position: "fixed", inset: 0, zIndex: 1500, background: T.bg, color: T.high, fontFamily: font, overflowY: "auto",
@@ -137,7 +156,8 @@ export function EventDetails({ card, onBack, actions }) {
           style={{ width: "44px", height: "44px", padding: 0, border: "none", background: "transparent", color: T.high, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
           <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
         </button>
-        <span style={{ fontSize: "16px", fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{card.title}</span>
+        <span style={{ flex: 1, fontSize: "16px", fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{card.title}</span>
+        {onShare && <ShareButton onShare={onShare} size={40} />}
       </header>
       <div className="md:grid md:grid-cols-2 md:gap-10" style={{ maxWidth: "960px", margin: "0 auto", padding: "0 16px 140px" }}>
         <Poster card={card} style={{ aspectRatio: "3 / 4", width: "100%", maxHeight: "70vh" }} />

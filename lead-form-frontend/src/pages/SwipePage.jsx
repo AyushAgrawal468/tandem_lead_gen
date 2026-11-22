@@ -7,6 +7,8 @@ import { initialCity } from "../lib/city";
 import { WEB_SWIPE_LIMIT, PHONE_ASK_RIGHTS, PHONE_ASK_SWIPES } from "../lib/funnel";
 import CityPicker from "../components/CityPicker";
 import PhoneSheet from "../components/PhoneSheet";
+import SendSheet from "../components/SendSheet";
+import { rememberFirstTouch, shareLink, shareText, canNativeShare } from "../lib/share";
 import { call, AuthError } from "../lib/tandemApi";
 import { SwipeCard, CardFace, EventDetails } from "../components/EventCard";
 import { fromPublic, fromPersonal, T, font } from "../lib/card";
@@ -16,6 +18,7 @@ const SWIPES_KEY = "webSwipes"; // swipes made before OTP, replayed in order aft
 const SEEN_KEY = "webSeen"; // every card shown, so no card appears twice
 const SEEN_MAX = 500;
 const ASKED_KEY = "webPhoneAsked";
+const SHARE_PROMPTED_KEY = "webSharePrompted";
 // Snapshot rule 3: the prerendered HTML holds the heading and a fixed-height placeholder, never live cards
 const PRERENDER = typeof window !== "undefined" && new URLSearchParams(window.location.search).has("prerender");
 
@@ -95,6 +98,7 @@ export default function SwipePage() {
   const [toast, setToast] = useState(null);
   const [error, setError] = useState("");
   const [totalUpcoming, setTotalUpcoming] = useState(null);
+  const [sendCard, setSendCard] = useState(null); // card in the "Send to a friend" sheet
   const deckRef = useRef(null);
   const pendingAction = useRef(null);
   const loading = useRef(false);
@@ -105,6 +109,8 @@ export default function SwipePage() {
   const top = queue[0];
 
   const signOut = (msg) => { writeJson(SESSION_KEY, null); setSession(null); setError(msg); };
+
+  useEffect(() => { rememberFirstTouch(); }, []);
 
   // One toast at a time, 3 s (design screen 5)
   useEffect(() => {
@@ -167,7 +173,7 @@ export default function SwipePage() {
     if (!card) return;
     setQueue((q) => q.slice(1));
     if (!session) {
-      const list = [...local, { eventId: card.id, action, at: Date.now() }];
+      const list = [...local, { eventId: card.id, action, at: Date.now(), card: { id: card.id, title: card.title, day: card.day, time: card.time, area: card.area, poster: card.poster } }];
       writeJson(SWIPES_KEY, list); setLocal(list);
       const rights = list.filter((s) => s.action === "RIGHT").length;
       // Ask once: 3rd right swipe, or 8th swipe with fewer than 3 rights. After Not now, only the hard stop asks again.
@@ -213,11 +219,29 @@ export default function SwipePage() {
   useEffect(() => { if (session && readJson(SWIPES_KEY, []).length) replay(session); }, [session?.token]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onVerified = async (data) => {
-    const s = { token: data.access_token, userId: data.user_id, expiresAt: Date.now() + ((data.expires_in || 600) - 30) * 1000 };
+    const s = { token: data.access_token, userId: data.user_id, referralCode: data.referral_code || null,
+      expiresAt: Date.now() + ((data.expires_in || 600) - 30) * 1000 };
     setPhoneAsk(null);
+    const lastRight = [...readJson(SWIPES_KEY, [])].reverse().find((sw) => sw.action === "RIGHT" && sw.card)?.card;
     const saved = await replay(s);
     writeJson(SESSION_KEY, s); setSession(s);
     setToast(saved ? `You're in. ${saved} swipes saved. Get the app to see which friends want the same.` : "You're in. Swipe right on anything you'd do.");
+    // Handoff 2.5: once per user, after the You're in toast, offer to send their latest "I'm in"
+    if (lastRight && !readJson(SHARE_PROMPTED_KEY, false)) {
+      writeJson(SHARE_PROMPTED_KEY, true);
+      setTimeout(() => setSendCard(lastRight), 3200);
+    }
+  };
+
+  // Card share icon: the phone's share sheet, or the Send sheet (WhatsApp Web + Copy link) elsewhere.
+  // Sharing doesn't change the card's swipe.
+  const share = async (card) => {
+    if (!canNativeShare()) { setSendCard(card); return; }
+    const link = shareLink(card.id, session?.referralCode);
+    try {
+      await navigator.share({ text: shareText(card, link) });
+      setToast("Sent. When they say they're in, you'll see it in the app.");
+    } catch { /* closed the share sheet */ }
   };
 
   const closePhoneAsk = () => {
@@ -252,7 +276,7 @@ export default function SwipePage() {
 
   useEffect(() => {
     const onKey = (e) => {
-      if (phoneAsk || showPopup || e.target.closest?.("input, textarea") || document.getElementById("city-title")) return;
+      if (phoneAsk || sendCard || showPopup || e.target.closest?.("input, textarea") || document.getElementById("city-title")) return;
       const a = { ArrowRight: "RIGHT", ArrowLeft: "LEFT", ArrowDown: "DOWN" }[e.key];
       if (a) { e.preventDefault(); act(a); }
     };
@@ -302,7 +326,7 @@ export default function SwipePage() {
                     <CardFace card={c} />
                   </div>
                 ))}
-                <SwipeCard key={top.id} ref={deckRef} card={top} onAction={onAction} onOpen={openDetails} />
+                <SwipeCard key={top.id} ref={deckRef} card={top} onAction={onAction} onOpen={openDetails} onShare={() => share(top)} />
               </>
             ) : feed === "loading" ? (
               <div aria-busy="true" style={{ background: T.surface1, borderRadius: "16px", padding: "12px" }}>
@@ -344,7 +368,7 @@ export default function SwipePage() {
       </main>
 
       {details && (
-        <EventDetails card={details} onBack={() => window.history.back()}
+        <EventDetails card={details} onBack={() => window.history.back()} onShare={() => share(details)}
           actions={<div style={{ maxWidth: "420px", margin: "0 auto" }}><ActionButtons onAct={act} disabled={capped} /></div>} />
       )}
 
@@ -352,6 +376,11 @@ export default function SwipePage() {
         <div role="status" className="toast-in" style={{ position: "fixed", left: 0, right: 0, margin: "0 auto", bottom: "calc(150px + env(safe-area-inset-bottom))",
           zIndex: 1700, width: "calc(100% - 32px)", maxWidth: "388px", background: T.surface1, color: T.high, borderRadius: "12px", padding: "12px 14px",
           fontSize: "14px", lineHeight: 1.5, boxShadow: "0 8px 24px rgba(0,0,0,0.5)" }}>{toast}</div>
+      )}
+
+      {sendCard && (
+        <SendSheet card={sendCard} referralCode={session?.referralCode} onClose={() => setSendCard(null)}
+          onSent={(msg) => { setSendCard(null); setToast(msg); }} />
       )}
 
       {phoneAsk && (
