@@ -23,6 +23,18 @@ server {
           add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
       }
 
+      # 3.5: shared links get their og: tags from Spring (LinkPreviewController). `= /r`, never a
+      # /r prefix (would catch /robots.txt). ^~ skips the regex locations below. If Spring is
+      # down, the plain SPA shell still serves the link page.
+      location = /r       { proxy_pass http://localhost:8080; include snippets/link-preview.conf; }
+      location ^~ /l/links { proxy_pass http://localhost:8080; include snippets/link-preview.conf; }
+      location ^~ /e/      { proxy_pass http://localhost:8080; include snippets/link-preview.conf; }
+      location @spa {
+          try_files /spa.html =404;
+          add_header Cache-Control "no-cache" always;
+          add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+      }
+
       # Vite's hashed bundles never change once built: cache for a year (CloudFront + browsers).
       # Deploys copy over without deleting, so last build's files stay for tabs opened before it.
       location /assets/ {
