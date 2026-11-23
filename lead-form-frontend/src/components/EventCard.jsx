@@ -29,7 +29,7 @@ const POSTER_H = "min(calc((min(100vw, 420px) - 56px) * 4 / 3), calc(100dvh - 49
 // Round mint button = "Send to a friend" (design brief: the card's round Tandem button on the web)
 export function ShareButton({ onShare, size = 44 }) {
   return (
-    <button onClick={(e) => { e.stopPropagation(); onShare(); }} aria-label="Send to a friend"
+    <button onClick={(e) => { e.stopPropagation(); onShare(); }} aria-label="Send to a friend" className="orb"
       style={{ flexShrink: 0, width: `${size}px`, height: `${size}px`, padding: 0, borderRadius: "50%", border: "none", cursor: "pointer",
         background: T.green, color: T.bg, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 0 12px rgba(0,255,200,0.35)" }}>
       <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -41,13 +41,14 @@ export function ShareButton({ onShare, size = 44 }) {
 
 export function CardFace({ card, onShare }) {
   return (
-    <div data-event-card="" style={{ background: T.surface1, borderRadius: "16px", overflow: "hidden", boxShadow: "0 8px 24px rgba(0,0,0,0.4)" }}>
-      <div style={{ padding: "12px 12px 0" }}>
-        <Poster card={card} style={{ height: POSTER_H, minHeight: "240px" }} />
+    <div data-event-card="" style={{ background: `linear-gradient(180deg, #26282B, ${T.surface1})`, border: `1px solid ${T.line}`, borderRadius: "20px",
+      overflow: "hidden", boxShadow: "0 24px 48px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3)" }}>
+      <div style={{ padding: "10px 10px 0" }}>
+        <Poster card={card} style={{ height: POSTER_H, minHeight: "240px", borderRadius: "14px" }} />
       </div>
-      <div style={{ padding: "12px 14px 16px", display: "flex", alignItems: "flex-end", gap: "12px" }}>
+      <div style={{ padding: "14px 16px 18px", display: "flex", alignItems: "flex-end", gap: "12px" }}>
         <div style={{ flex: 1, minWidth: 0 }}>
-        <h2 className="text-[18px] md:text-[20px]" style={{ fontWeight: 700, color: T.high, lineHeight: 1.25, margin: 0,
+        <h2 className="wide text-[18px] md:text-[20px]" style={{ fontWeight: 700, color: T.high, lineHeight: 1.25, margin: 0,
           display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{card.title}</h2>
         {metaLine(card) && <p style={{ color: T.low, fontSize: "14px", lineHeight: 1.5, margin: "4px 0 0" }}>{metaLine(card)}</p>}
         {card.price && <p style={{ color: T.green, fontSize: "14px", lineHeight: 1.5, margin: "2px 0 0" }}>{card.price}</p>}
@@ -148,10 +149,10 @@ export const SwipeCard = forwardRef(function SwipeCard({ card, onAction, onOpen,
 
 export function EventDetails({ card, onBack, actions, onShare }) {
   return (
-    <div role="dialog" aria-modal="true" aria-label={card.title}
+    <div role="dialog" aria-modal="true" aria-label={card.title} className="aurora"
       style={{ position: "fixed", inset: 0, zIndex: 1500, background: T.bg, color: T.high, fontFamily: font, overflowY: "auto",
         animation: `detailsIn 0.25s ${EASE_OUT}` }}>
-      <header style={{ position: "sticky", top: 0, zIndex: 1, background: T.bg, display: "flex", alignItems: "center", gap: "8px", padding: "12px 16px" }}>
+      <header style={{ position: "sticky", top: 0, zIndex: 1, background: "rgba(17,17,17,0.6)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", display: "flex", alignItems: "center", gap: "8px", padding: "12px 16px" }}>
         <button onClick={onBack} aria-label="Back" autoFocus
           style={{ width: "44px", height: "44px", padding: 0, border: "none", background: "transparent", color: T.high, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
           <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
@@ -162,7 +163,7 @@ export function EventDetails({ card, onBack, actions, onShare }) {
       <div className="md:grid md:grid-cols-2 md:gap-10" style={{ maxWidth: "960px", margin: "0 auto", padding: "0 16px 140px" }}>
         <Poster card={card} style={{ aspectRatio: "3 / 4", width: "100%", maxHeight: "70vh" }} />
         <div>
-          <h1 className="text-[22px] md:text-[24px]" style={{ fontWeight: 700, lineHeight: 1.2, margin: "16px 0 6px" }}>{card.title}</h1>
+          <h1 className="wide text-[24px] md:text-[28px]" style={{ fontWeight: 700, lineHeight: 1.15, margin: "18px 0 8px" }}>{card.title}</h1>
           {metaLine(card) && <p style={{ color: T.low, fontSize: "14px", margin: 0 }}>{metaLine(card)}</p>}
           {card.price && <p style={{ color: T.green, fontSize: "14px", margin: "4px 0 0" }}>{card.price}</p>}
           {card.description && <p style={{ color: T.mid, fontSize: "16px", lineHeight: 1.5, margin: "16px 0 0", whiteSpace: "pre-line" }}>{card.description}</p>}

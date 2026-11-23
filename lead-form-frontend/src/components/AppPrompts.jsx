@@ -77,7 +77,7 @@ export function SoftPrompt({ at, onGetApp, onLater }) {
     <div role="status" className="toast-in" style={{ background: T.surface1, borderRadius: "12px", padding: "12px 14px", margin: "12px 0 0", display: "flex", alignItems: "center", gap: "12px" }}>
       <p style={{ flex: 1, fontSize: "14px", lineHeight: 1.5, color: T.high, margin: 0 }}>{text}</p>
       <button onClick={onLater} style={{ background: "none", border: "none", color: T.mid, fontFamily: font, fontSize: "14px", cursor: "pointer", padding: "8px 4px" }}>Later</button>
-      <button onClick={onGetApp} style={{ background: T.high, color: T.bg, border: "none", borderRadius: "999px", fontFamily: font, fontWeight: 700, fontSize: "14px", padding: "10px 14px", cursor: "pointer", whiteSpace: "nowrap" }}>Get the app</button>
+      <button onClick={onGetApp} className="pill" style={{ background: T.high, color: T.bg, border: "none", borderRadius: "999px", fontFamily: font, fontWeight: 700, fontSize: "14px", padding: "10px 14px", cursor: "pointer", whiteSpace: "nowrap" }}>Get the app</button>
     </div>
   );
 }

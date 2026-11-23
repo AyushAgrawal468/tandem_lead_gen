@@ -27,14 +27,13 @@ export default function CityPage({ slug }) {
     },
   };
   return (
-    <div style={{ minHeight: "100dvh", background: T.bg, color: T.high, fontFamily: font }}>
+    <div className="aurora" style={{ minHeight: "100dvh", background: T.bg, color: T.high, fontFamily: font }}>
       <Seo title={page.title} description={page.description} path={`/${slug}`} jsonLd={jsonLd} />
       <main className="px-4 md:px-6" style={{ maxWidth: "1120px", margin: "0 auto", paddingTop: "16px" }}>
         <SiteHeader city={city} onCity={setCity} />
-        <div className="md:grid md:grid-cols-2 md:gap-12 md:items-start" style={{ marginTop: "24px" }}>
-          <div className="md:pt-16">
-            <p style={{ margin: "0 0 12px", fontSize: "14px", fontWeight: 700, letterSpacing: "1px", color: "#C1F546" }}>{page.city.toUpperCase()}</p>
-            <h1 className="text-[40px] md:text-[56px]" style={{ fontWeight: 700, lineHeight: 1.1, margin: 0 }}>Things to do in {page.city} with friends</h1>
+        <div className="md:grid md:grid-cols-[1.1fr_1fr] md:gap-16 md:items-center" style={{ marginTop: "32px" }}>
+          <div>
+            <h1 className="wide text-[29px] xs:text-[31px] md:text-[60px]" style={{ fontWeight: 800, lineHeight: 1.05, margin: 0 }}>Things to do in {page.city} with friends</h1>
             <p className="text-[16px] md:text-[18px]" style={{ color: T.mid, lineHeight: 1.5, margin: "20px 0 0", maxWidth: "560px" }}>{page.intro}</p>
           </div>
           <div style={{ maxWidth: "420px", width: "100%", margin: "24px auto 0" }}>

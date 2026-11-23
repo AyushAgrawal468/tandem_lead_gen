@@ -25,9 +25,9 @@ export function StoreBadges({ width = 336 }) {
 export function SiteHeader({ city, onCity }) {
   return (
     <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", fontFamily: font }}>
-      <Link to="/" style={{ color: T.green, fontWeight: 700, fontSize: "22px", textDecoration: "none" }}>tandem</Link>
-      <nav style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-        <Link to="/faq" style={{ color: T.mid, fontSize: "14px", textDecoration: "none" }}>FAQ</Link>
+      <Link to="/" className="wide" style={{ color: T.green, fontWeight: 800, fontSize: "24px", textDecoration: "none" }}>tandem</Link>
+      <nav style={{ display: "flex", alignItems: "center", gap: "18px" }}>
+        <Link to="/faq" style={{ color: T.high, fontSize: "15px", textDecoration: "none", opacity: 0.85 }}>FAQ</Link>
         {onCity && <CityPicker city={city} onChange={onCity} />}
       </nav>
     </header>
@@ -38,10 +38,10 @@ export function SiteHeader({ city, onCity }) {
 export function SiteFooter() {
   const link = { color: T.mid, fontSize: "14px", textDecoration: "none" };
   return (
-    <footer style={{ borderTop: `1px solid ${T.surface2}`, marginTop: "80px", padding: "40px 0 calc(48px + env(safe-area-inset-bottom))", fontFamily: font }}>
-      <div className="px-4 md:px-6" style={{ maxWidth: "1120px", margin: "0 auto", display: "flex", flexWrap: "wrap", gap: "24px 48px", alignItems: "center", justifyContent: "space-between" }}>
+    <footer style={{ borderTop: `1px solid ${T.line}`, marginTop: "96px", padding: "48px 0 calc(48px + env(safe-area-inset-bottom))", fontFamily: font }}>
+      <div className="px-4 md:px-6" style={{ maxWidth: "1120px", margin: "0 auto", display: "flex", flexWrap: "wrap", gap: "28px 48px", alignItems: "flex-end", justifyContent: "space-between" }}>
         <div>
-          <p style={{ color: T.high, fontSize: "18px", fontWeight: 700, margin: "0 0 14px" }}>Get Tandem on iPhone and Android.</p>
+          <p className="wide text-[24px] md:text-[30px]" style={{ color: T.high, fontWeight: 700, lineHeight: 1.15, margin: "0 0 18px", maxWidth: "460px" }}>Get Tandem on iPhone and Android.</p>
           <StoreBadges />
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>

@@ -461,3 +461,59 @@ button.waitlist-join-btn:focus {
   .match-burst { display: none; }
   .oib-nudge { animation: none; }
 }
+
+/* ---------- Site look (matches the app: header glow, wide headlines, pill buttons) ---------- */
+
+/* The app's header glow (teal, slate blue, moss) behind the top of the page, softer again at the bottom */
+.aurora { position: relative; isolation: isolate; }
+.aurora::before, .aurora::after { content: ""; position: absolute; left: 0; right: 0; z-index: -1; pointer-events: none; }
+.aurora::before {
+  top: 0; height: 760px;
+  background:
+    radial-gradient(60% 55% at 12% 0%, rgba(16, 122, 108, 0.55), transparent 70%),
+    radial-gradient(50% 50% at 55% 0%, rgba(62, 84, 104, 0.55), transparent 72%),
+    radial-gradient(45% 50% at 95% 4%, rgba(86, 98, 44, 0.5), transparent 70%);
+  -webkit-mask-image: linear-gradient(#000 35%, transparent);
+  mask-image: linear-gradient(#000 35%, transparent);
+}
+.aurora::after {
+  bottom: 0; height: 420px;
+  background:
+    radial-gradient(55% 60% at 20% 100%, rgba(16, 122, 108, 0.28), transparent 70%),
+    radial-gradient(50% 60% at 85% 100%, rgba(131, 73, 255, 0.22), transparent 70%);
+}
+
+/* Headlines: Anek Latin set wide, like the app's titles */
+.wide { font-stretch: 118%; font-variation-settings: "wdth" 118; letter-spacing: -0.01em; }
+
+/* Primary button: the app's white pill with a colour edge along the bottom */
+.pill {
+  background: linear-gradient(#fff, #fff) padding-box,
+              linear-gradient(90deg, #00FFC8, #4FA3FF 40%, #A77DFF 70%, #C1F546) border-box !important;
+  color: #111 !important;
+  border: 0 solid transparent !important;
+  border-bottom-width: 3px !important;
+}
+.pill:hover:not(:disabled) { filter: brightness(0.94); }
+
+/* Card's round button: the app's mint-to-blue gradient */
+.orb { background: linear-gradient(140deg, #00FFC8, #3B8CFF) !important; box-shadow: 0 6px 20px rgba(0, 200, 190, 0.35) !important; }
+
+/* Glass surfaces (header chip, swipe buttons) */
+.glass { background: rgba(255, 255, 255, 0.07) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+
+:focus-visible { outline: 2px solid #00FFC8; outline-offset: 2px; }
+
+/* How it works: three steps in a row joined by a line (stacked on phones) */
+.steps { display: grid; gap: 32px; }
+@media (min-width: 768px) {
+  .steps { grid-template-columns: repeat(3, 1fr); gap: 40px; }
+  .steps > li:not(:last-child)::after { content: ""; position: absolute; top: 26px; left: 68px; right: -24px; height: 1px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.18), rgba(255,255,255,0.02)); }
+}
+@media (max-width: 767px) {
+  .steps > li { display: grid; grid-template-columns: 52px 1fr; column-gap: 16px; }
+  .steps > li > span { grid-row: span 3; }
+  .steps > li > p:first-of-type { margin-top: 0 !important; }
+}

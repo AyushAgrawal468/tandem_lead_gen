@@ -9,7 +9,7 @@ import { shareLink, shareText, canNativeShare } from "../lib/share";
 import { track, identify } from "../lib/analytics";
 import { call, AuthError } from "../lib/tandemApi";
 import { SESSION_KEY, readJson, writeJson, loadSession, sessionFrom, creditReferral } from "../lib/session";
-import { SwipeCard, CardFace, EventDetails } from "./EventCard";
+import { SwipeCard, EventDetails } from "./EventCard";
 import { fromPublic, fromPersonal, T, font } from "../lib/card";
 
 const SWIPES_KEY = "webSwipes"; // swipes made before OTP, replayed in order after verifying
@@ -37,7 +37,7 @@ function ActionButtons({ onAct, disabled }) {
     <div style={{ display: "flex", justifyContent: "center", gap: "28px" }}>
       {ACTIONS.map(([a, label, key, color, d]) => (
         <div key={a} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px" }}>
-          <button onClick={() => onAct(a)} disabled={disabled} aria-label={label} aria-keyshortcuts={`Arrow${a === "DOWN" ? "Down" : a === "LEFT" ? "Left" : "Right"}`}
+          <button onClick={() => onAct(a)} disabled={disabled} className={a === "RIGHT" ? "orb" : "glass"} aria-label={label} aria-keyshortcuts={`Arrow${a === "DOWN" ? "Down" : a === "LEFT" ? "Left" : "Right"}`}
             style={{ width: "56px", height: "56px", padding: 0, borderRadius: "50%", border: "none", cursor: disabled ? "default" : "pointer",
               opacity: disabled ? 0.4 : 1, display: "flex", alignItems: "center", justifyContent: "center",
               background: a === "RIGHT" ? T.green : T.surface2, color: a === "RIGHT" ? T.bg : color }}>
@@ -315,7 +315,7 @@ export default function SwipeDeck({ city }) {
                 {fan}
                 <p style={stopTitle}>Welcome back</p>
                 <p style={{ color: T.mid, fontSize: "16px", lineHeight: 1.5, margin: "0 0 24px" }}>Your swipes are saved. Get the app to keep going and see who's in.</p>
-                <button onClick={() => getApp("return_visit")} style={btn()}>Get the app</button>
+                <button onClick={() => getApp("return_visit")} className="pill" style={btn()}>Get the app</button>
                 <OpenTandemLink onStuck={() => setStuck(true)} />
               </div>
               ) : (
@@ -329,7 +329,7 @@ export default function SwipeDeck({ city }) {
                     ? `You've used your ${WEB_SWIPE_LIMIT} web swipes, and they're saved. Download Tandem and allow contacts to see which friends want the same.`
                     : `You've used your ${WEB_SWIPE_LIMIT} web swipes. Download Tandem to keep going, or save these swipes with your number first.`}
                 </p>
-                <button onClick={() => getApp("hard_stop")} style={btn()}>Download now</button>
+                <button onClick={() => getApp("hard_stop")} className="pill" style={btn()}>Download now</button>
                 {!session && <button onClick={() => setPhoneAsk("save")} style={{ ...btn(), background: T.surface2, color: T.high, marginTop: "10px" }}>Save my swipes first</button>}
                 <OpenTandemLink onStuck={() => setStuck(true)} />
               </div>
@@ -339,9 +339,8 @@ export default function SwipeDeck({ city }) {
                 {/* Cards behind the top one peek out rotated, as in the app's Discover stack */}
                 {queue.slice(1, 3).map((c, i) => (
                   <div key={c.id} aria-hidden="true" style={{ position: "absolute", inset: 0, zIndex: 1 - i, pointerEvents: "none",
-                    transform: `rotate(${i ? -3 : 3}deg) scale(0.95)`, transformOrigin: "50% 100%", opacity: 0.6, overflow: "hidden", borderRadius: "16px" }}>
-                    <CardFace card={c} />
-                  </div>
+                    transform: `rotate(${i ? -3 : 3}deg) scale(0.95)`, transformOrigin: "50% 100%", borderRadius: "20px",
+                    background: i ? "#1A1B1D" : "#222326", border: `1px solid ${T.line}` }} />
                 ))}
                 <SwipeCard key={top.id} ref={deckRef} card={top} onAction={onAction} onOpen={openDetails} onShare={() => share(top)} />
               </>
@@ -354,13 +353,13 @@ export default function SwipeDeck({ city }) {
               <div style={panel}>
                 <p style={{ fontSize: "22px", fontWeight: 700, marginBottom: "6px" }}>Couldn't load plans</p>
                 <p style={{ color: T.mid, fontSize: "16px", marginBottom: "20px" }}>Check your connection and try again.</p>
-                <button onClick={() => loadMore(true)} style={btn()}>Retry</button>
+                <button onClick={() => loadMore(true)} className="pill" style={btn()}>Retry</button>
               </div>
             ) : (
               <div style={{ ...panel, background: "transparent", border: `2px dashed ${T.surface2}` }}>
                 <p style={{ fontSize: "22px", fontWeight: 700, marginBottom: "6px" }}>That's everything on in {city} right now</p>
                 <p style={{ color: T.mid, fontSize: "16px", marginBottom: "20px" }}>New plans land every day. In the app, you see them first, and which friends are in.</p>
-                <button onClick={() => getApp("end_of_deck")} style={btn()}>Get the app</button>
+                <button onClick={() => getApp("end_of_deck")} className="pill" style={btn()}>Get the app</button>
               </div>
             )}
           </div>

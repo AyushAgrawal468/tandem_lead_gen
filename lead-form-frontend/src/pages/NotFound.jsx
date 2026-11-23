@@ -12,7 +12,7 @@ import { T, font } from "../lib/card";
 export default function NotFound() {
   const city = initialCity();
   return (
-    <div style={{ minHeight: "100dvh", background: T.bg, color: T.high, fontFamily: font }}>
+    <div className="aurora" style={{ minHeight: "100dvh", background: T.bg, color: T.high, fontFamily: font }}>
       <Seo title="Page not found | Tandem" description="This page took a wrong turn. See what's on near you instead." path="/404" noindex />
       <main style={{ maxWidth: "420px", margin: "0 auto", padding: "16px 16px calc(32px + env(safe-area-inset-bottom))", minHeight: "100dvh", boxSizing: "border-box", display: "flex", flexDirection: "column" }}>
         <SiteHeader />

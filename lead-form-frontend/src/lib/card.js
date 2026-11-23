@@ -3,7 +3,7 @@ import { matchCity } from "./city";
 
 // Design brief tokens (section 2)
 export const T = {
-  bg: "#111111", surface1: "#252525", surface2: "#414141", green: "#00FFC8", purple: "#8349FF",
+  bg: "#111111", surface1: "#1E1F21", line: "rgba(255,255,255,0.08)", surface2: "#414141", green: "#00FFC8", purple: "#8349FF",
   high: "#F2F2F2", mid: "#BCBCBC", low: "#969696", fail: "#F3543F",
 };
 export const font = '"Anek Latin", Helvetica, sans-serif';
@@ -49,4 +49,4 @@ export function fromPersonal(d) {
   };
 }
 
-export const metaLine = (c) => [[c.day, c.time].filter(Boolean).join(", "), c.area].filter(Boolean).join(" · ");
+export const metaLine = (c) => [[c.day, c.time].filter(Boolean).join(", "), c.area].filter(Boolean).join("  •  ");
