@@ -68,9 +68,6 @@ export function HowItWorks() {
   );
 }
 
-// The web's three swipe directions, the same words the deck uses
-const DIRECTIONS = [["→", "I'm in", T.green], ["←", "Not now", T.mid], ["↓", "Never", T.fail]];
-
 /**
  * Journey 3 homepage (handoff 3.1 / design screen 36): the promise and the live deck above the fold,
  * then real-text answers crawlers read. Swiping here runs the full Journey 1 flow.
@@ -97,13 +94,6 @@ export default function HomePage() {
             <p className="text-[15px] md:text-[19px]" style={{ ...body, fontSize: undefined, margin: "12px 0 0", maxWidth: "500px" }}>
               No more "let's plan something" that never happens. Swipe on what you'd actually do, and the app matches you with friends who want the same.
             </p>
-            <ul aria-label="How to swipe" className="hidden md:flex" style={{ listStyle: "none", padding: 0, margin: "28px 0 0", flexWrap: "wrap", gap: "8px" }}>
-              {DIRECTIONS.map(([k, t, c]) => (
-                <li key={t} className="glass" style={{ display: "flex", alignItems: "center", gap: "8px", padding: "7px 14px 7px 8px", borderRadius: "999px", fontSize: "14px" }}>
-                  <span aria-hidden="true" style={{ width: "24px", height: "24px", borderRadius: "50%", background: `${c}26`, color: c, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800 }}>{k}</span>{t}
-                </li>
-              ))}
-            </ul>
             <div className="hidden md:block" style={{ marginTop: "36px" }}><StoreBadges width={300} /></div>
           </div>
           <div className="mt-5 md:mt-0" style={{ maxWidth: "420px", width: "100%", marginLeft: "auto", marginRight: "auto" }}>
