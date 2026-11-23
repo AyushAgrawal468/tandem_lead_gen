@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import StoreButtons from "../assets/store-buttons.svg";
+import Wordmark from "../assets/tandem-wordmark.svg";
 import CityPicker from "./CityPicker";
 import { T, font } from "../lib/card";
 
@@ -21,14 +22,19 @@ export function StoreBadges({ width = 336 }) {
   );
 }
 
-/** Design screens 1 and 36: wordmark, city chip (pages with a deck), FAQ link. */
-export function SiteHeader({ city, onCity }) {
+/** Design screens 1 and 36: the app wordmark, FAQ link, city chip (pages with a deck), Get the app (pages with the footer). */
+export function SiteHeader({ city, onCity, getApp = false }) {
   return (
-    <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", fontFamily: font }}>
-      <Link to="/" className="wide" style={{ color: T.green, fontWeight: 800, fontSize: "24px", textDecoration: "none" }}>tandem</Link>
-      <nav style={{ display: "flex", alignItems: "center", gap: "18px" }}>
+    <header className="site-header" style={{ fontFamily: font }}>
+      <Link to="/" aria-label="Tandem home" style={{ display: "flex", alignItems: "center" }}>
+        <img src={Wordmark} alt="tandem" width="138" height="32" className="h-[26px] md:h-[30px]" style={{ width: "auto", display: "block" }} />
+      </Link>
+      <nav style={{ display: "flex", alignItems: "center", gap: "16px" }}>
         <Link to="/faq" style={{ color: T.high, fontSize: "15px", textDecoration: "none", opacity: 0.85 }}>FAQ</Link>
         {onCity && <CityPicker city={city} onChange={onCity} />}
+        {/* Desktop only: scrolls to the footer's store badges (/download would send Mac users to Play) */}
+        {getApp && <a href="#get-app" className="pill hidden md:inline-flex" style={{ alignItems: "center", height: "40px", padding: "0 18px", borderRadius: "999px",
+          fontSize: "14px", fontWeight: 700, textDecoration: "none" }}>Get the app</a>}
       </nav>
     </header>
   );
@@ -38,7 +44,7 @@ export function SiteHeader({ city, onCity }) {
 export function SiteFooter() {
   const link = { color: T.mid, fontSize: "14px", textDecoration: "none" };
   return (
-    <footer style={{ borderTop: `1px solid ${T.line}`, marginTop: "96px", padding: "48px 0 calc(48px + env(safe-area-inset-bottom))", fontFamily: font }}>
+    <footer id="get-app" style={{ borderTop: `1px solid ${T.line}`, marginTop: "96px", padding: "48px 0 calc(48px + env(safe-area-inset-bottom))", fontFamily: font }}>
       <div className="px-4 md:px-6" style={{ maxWidth: "1120px", margin: "0 auto", display: "flex", flexWrap: "wrap", gap: "28px 48px", alignItems: "flex-end", justifyContent: "space-between" }}>
         <div>
           <p className="wide text-[24px] md:text-[30px]" style={{ color: T.high, fontWeight: 700, lineHeight: 1.15, margin: "0 0 18px", maxWidth: "460px" }}>Get Tandem on iPhone and Android.</p>

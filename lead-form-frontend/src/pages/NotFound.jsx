@@ -14,7 +14,7 @@ export default function NotFound() {
   return (
     <div className="aurora" style={{ minHeight: "100dvh", background: T.bg, color: T.high, fontFamily: font }}>
       <Seo title="Page not found | Tandem" description="This page took a wrong turn. See what's on near you instead." path="/404" noindex />
-      <main style={{ maxWidth: "420px", margin: "0 auto", padding: "16px 16px calc(32px + env(safe-area-inset-bottom))", minHeight: "100dvh", boxSizing: "border-box", display: "flex", flexDirection: "column" }}>
+      <main style={{ maxWidth: "420px", margin: "0 auto", padding: "0 16px calc(32px + env(safe-area-inset-bottom))", minHeight: "100dvh", boxSizing: "border-box", display: "flex", flexDirection: "column" }}>
         <SiteHeader />
         <div aria-hidden="true" style={{ marginTop: "32px", background: T.surface1, borderRadius: "16px", padding: "12px", opacity: 0.4, transform: "rotate(-4deg)" }}>
           <div style={{ height: "280px", borderRadius: "10px", background: T.surface2 }} />

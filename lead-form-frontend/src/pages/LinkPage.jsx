@@ -184,7 +184,7 @@ export default function LinkPage() {
   return (
     <div className="aurora" style={{ minHeight: "100dvh", background: T.bg, color: T.high, fontFamily: font }}>
       <Helmet><title>{title}</title></Helmet>
-      <main style={{ maxWidth: "420px", margin: "0 auto", padding: "16px 16px calc(24px + env(safe-area-inset-bottom))" }}>
+      <main style={{ maxWidth: "420px", margin: "0 auto", padding: "0 16px calc(24px + env(safe-area-inset-bottom))" }}>
         <SiteHeader {...(deckStage ? { city, onCity: setCity } : {})} />
 
         {stage === "loading" && (

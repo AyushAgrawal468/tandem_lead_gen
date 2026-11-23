@@ -86,8 +86,8 @@ export default function HomePage() {
         <script>{`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA_ID}');`}</script>
       </Helmet>
 
-      <main className="px-4 md:px-6" style={{ maxWidth: "1120px", margin: "0 auto", paddingTop: "16px" }}>
-        <SiteHeader city={city} onCity={setCity} />
+      <main className="px-4 md:px-6" style={{ maxWidth: "1120px", margin: "0 auto" }}>
+        <SiteHeader city={city} onCity={setCity} getApp />
 
         <div className="md:grid md:grid-cols-[1.1fr_1fr] md:gap-16 md:items-center mt-5 md:mt-8">
           <div>

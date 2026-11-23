@@ -22,7 +22,7 @@ export default function SwipePage() {
     <div className="aurora" style={{ minHeight: "100dvh", background: T.bg, color: T.high, fontFamily: font }}>
       <Seo title="Swipe on things to do near you | Tandem" path="/swipe"
         description="See what's on in your city, swipe right on what you'd do, and get matched with friends who want the same plan." />
-      <main style={{ maxWidth: "420px", margin: "0 auto", padding: "16px 16px calc(24px + env(safe-area-inset-bottom))" }}>
+      <main style={{ maxWidth: "420px", margin: "0 auto", padding: "0 16px calc(24px + env(safe-area-inset-bottom))" }}>
         <SiteHeader city={city} onCity={setCity} />
         <h1 className="wide" style={{ fontSize: "24px", fontWeight: 800, lineHeight: 1.15, margin: "20px 0 0" }}>
           {creator ? `Saw ${creator}'s reel? Here's what's on in ${city}.` : `What's on in ${city} this week`}

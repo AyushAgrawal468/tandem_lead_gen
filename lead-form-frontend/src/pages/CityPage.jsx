@@ -29,8 +29,8 @@ export default function CityPage({ slug }) {
   return (
     <div className="aurora" style={{ minHeight: "100dvh", background: T.bg, color: T.high, fontFamily: font }}>
       <Seo title={page.title} description={page.description} path={`/${slug}`} jsonLd={jsonLd} />
-      <main className="px-4 md:px-6" style={{ maxWidth: "1120px", margin: "0 auto", paddingTop: "16px" }}>
-        <SiteHeader city={city} onCity={setCity} />
+      <main className="px-4 md:px-6" style={{ maxWidth: "1120px", margin: "0 auto" }}>
+        <SiteHeader city={city} onCity={setCity} getApp />
         <div className="md:grid md:grid-cols-[1.1fr_1fr] md:gap-16 md:items-center" style={{ marginTop: "32px" }}>
           <div>
             <h1 className="wide text-[29px] xs:text-[31px] md:text-[60px]" style={{ fontWeight: 800, lineHeight: 1.05, margin: 0 }}>Things to do in {page.city} with friends</h1>
