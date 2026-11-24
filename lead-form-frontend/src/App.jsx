@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 import { BrowserRouter, Routes, Route, Outlet, useLocation, useNavigationType } from "react-router-dom";
-import { Helmet } from "react-helmet";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -54,11 +53,13 @@ import NotFound from "./pages/NotFound";
 import CityPage from "./pages/CityPage";
 import LinkPage from "./pages/LinkPage";
 
-// Handoff 3.3: personal links (someone's invite, referral or ambassador wallet) stay out of search results
+// Handoff 3.3: personal links (someone's invite, referral or ambassador wallet) stay out of search results.
+// A plain <meta>, which React 19 moves into <head>: inside <Helmet> it was dropped once the page's own
+// <Helmet> (the title) mounted, so these pages had no noindex at all.
 function NoIndex() {
   return (
     <>
-      <Helmet><meta name="robots" content="noindex" /></Helmet>
+      <meta name="robots" content="noindex" />
       <Outlet />
     </>
   );

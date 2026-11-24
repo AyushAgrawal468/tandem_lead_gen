@@ -10,7 +10,8 @@
     "build:site": "npm run build && node scripts/prerender.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
-    "generate:sitemap": "node scripts/generate-sitemap.mjs"
+    "generate:sitemap": "node scripts/generate-sitemap.mjs",
+    "e2e": "node scripts/e2e.mjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
