@@ -64,13 +64,14 @@ const LABELS = {
   RIGHT: { text: "I'm in", color: T.green, pos: { top: "28px", left: "24px" }, rot: -12 },
   LEFT: { text: "Not now", color: T.mid, pos: { top: "28px", right: "24px" }, rot: 12 },
   DOWN: { text: "Never", color: T.fail, pos: { bottom: "120px", left: "50%" }, rot: 0 },
+  UP: { text: "Send to a friend", color: "#A77DFF", pos: { bottom: "120px", left: "50%" }, rot: 0 },
 };
 const OFF = { RIGHT: { x: 700, rotation: 12 }, LEFT: { x: -700, rotation: -12 }, DOWN: { y: 900, rotation: 0 } };
 const reducedMotion = () => typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
 /**
  * Top card of the deck (handoff 2.2): drag right (I'm in), left (Not now), down (Never) with GSAP
- * Draggable for touch and mouse. Up drags spring back: the web has no up swipe. A tap opens details.
+ * Draggable for touch and mouse. Up opens Send to a friend (the Tandem button) and springs back. A tap opens details.
  * The parent calls ref.fly(action) for buttons and arrow keys; onAction fires once the card is off.
  */
 export const SwipeCard = forwardRef(function SwipeCard({ card, onAction, onOpen, onShare }, ref) {
@@ -79,8 +80,9 @@ export const SwipeCard = forwardRef(function SwipeCard({ card, onAction, onOpen,
   const flying = useRef(false);
 
   const showLabels = (x, y) => {
-    const down = y > 0 && y > Math.abs(x);
-    const o = { RIGHT: !down && x > 0 ? x / SWIPE_PX : 0, LEFT: !down && x < 0 ? -x / SWIPE_PX : 0, DOWN: down ? y / SWIPE_PX : 0 };
+    const down = y > 0 && y > Math.abs(x), up = y < 0 && -y > Math.abs(x);
+    const o = { RIGHT: !down && !up && x > 0 ? x / SWIPE_PX : 0, LEFT: !down && !up && x < 0 ? -x / SWIPE_PX : 0,
+      DOWN: down ? y / SWIPE_PX : 0, UP: up && onShare ? -y / SWIPE_PX : 0 };
     for (const k in o) if (labels.current[k]) labels.current[k].style.opacity = Math.min(1, o[k]);
   };
 
@@ -116,6 +118,8 @@ export const SwipeCard = forwardRef(function SwipeCard({ card, onAction, onOpen,
           : v.y > SWIPE_VELOCITY && v.y > Math.abs(v.x) ? "DOWN"
           : v.x > SWIPE_VELOCITY ? "RIGHT" : v.x < -SWIPE_VELOCITY ? "LEFT" : null;
         if (action) { fly(action); return; }
+        // Up is the app's Tandem swipe: on the web it opens "Send to a friend" (the round button); the card stays
+        if (onShare && -y > SWIPE_PX && -y > Math.abs(x)) onShare();
         showLabels(0, 0);
         gsap.to(el.current, { x: 0, y: 0, rotation: 0, duration: reducedMotion() ? 0 : 0.2, ease: "power2.out" });
       },

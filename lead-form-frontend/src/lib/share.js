@@ -13,7 +13,19 @@ export function shareLink(eventId, referralCode) {
   return `${window.location.origin}/l/links?${p}`;
 }
 
-export const shareText = (card, link) => `I'm in for ${card.title}${card.day ? ` on ${card.day}` : ""}. You in? ${link}`;
+// Same message as the app's discovery invite (event-service EventService.buildDiscoveryInviteMessage)
+export function shareText(card, link) {
+  const when = [card.day, card.time].filter(Boolean).join(", ");
+  const details = [`🎉 ${card.title}`, when && `🗓️ ${when}`, card.price, card.area && `📍${card.area}`].filter(Boolean).join("\n");
+  return [
+    "Hey!", "",
+    "Found this on Tandem and thought of you 👀", "",
+    details, "",
+    "Download the app - you'll land straight on this event after signing up:",
+    link, "",
+    "Let me know if you're in!",
+  ].join("\n");
+}
 
 export const whatsappUrl = (text) => `https://wa.me/?text=${encodeURIComponent(text)}`;
 

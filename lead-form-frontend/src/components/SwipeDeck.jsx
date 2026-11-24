@@ -11,9 +11,6 @@ import { call, AuthError } from "../lib/tandemApi";
 import { SESSION_KEY, readJson, writeJson, loadSession, sessionFrom, creditReferral } from "../lib/session";
 import { SwipeCard, EventDetails } from "./EventCard";
 import { fromPublic, fromPersonal, T, font } from "../lib/card";
-import InIcon from "../assets/swipe/in.svg";
-import NotNowIcon from "../assets/swipe/not-now.svg";
-import NeverIcon from "../assets/swipe/never.svg";
 
 const SWIPES_KEY = "webSwipes"; // swipes made before OTP, replayed in order after verifying
 const SEEN_KEY = "webSeen"; // every card shown, so no card appears twice
@@ -29,26 +26,19 @@ const btn = (active = true) => ({
   fontSize: "16px", cursor: active ? "pointer" : "default", background: T.high, color: T.bg, opacity: active ? 1 : 0.4,
 });
 
-// Not now / Never / I'm in (handoff "Swipe directions on the web"), with the app's swipe icons; arrow keys on desktop
-const ACTIONS = [
-  ["LEFT", "Not now", "Left", NotNowIcon],
-  ["DOWN", "Never", "Down", NeverIcon],
-  ["RIGHT", "I'm in", "Right", InIcon],
-];
+// Not now / Never / I'm in (handoff "Swipe directions on the web") in the app's button styles:
+// a text button, the red pill ("Stop event") and the white pill with the colour edge ("Apply"). Arrow keys on desktop.
 function ActionButtons({ onAct, disabled }) {
+  const base = { height: "48px", borderRadius: "999px", fontFamily: font, fontWeight: 700, fontSize: "15px",
+    cursor: disabled ? "default" : "pointer", opacity: disabled ? 0.4 : 1, whiteSpace: "nowrap" };
   return (
-    <div style={{ display: "flex", justifyContent: "center", gap: "28px" }}>
-      {ACTIONS.map(([a, label, key, icon]) => (
-        <div key={a} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px" }}>
-          <button onClick={() => onAct(a)} disabled={disabled} className="glass" aria-label={label} aria-keyshortcuts={`Arrow${key}`}
-            style={{ width: a === "RIGHT" ? "64px" : "56px", height: a === "RIGHT" ? "64px" : "56px", padding: 0, borderRadius: "50%", cursor: disabled ? "default" : "pointer",
-              opacity: disabled ? 0.4 : 1, display: "flex", alignItems: "center", justifyContent: "center",
-              boxShadow: a === "RIGHT" ? "0 0 0 1px rgba(0,255,200,0.35), 0 0 24px rgba(0,255,200,0.25)" : "none" }}>
-            <img src={icon} alt="" draggable={false} style={{ width: a === "RIGHT" ? "34px" : "30px", height: a === "RIGHT" ? "34px" : "30px" }} />
-          </button>
-          <span style={{ color: a === "RIGHT" ? T.high : T.mid, fontSize: "12px", fontWeight: a === "RIGHT" ? 700 : 400 }}>{label}</span>
-        </div>
-      ))}
+    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+      <button onClick={() => onAct("LEFT")} disabled={disabled} aria-keyshortcuts="ArrowLeft"
+        style={{ ...base, flex: "0 0 auto", padding: "0 14px", background: "none", border: "none", color: T.high }}>Not now</button>
+      <button onClick={() => onAct("DOWN")} disabled={disabled} aria-keyshortcuts="ArrowDown"
+        style={{ ...base, flex: 1, padding: "0 16px", border: "none", background: T.fail, color: "#fff" }}>Never</button>
+      <button onClick={() => onAct("RIGHT")} disabled={disabled} aria-keyshortcuts="ArrowRight" className="pill"
+        style={{ ...base, flex: 1.3, padding: "0 16px" }}>I'm in</button>
     </div>
   );
 }
@@ -372,7 +362,7 @@ export default function SwipeDeck({ city }) {
               {softAt && !phoneAsk && !sendCard && !match && (
                 <SoftPrompt at={softAt} onGetApp={() => { setSoftAt(null); getApp(`soft_${softAt}`); }} onLater={() => setSoftAt(null)} />
               )}
-              <p style={{ color: T.low, fontSize: "12px", textAlign: "center", margin: "12px 0" }}>Right if you're in. Left for not now. Down for never.</p>
+              <p style={{ color: T.low, fontSize: "12px", textAlign: "center", margin: "12px 0" }}>Swipe or tap. Swipe up to send it to a friend.</p>
               <ActionButtons onAct={act} />
             </>
           )}
