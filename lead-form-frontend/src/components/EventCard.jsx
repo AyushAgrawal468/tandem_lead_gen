@@ -175,6 +175,12 @@ export function EventDetails({ card, onBack, actions, onShare }) {
   const box = useRef(null);
   // Focus the dialog itself (screen readers start here) without drawing a focus ring on the Back button
   useEffect(() => { box.current?.focus(); }, []);
+  // Only the details scroll: lock the page underneath (else two scrollbars on desktop), restore on close
+  useEffect(() => {
+    const html = document.documentElement, prev = html.style.overflow;
+    html.style.overflow = "hidden";
+    return () => { html.style.overflow = prev; };
+  }, []);
   const when = [card.day, card.time].filter(Boolean).join(", ");
   return (
     <div ref={box} tabIndex={-1} role="dialog" aria-modal="true" aria-label={card.title}
