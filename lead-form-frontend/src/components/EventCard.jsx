@@ -3,6 +3,7 @@ import gsap from "gsap";
 import { Draggable } from "gsap/Draggable";
 import { useGSAP } from "@gsap/react";
 import { T, font, metaLine } from "../lib/card";
+import TandemE from "../assets/swipe/tandem-e.svg";
 import { SWIPE_PX, SWIPE_VELOCITY } from "../lib/funnel";
 
 gsap.registerPlugin(Draggable, useGSAP);
@@ -24,17 +25,15 @@ function Poster({ card, style }) {
 }
 
 // Poster is 3:4, but shrinks on short screens (in-app browsers) so the buttons stay on screen
-const POSTER_H = "min(calc((min(100vw, 420px) - 56px) * 4 / 3), calc(100dvh - 490px))";
+const POSTER_H = "min(calc((min(100vw, 420px) - 56px) * 4 / 3), calc(100dvh - 502px))";
 
-// Round mint button = "Send to a friend" (design brief: the card's round Tandem button on the web)
-export function ShareButton({ onShare, size = 44 }) {
+// The card's round Tandem button (the app's gradient "e") = "Send to a friend" on the web (design brief)
+export function ShareButton({ onShare, size = 48 }) {
   return (
-    <button onClick={(e) => { e.stopPropagation(); onShare(); }} aria-label="Send to a friend" className="orb"
-      style={{ flexShrink: 0, width: `${size}px`, height: `${size}px`, padding: 0, borderRadius: "50%", border: "none", cursor: "pointer",
-        background: T.green, color: T.bg, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 0 12px rgba(0,255,200,0.35)" }}>
-      <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
-      </svg>
+    <button onClick={(e) => { e.stopPropagation(); onShare(); }} aria-label="Send to a friend"
+      style={{ flexShrink: 0, width: `${size}px`, height: `${size}px`, padding: 0, borderRadius: "50%", border: "none", cursor: "pointer", background: "none",
+        filter: "drop-shadow(0 6px 16px rgba(0,200,190,0.35))" }}>
+      <img src={TandemE} alt="" draggable={false} style={{ width: "100%", height: "100%", display: "block" }} />
     </button>
   );
 }

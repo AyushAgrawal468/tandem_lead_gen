@@ -11,6 +11,9 @@ import { call, AuthError } from "../lib/tandemApi";
 import { SESSION_KEY, readJson, writeJson, loadSession, sessionFrom, creditReferral } from "../lib/session";
 import { SwipeCard, EventDetails } from "./EventCard";
 import { fromPublic, fromPersonal, T, font } from "../lib/card";
+import InIcon from "../assets/swipe/in.svg";
+import NotNowIcon from "../assets/swipe/not-now.svg";
+import NeverIcon from "../assets/swipe/never.svg";
 
 const SWIPES_KEY = "webSwipes"; // swipes made before OTP, replayed in order after verifying
 const SEEN_KEY = "webSeen"; // every card shown, so no card appears twice
@@ -26,24 +29,24 @@ const btn = (active = true) => ({
   fontSize: "16px", cursor: active ? "pointer" : "default", background: T.high, color: T.bg, opacity: active ? 1 : 0.4,
 });
 
-// Not now / Never / I'm in (handoff "Swipe directions on the web"); arrow keys on desktop
+// Not now / Never / I'm in (handoff "Swipe directions on the web"), with the app's swipe icons; arrow keys on desktop
 const ACTIONS = [
-  ["LEFT", "Not now", "←", T.mid, "M12 7v5l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"],
-  ["DOWN", "Never", "↓", T.fail, "M6 6l12 12M18 6L6 18"],
-  ["RIGHT", "I'm in", "→", T.green, "M5 12.5l4.5 4.5L19 7"],
+  ["LEFT", "Not now", "Left", NotNowIcon],
+  ["DOWN", "Never", "Down", NeverIcon],
+  ["RIGHT", "I'm in", "Right", InIcon],
 ];
 function ActionButtons({ onAct, disabled }) {
   return (
     <div style={{ display: "flex", justifyContent: "center", gap: "28px" }}>
-      {ACTIONS.map(([a, label, key, color, d]) => (
+      {ACTIONS.map(([a, label, key, icon]) => (
         <div key={a} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px" }}>
-          <button onClick={() => onAct(a)} disabled={disabled} className={a === "RIGHT" ? "orb" : "glass"} aria-label={label} aria-keyshortcuts={`Arrow${a === "DOWN" ? "Down" : a === "LEFT" ? "Left" : "Right"}`}
-            style={{ width: "56px", height: "56px", padding: 0, borderRadius: "50%", border: "none", cursor: disabled ? "default" : "pointer",
+          <button onClick={() => onAct(a)} disabled={disabled} className="glass" aria-label={label} aria-keyshortcuts={`Arrow${key}`}
+            style={{ width: a === "RIGHT" ? "64px" : "56px", height: a === "RIGHT" ? "64px" : "56px", padding: 0, borderRadius: "50%", cursor: disabled ? "default" : "pointer",
               opacity: disabled ? 0.4 : 1, display: "flex", alignItems: "center", justifyContent: "center",
-              background: a === "RIGHT" ? T.green : T.surface2, color: a === "RIGHT" ? T.bg : color }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d={d} /></svg>
+              boxShadow: a === "RIGHT" ? "0 0 0 1px rgba(0,255,200,0.35), 0 0 24px rgba(0,255,200,0.25)" : "none" }}>
+            <img src={icon} alt="" draggable={false} style={{ width: a === "RIGHT" ? "34px" : "30px", height: a === "RIGHT" ? "34px" : "30px" }} />
           </button>
-          <span style={{ color: T.mid, fontSize: "12px" }}>{label}<span className="hidden md:inline" style={{ color: T.low }}> {key}</span></span>
+          <span style={{ color: a === "RIGHT" ? T.high : T.mid, fontSize: "12px", fontWeight: a === "RIGHT" ? 700 : 400 }}>{label}</span>
         </div>
       ))}
     </div>
@@ -346,7 +349,7 @@ export default function SwipeDeck({ city }) {
               </>
             ) : feed === "loading" ? (
               <div aria-busy="true" style={{ background: T.surface1, borderRadius: "16px", padding: "12px" }}>
-                <div style={{ height: "min(calc((min(100vw, 420px) - 56px) * 4 / 3), calc(100dvh - 490px))", minHeight: "240px", borderRadius: "10px", background: T.surface2 }} />
+                <div style={{ height: "min(calc((min(100vw, 420px) - 56px) * 4 / 3), calc(100dvh - 502px))", minHeight: "240px", borderRadius: "10px", background: T.surface2 }} />
                 <p style={{ color: T.low, fontSize: "14px", margin: "14px 2px 6px" }}>Finding what's on in {city}...</p>
               </div>
             ) : feed === "error" ? (
