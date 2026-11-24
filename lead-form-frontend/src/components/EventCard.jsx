@@ -177,9 +177,11 @@ export function EventDetails({ card, onBack, actions, onShare }) {
   useEffect(() => { box.current?.focus(); }, []);
   const when = [card.day, card.time].filter(Boolean).join(", ");
   return (
-    <div ref={box} tabIndex={-1} role="dialog" aria-modal="true" aria-label={card.title} className="aurora"
+    <div ref={box} tabIndex={-1} role="dialog" aria-modal="true" aria-label={card.title}
       style={{ position: "fixed", inset: 0, zIndex: 1500, background: T.bg, color: T.high, fontFamily: font, overflowY: "auto", outline: "none",
         animation: `detailsIn 0.25s ${EASE_OUT}` }}>
+      {/* The glow sits on this inner box (as tall as the content), not on the fixed scroller */}
+      <div className="aurora" style={{ minHeight: "100%" }}>
       <header style={{ position: "sticky", top: 0, zIndex: 2, background: "rgba(17,17,17,0.55)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)",
         borderBottom: `1px solid ${T.line}` }}>
         <div style={{ maxWidth: "960px", margin: "0 auto", display: "flex", alignItems: "center", gap: "4px", padding: "10px 8px" }}>
@@ -224,6 +226,7 @@ export function EventDetails({ card, onBack, actions, onShare }) {
       <div style={{ position: "fixed", left: 0, right: 0, bottom: 0, padding: "24px 16px calc(16px + env(safe-area-inset-bottom))",
         background: `linear-gradient(transparent, ${T.bg} 40%)` }}>
         {actions}
+      </div>
       </div>
     </div>
   );

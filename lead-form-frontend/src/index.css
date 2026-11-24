@@ -479,6 +479,8 @@ button.waitlist-join-btn:focus {
 }
 .aurora::after {
   bottom: 0; height: 420px;
+  -webkit-mask-image: linear-gradient(transparent, #000 60%);
+  mask-image: linear-gradient(transparent, #000 60%);
   background:
     radial-gradient(55% 60% at 20% 100%, rgba(16, 122, 108, 0.28), transparent 70%),
     radial-gradient(50% 60% at 85% 100%, rgba(131, 73, 255, 0.22), transparent 70%);
