@@ -1,6 +1,5 @@
 import React, { useRef } from "react";
-import QrCardBg from "../assets/qr-card-bg.svg";
-import QrCode from "../assets/qr-code.svg";
+import QrCode from "./QrCode";
 import { T, font } from "../lib/card";
 import { openTandemUrl, whenStuck } from "../lib/app";
 import { useSheetKeys } from "../lib/useSheetKeys";
@@ -61,9 +60,10 @@ export function DesktopAppPrompt({ onClose }) {
   const box = useRef(null);
   useSheetKeys(box, onClose);
   return (
-    <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2000, padding: "16px" }}>
-      <div ref={box} role="dialog" aria-modal="true" aria-labelledby="dl-title" onClick={(e) => e.stopPropagation()} className="sheet-in"
-        style={{ position: "relative", background: T.surface1, color: T.high, fontFamily: font, borderRadius: "20px", padding: "28px 24px", maxWidth: "400px", width: "100%", textAlign: "center" }}>
+    <div onClick={onClose} className="sheet-backdrop" style={{ zIndex: 2000 }}>
+      <div ref={box} role="dialog" aria-modal="true" aria-labelledby="dl-title" onClick={(e) => e.stopPropagation()} className="sheet"
+        style={{ textAlign: "center" }}>
+        <span className="sheet-handle" aria-hidden="true" />
         <button onClick={onClose} aria-label="Close" autoFocus
           style={{ position: "absolute", top: "12px", right: "12px", width: "36px", height: "36px", padding: 0, borderRadius: "50%", border: "none",
             background: "transparent", color: T.low, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -71,11 +71,7 @@ export function DesktopAppPrompt({ onClose }) {
         </button>
         <h2 id="dl-title" style={{ fontSize: "24px", fontWeight: 700, margin: "0 0 8px" }}>Get Tandem on your phone</h2>
         <p style={{ color: T.mid, fontSize: "16px", margin: "0 0 20px" }}>Scan with your phone camera.</p>
-        <div style={{ position: "relative", width: "200px", height: "200px", margin: "0 auto 20px" }}>
-          <img src={QrCardBg} alt="" width={200} height={200} style={{ display: "block" }} />
-          <img src={QrCode} alt="QR code to download Tandem"
-            style={{ position: "absolute", top: "14px", left: "50%", transform: "translateX(-50%)", width: "108px", height: "108px", objectFit: "contain" }} />
-        </div>
+        <div style={{ marginBottom: "20px" }}><QrCode size={200} /></div>
         <div style={{ display: "flex", justifyContent: "center" }}><StoreBadges /></div>
         <Bridge />
       </div>

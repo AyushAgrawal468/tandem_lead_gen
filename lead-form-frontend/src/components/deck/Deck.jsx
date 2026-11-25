@@ -52,7 +52,7 @@ export function Deck({ cards, index, onSwipe, onOpenDetails, onShare, locked, de
           <EventCard event={next} desk={desk} /></div>}
         {top && (
           <div className="deck-top" ref={card} key={top.id} {...cardHandlers}>
-            <EventCard event={top} desk={desk} onShare={() => onShare(top)} />
+            <EventCard event={top} desk={desk} strip={top.strip} onShare={() => onShare(top)} />
             <Stamp ref={stamps.right} kind="right" /><Stamp ref={stamps.left} kind="left" /><Stamp ref={stamps.down} kind="down" />
           </div>
         )}

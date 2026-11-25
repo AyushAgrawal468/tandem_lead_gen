@@ -3,7 +3,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import { apiUrl } from "../lib/api";
 import { call, AuthError } from "../lib/tandemApi";
-import { SESSION_KEY, writeJson, loadSession, sessionFrom, rememberReferral, creditReferral } from "../lib/session";
+import { SESSION_KEY, writeJson, loadSession, sessionFrom, rememberReferral, creditReferral, rememberInvite, clearInvite } from "../lib/session";
 import { fromPublic, metaLine, T, font } from "../lib/card";
 import { initialCity, matchCity } from "../lib/city";
 import { isPhone } from "../lib/app";
@@ -111,6 +111,7 @@ export default function LinkPage() {
     opened.current = true;
     logClick(mode, code, eventId);
     rememberReferral(code);
+    if (mode === "invite") rememberInvite(eventId, code); // answered here or later on the homepage (LP-08)
     track("invite_opened", { link: LINK[mode], event_id: eventId });
     (async () => {
       let d = { event: null, sender: null };
@@ -149,6 +150,7 @@ export default function LinkPage() {
         setStage("usedup"); track("app_prompt_shown", { type: "event_swipes_used_up" });
         return;
       }
+      clearInvite();
       if (await creditReferral(s)) track("referral_credited", { link: LINK[mode], event_id: eventId });
       track("invite_accepted", { link: LINK[mode], event_id: eventId });
       if (r.match) { setMatch(r.match); track("match_shown", { event_id: eventId }); }

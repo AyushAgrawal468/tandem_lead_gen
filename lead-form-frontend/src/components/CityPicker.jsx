@@ -54,11 +54,10 @@ export default function CityPicker({ city, onChange }) {
       </button>
 
       {open && (
-        <div onClick={() => setOpen(false)} className="items-end md:items-center"
-          style={{ position: "fixed", inset: 0, zIndex: 2000, background: "rgba(0,0,0,0.7)", display: "flex", justifyContent: "center" }}>
+        <div onClick={() => setOpen(false)} className="sheet-backdrop" style={{ zIndex: 2000 }}>
           <div role="dialog" aria-modal="true" aria-labelledby="city-title" onClick={(e) => e.stopPropagation()}
-            className="rounded-t-[20px] md:rounded-[20px]"
-            style={{ background: T.surface1, width: "100%", maxWidth: "420px", padding: "24px 16px 28px", fontFamily: font }}>
+            className="sheet">
+            <span className="sheet-handle" aria-hidden="true" />
             <h2 id="city-title" style={{ fontSize: "22px", fontWeight: 700, color: T.text, marginBottom: "16px" }}>Pick your city</h2>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
               <button onClick={nearMe} disabled={locating} autoFocus style={{ ...chip(false), border: `1px solid ${T.low}` }}>

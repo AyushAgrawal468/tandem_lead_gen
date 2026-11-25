@@ -10,7 +10,7 @@ import SendSheet from "./SendSheet";
 import { shareLink, shareText, canNativeShare } from "../lib/share";
 import { track, identify } from "../lib/analytics";
 import { call, AuthError } from "../lib/tandemApi";
-import { SESSION_KEY, readJson, writeJson, loadSession, sessionFrom, creditReferral } from "../lib/session";
+import { SESSION_KEY, readJson, writeJson, loadSession, sessionFrom, creditReferral, pendingInvite, clearInvite } from "../lib/session";
 import { EventDetails } from "./EventCard";
 import { Deck } from "./deck/Deck";
 import { SwipeButtons } from "./deck/SwipeButtons";
@@ -118,12 +118,25 @@ export default function SwipeDeck({ city, onCity }) {
         add(cards);
         setCursor(next);
       }
+      if (reset) await inviteFirst();
       setFeed("ready");
     } catch (err) {
       if (err instanceof AuthError) signOut("Session expired, please log in again.");
       else setFeed("error");
     } finally { loading.current = false; }
   }, [session, city, cursor]);
+
+  // LP-08: a pending invite (from /l/links) goes first, with the sender's strip. Gone or started → dropped.
+  const inviteFirst = async () => {
+    const inv = pendingInvite();
+    if (!inv) return;
+    try {
+      const d = await call(`/events/public/link?eventId=${encodeURIComponent(inv.eventId)}&code=${encodeURIComponent(inv.code)}`);
+      if (!d.event || d.eventOver) { clearInvite(); return; }
+      const card = { ...fromPublic(d.event), strip: d.sender?.firstName || "A friend", invite: inv };
+      setQueue((q) => [card, ...q.filter((c) => c.id !== card.id)]);
+    } catch { /* the deck works without it */ }
+  };
 
   useEffect(() => {
     if (PRERENDER) { window.__PRERENDER_READY = true; return; }
@@ -169,8 +182,11 @@ export default function SwipeDeck({ city, onCity }) {
       while (list.length && navigator.onLine !== false) {
         const sw = list[0];
         try {
+          const inv = pendingInvite();
+          const inviteRef = inv && inv.eventId === sw.event_id && sw.direction === "RIGHT" ? { referralCode: inv.code, eventId: inv.eventId } : undefined;
           const r = await call("/events/web/saveAction", { token: sess.token, method: "POST",
-            body: { eventId: sw.event_id, action: sw.direction, clientTs: sw.client_ts } });
+            body: { eventId: sw.event_id, action: sw.direction, clientTs: sw.client_ts, inviteRef } });
+          if (inviteRef) clearInvite();
           serverCount(r.remainingSwipes);
           if (r.match) dispatch({ type: "REPLAY_MATCH", match: { eventId: sw.event_id, match: r.match, card: sw.card } });
           list = list.slice(1); writeJson(K.pending, list.length ? list : null); tries = 0;
@@ -200,6 +216,8 @@ export default function SwipeDeck({ city, onCity }) {
     if (direction === "RIGHT") writeJson(K.lastRight, { id: card.id, title: card.title, day: card.day, time: card.time, area: card.area, price: card.price, poster: card.poster });
     track("swiped", { event_id: card.id, direction, method, count: s.count + 1 });
     setSaid(`Saved as ${LABEL[direction]}. ${Math.min(s.count + 1, LIMIT)} of ${LIMIT}.${next ? ` Next: ${next.title}.` : ""}`);
+    // Any answer to the invite card clears it; an unverified I'm in keeps it for the replay's inviteRef
+    if (card.invite && (session || direction !== "RIGHT")) clearInvite();
     if (!session) { dispatch({ type: "SWIPED", direction, eventId: card.id }); return; }
 
     const sw = { event_id: card.id, direction, client_ts: Date.now(), card: { id: card.id, title: card.title, day: card.day, poster: card.poster } };
@@ -210,7 +228,8 @@ export default function SwipeDeck({ city, onCity }) {
       return;
     }
     try {
-      const r = await call("/events/web/saveAction", { token: session.token, method: "POST", body: { eventId: card.id, action: direction, clientTs: sw.client_ts } });
+      const inviteRef = card.invite && direction === "RIGHT" ? { referralCode: card.invite.code, eventId: card.id } : undefined;
+      const r = await call("/events/web/saveAction", { token: session.token, method: "POST", body: { eventId: card.id, action: direction, clientTs: sw.client_ts, inviteRef } });
       dispatch({ type: "SWIPED", direction, eventId: card.id, match: r.match ? { eventId: card.id, match: r.match, card } : undefined });
       serverCount(r.remainingSwipes);
     } catch (err) {
@@ -288,7 +307,7 @@ export default function SwipeDeck({ city, onCity }) {
   const sheetOpen = (overlay && overlay.type !== "youreIn") || sendCard || saveAsk;
 
   return (
-    <div style={{ color: T.high, fontFamily: font, display: "flex", flexDirection: "column", gap: "14px", flex: "1 1 auto", minHeight: 0 }}>
+    <div style={{ position: "relative", color: T.high, fontFamily: font, display: "flex", flexDirection: "column", gap: "14px", flex: "1 1 auto", minHeight: 0 }}>
       <section aria-label={`Plans in ${city}`} style={{ display: "flex", flexDirection: "column", gap: "14px", flex: "1 1 auto", minHeight: 0 }}>
         <div className={top && !capped ? undefined : "deck-scroll"} style={{ position: "relative", display: "flex", flexDirection: "column", flex: "1 1 auto", minHeight: 0 }}>
           {capped ? (
@@ -380,11 +399,9 @@ export default function SwipeDeck({ city, onCity }) {
           actions={<SwipeButtons desk={desk} disabled={capped} onLeft={() => act("LEFT")} onDown={() => act("DOWN")} onRight={() => act("RIGHT")} />} />
       )}
 
-      {/* Toast pill: fixed 152px up on phones so it never covers the buttons; never over a sheet or modal */}
+      {/* Toast pill (handoff "Toast"): never over a sheet or modal; placed by .deck-toast */}
       {(toast || overlay?.type === "youreIn") && !sheetOpen && (
-        <div role="status" className="toast-in" style={{ position: "fixed", left: 0, right: 0, margin: "0 auto", bottom: "calc(152px + env(safe-area-inset-bottom))",
-          zIndex: 1700, width: "fit-content", maxWidth: "calc(100% - 32px)", background: T.surface1, color: T.high, border: `1px solid ${T.line}`, borderRadius: "999px",
-          padding: "11px 18px", fontSize: "14px", lineHeight: 1.4, textAlign: "center", boxShadow: "0 8px 24px rgba(0,0,0,0.5)" }}>
+        <div role="status" className="deck-toast toast-in">
           {overlay?.type === "youreIn"
             ? (overlay.saved ? `You're in. ${overlay.saved} swipes saved.` : "You're in. Swipe right on anything you'd do.")
             : toast}

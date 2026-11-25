@@ -15,7 +15,7 @@ export const isPhone = () => isIOS() || isAndroid();
 const isInAppBrowser = () => /Instagram|FBAN|FBAV/i.test(ua());
 
 /** The visitor's UTM tags: the current URL first, else the first touch saved at boot. */
-function utm() {
+export function utm() {
   const q = typeof window === "undefined" ? new URLSearchParams() : new URLSearchParams(window.location.search);
   const ft = firstTouch();
   return { source: q.get("utm_source") || ft.utm_source || "web", campaign: q.get("utm_campaign") || ft.utm_campaign || "organic" };

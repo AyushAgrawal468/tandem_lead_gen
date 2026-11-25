@@ -114,11 +114,10 @@ export default function PhoneSheet({ variant = "normal", rights = 3, sender = "Y
   const codeError = screen === "code" && error.startsWith("That code");
 
   return (
-    <div onClick={onClose} className="items-end md:items-center"
-      style={{ position: "fixed", inset: 0, zIndex: 1800, background: "rgba(0,0,0,0.6)", display: "flex", justifyContent: "center", animation: "deckIn 0.2s" }}>
+    <div onClick={onClose} className="sheet-backdrop">
       <div ref={box} role="dialog" aria-modal="true" aria-labelledby="phone-title" onClick={(e) => e.stopPropagation()}
-        className="rounded-t-[20px] md:rounded-[20px] sheet-in"
-        style={{ background: T.surface1, color: T.high, fontFamily: font, width: "100%", maxWidth: "420px", padding: "24px 16px calc(24px + env(safe-area-inset-bottom))" }}>
+        className="sheet">
+        <span className="sheet-handle" aria-hidden="true" />
         <h2 id="phone-title" className="text-[22px] md:text-[24px]" style={{ fontWeight: 700, lineHeight: 1.2, margin: "0 0 6px" }}>{title}</h2>
         <p style={{ color: T.mid, fontSize: "16px", lineHeight: 1.5, margin: "0 0 16px" }}>{body}</p>
 

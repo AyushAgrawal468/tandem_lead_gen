@@ -18,6 +18,7 @@
     "helmet": "^8.1.0",
     "input-otp": "^1.5.0",
     "plugin-react": "^0.0.1-security",
+    "qrcode-generator": "^1.5.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-helmet": "^6.1.0",

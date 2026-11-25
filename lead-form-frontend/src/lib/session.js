@@ -3,7 +3,9 @@ import { call } from "./tandemApi";
 // The web login, shared by the deck (/swipe, /, city pages) and the shared link page (/l/links, /e/, /r).
 // Browser storage keys: handoff "What the browser stores" (tdm.*)
 export const SESSION_KEY = "tdm.token";
-const PENDING_REFERRAL_KEY = "tdm.invite"; // a friend's code from /l/links or /r, credited after login
+const PENDING_REFERRAL_KEY = "tdm.referral"; // a friend's code from /l/links or /r, credited after login
+const INVITE_KEY = "tdm.invite"; // handoff: pending invite (event id, referral code); cleared when answered or after 7 days
+const INVITE_DAYS = 7;
 
 // Every localStorage call is wrapped: in private mode or a locked-down in-app browser it throws. Then
 // values live in memory, so the deck keeps working and the cap holds for the session only.
@@ -31,6 +33,14 @@ export function sessionFrom(data) {
 }
 
 export const rememberReferral = (code) => { if (code) writeJson(PENDING_REFERRAL_KEY, code); };
+
+/** Journey 2 invite the visitor hasn't answered yet: the homepage deck shows it first (LP-08). */
+export const rememberInvite = (eventId, code) => { if (eventId && code) writeJson(INVITE_KEY, { eventId, code, at: Date.now() }); };
+export const pendingInvite = () => {
+  const inv = readJson(INVITE_KEY, null);
+  return inv?.eventId && Date.now() - inv.at < INVITE_DAYS * 864e5 ? inv : null;
+};
+export const clearInvite = () => writeJson(INVITE_KEY, null);
 
 /**
  * Handoff 1.5: after login, hand the friend's code to tandem-core, which keeps it as pending and credits

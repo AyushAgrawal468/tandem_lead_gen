@@ -25,9 +25,11 @@ function saveFirstTouch() {
 // Person properties, kept from the first touch ($set_once)
 const setOnce = () => Object.fromEntries(Object.entries(firstTouch()).filter(([, v]) => v).map(([k, v]) => [`first_${k}`, v]));
 
-function loadScript(src) {
+// cors: Sentry and PostHog serve CORS headers (fuller error reports); Facebook's fbevents.js doesn't, so it loads without
+function loadScript(src, cors = true) {
   const s = document.createElement("script");
-  s.src = src; s.async = true; s.crossOrigin = "anonymous";
+  s.src = src; s.async = true;
+  if (cors) s.crossOrigin = "anonymous";
   document.head.appendChild(s);
 }
 
@@ -71,7 +73,7 @@ export function loadPixel() {
   const n = window.fbq = function (...a) { n.callMethod ? n.callMethod(...a) : n.queue.push(a); };
   if (!window._fbq) window._fbq = n;
   n.push = n; n.loaded = true; n.version = "2.0"; n.queue = [];
-  loadScript("https://connect.facebook.net/en_US/fbevents.js");
+  loadScript("https://connect.facebook.net/en_US/fbevents.js", false);
   window.fbq("init", PIXEL_ID);
   window.fbq("track", "PageView");
 }
