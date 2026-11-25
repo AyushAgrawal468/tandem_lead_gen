@@ -6,6 +6,7 @@ import { openTandemUrl, whenStuck } from "../lib/app";
 import { useSheetKeys } from "../lib/useSheetKeys";
 import { track } from "../lib/analytics";
 import { StoreBadges } from "./SiteChrome";
+import AppIcon from "../assets/t-logo.svg";
 
 // Handoff 2.6: app prompts. Copy from "Every screen and its copy".
 const pill = (main) => ({
@@ -23,6 +24,35 @@ export function OpenTandemLink({ onStuck }) {
       Already have it?{" "}
       <a href={href} onClick={() => { track("open_tandem_tapped"); whenStuck(onStuck); }} style={{ color: T.green, textDecoration: "none", fontWeight: 700 }}>Open Tandem</a>
     </p>
+  );
+}
+
+/**
+ * Handoff "Bridge": "After you install", three numbered steps, step 1 shows the app icon. Used under
+ * every app button. Steps 2 and 3 wait on the doc's open decisions (swipes shown at first sign-in;
+ * "we never message your contacts"), so their copy is marked to confirm with Shreyas.
+ */
+export function Bridge() {
+  const step = (n, body, icon) => (
+    <li style={{ display: "flex", gap: "12px", alignItems: "center", textAlign: "left" }}>
+      <span aria-hidden="true" style={{ flex: "none", width: "36px", height: "36px", borderRadius: icon ? "10px" : "50%", display: "grid", placeItems: "center",
+        background: icon ? "#F2F2F2" : T.surface2, color: T.high, fontWeight: 800, fontSize: "14px" }}>
+        {icon ? <img src={AppIcon} alt="" style={{ height: "22px" }} /> : n}
+      </span>
+      <span style={{ fontSize: "14px", lineHeight: 1.4, color: T.mid }}>{body}</span>
+    </li>
+  );
+  return (
+    <div style={{ marginTop: "20px", padding: "16px", borderRadius: "16px", background: "rgba(255,255,255,0.03)", border: `1px solid ${T.line}` }}>
+      <p style={{ margin: "0 0 12px", fontSize: "13px", fontWeight: 800, color: "#C1F546", textAlign: "left" }}>After you install</p>
+      <ol style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: "10px" }}>
+        {step(1, <><strong style={{ color: T.high }}>Open Tandem</strong> and sign in with the same number.</>, true)}
+        {/* [confirm] open decision: does the app show web swipes at first sign-in? */}
+        {step(2, "Your web swipes are already there.")}
+        {/* [confirm] open decision: "we never message your contacts" on every app path */}
+        {step(3, "Allow contacts to see which friends want the same. We never message your contacts.")}
+      </ol>
+    </div>
   );
 }
 
@@ -47,6 +77,7 @@ export function DesktopAppPrompt({ onClose }) {
             style={{ position: "absolute", top: "14px", left: "50%", transform: "translateX(-50%)", width: "108px", height: "108px", objectFit: "contain" }} />
         </div>
         <div style={{ display: "flex", justifyContent: "center" }}><StoreBadges /></div>
+        <Bridge />
       </div>
     </div>
   );

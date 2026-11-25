@@ -10,6 +10,7 @@ import { isPhone } from "../lib/app";
 import { track, identify } from "../lib/analytics";
 import { shareLink, shareText, whatsappUrl } from "../lib/share";
 import { EventCard } from "../components/deck/EventCard";
+import { SwipeButtons } from "../components/deck/SwipeButtons";
 
 // The handoff card fills its frame (poster flexes), so it needs a height here
 const Card = ({ card }) => <div style={{ height: "min(520px, 62dvh)" }}><EventCard event={card} /></div>;
@@ -65,6 +66,8 @@ const Chip = ({ text }) => (
  * "I'm in" is the first action, always: no "Open in app" at the top, or the acceptance and the
  * referral credit would be lost. noindex comes from the route wrapper (3.3).
  */
+const desk = typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches;
+
 export default function LinkPage() {
   const { pathname, search } = useLocation();
   const params = useParams();
@@ -203,9 +206,9 @@ export default function LinkPage() {
               {mode === "invite" && <Strip sender={sender} text={`${sender.firstName} is in`} />}
               <Card card={card} />
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "16px" }}>
-              <button onClick={imIn} disabled={busy} style={{ ...pill(true), opacity: busy ? 0.4 : 1 }}>{busy ? "Saving…" : "I'm in"}</button>
-              <button onClick={notNow} style={pill(false)}>Not now</button>
+            {/* Handoff audit #6: the invite uses the round buttons without Never (two answers). The white pill is only for leaving to the app. */}
+            <div style={{ marginTop: "16px" }}>
+              <SwipeButtons hideNever disabled={busy} desk={desk} onLeft={notNow} onRight={imIn} />
             </div>
           </>
         )}

@@ -86,7 +86,7 @@ export default function HomePage() {
       <main className="page">
         <SiteHeader city={city} onCity={setCity} />
 
-        <DeckScreen city={city} h1="Swipe on things to do. Match with friends who want the same."
+        <DeckScreen city={city} onCity={setCity} h1="Swipe on things to do. Match with friends who want the same."
           aside={<>
             <p style={{ ...body, fontSize: "18px", margin: "0 0 32px", maxWidth: "500px" }}>
               No more "let's plan something" that never happens. Swipe on what you'd actually do, and the app matches you with friends who want the same.

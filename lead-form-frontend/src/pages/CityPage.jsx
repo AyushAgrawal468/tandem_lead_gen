@@ -31,7 +31,7 @@ export default function CityPage({ slug }) {
       <Seo title={page.title} description={page.description} path={`/${slug}`} jsonLd={jsonLd} />
       <main className="page">
         <SiteHeader city={city} onCity={setCity} />
-        <DeckScreen city={city} h1={`Things to do in ${page.city} with friends`}
+        <DeckScreen city={city} onCity={setCity} h1={`Things to do in ${page.city} with friends`}
           aside={<p style={{ color: T.mid, fontSize: "18px", lineHeight: 1.5, margin: 0, maxWidth: "560px" }}>{page.intro}</p>} />
         {/* Phones: the intro sits under the deck screen, so the deck stays one screen tall */}
         <p className="phone-only" style={{ color: T.mid, fontSize: "16px", lineHeight: 1.5, margin: "32px 0 0" }}>{page.intro}</p>

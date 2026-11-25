@@ -100,8 +100,8 @@ async function journey2(page) {
   await fakeApi(page);
   await page.goto(`${BASE}/l/links?event-id=e2e0001&referral-code=RIYA1234`);
   await page.getByRole("heading", { name: "Riya is in for this" }).waitFor();
-  const [first] = await page.locator("main button").filter({ hasText: /I'm in|Not now/ }).allInnerTexts();
-  assert.equal(first, "I'm in", "\"I'm in\" is the first action");
+  // Handoff audit #6: the invite answers with the round buttons, Not now and I'm in, no Never
+  assert.equal(await page.getByRole("button", { name: "Never", exact: true }).count(), 0, "no Never on an invite");
   assert.ok(await page.locator('meta[name="robots"][content*="noindex"]').count() > 0, "personal link is noindex");
   await page.getByRole("button", { name: "I'm in", exact: true }).click();
   await page.locator("#phone-title").waitFor({ timeout: 3000 }); // no session: the phone step

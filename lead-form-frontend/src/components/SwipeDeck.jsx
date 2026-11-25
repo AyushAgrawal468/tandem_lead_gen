@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { FUNNEL } from "../lib/funnel.config.js";
 import { reducer, initial } from "../lib/funnel.reducer.js";
 import { isPhone } from "../lib/app";
-import { DesktopAppPrompt, OpenInBrowser, OpenTandemLink, SoftPrompt, MatchScreen } from "./AppPrompts";
+import { Bridge, DesktopAppPrompt, OpenInBrowser, OpenTandemLink, SoftPrompt, MatchScreen } from "./AppPrompts";
+import { SUPPORTED_CITIES } from "../lib/city";
 import PhoneSheet from "./PhoneSheet";
 import SendSheet from "./SendSheet";
 import { shareLink, shareText, canNativeShare } from "../lib/share";
@@ -42,7 +43,7 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
  * handoff's reducer; overlays show one at a time (match, phone ask, you're in, send to friend, soft
  * prompts). Used by /, /swipe and the city pages. The page owns the city (header chip) and heading.
  */
-export default function SwipeDeck({ city }) {
+export default function SwipeDeck({ city, onCity }) {
   const [s, dispatch] = useReducer(reducer, null, () => initial(stored()));
   const [session, setSession] = useState(loadSession);
   const [queue, setQueue] = useState([]); // cards still to swipe; queue[0] is the top card
@@ -296,6 +297,7 @@ export default function SwipeDeck({ city }) {
                 <p style={{ color: T.mid, fontSize: "16px", lineHeight: 1.5, margin: "0 0 24px" }}>Your swipes are saved. Get the app to keep going and see who's in.</p>
                 <button onClick={() => getApp("return")} className="pill" style={btn()}>Get Tandem free</button>
                 <OpenTandemLink onStuck={() => setStuck(true)} />
+                <Bridge />
               </div>
             ) : (
               // J1-16a / J1-16b / J1-17: hard stop, verified or not, normal or quick look
@@ -312,6 +314,7 @@ export default function SwipeDeck({ city }) {
                 {!session && <button onClick={() => { setSaveAsk(true); track("phone_ask_shown", { trigger: "hard_stop" }); }}
                   style={{ ...btn(), background: T.surface2, color: T.high, marginTop: "10px" }}>Save my swipes first</button>}
                 <OpenTandemLink onStuck={() => setStuck(true)} />
+                <Bridge />
               </div>
             )
           ) : top ? (
@@ -340,6 +343,16 @@ export default function SwipeDeck({ city }) {
               <p style={{ fontSize: "22px", fontWeight: 800, margin: "0 0 6px" }}>That's everything on in {city} right now</p>
               <p style={{ color: T.mid, fontSize: "16px", margin: "0 0 20px" }}>New plans land every day. In the app, you see them first, and which friends are in.</p>
               <button onClick={() => getApp("end_of_deck")} className="pill" style={btn()}>Get Tandem free</button>
+              {onCity && (
+                <>
+                  <p style={{ color: T.low, fontSize: "14px", margin: "24px 0 10px" }}>Or see what's on in another city</p>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", justifyContent: "center" }}>
+                    {SUPPORTED_CITIES.filter((c) => c !== city).map((c) => (
+                      <button key={c} onClick={() => onCity(c)} className="city-chip">{c}</button>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
           )}
         </div>
