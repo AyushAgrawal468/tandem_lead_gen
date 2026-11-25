@@ -89,7 +89,7 @@ async function journey1(page) {
     await swipe(page, "Not now");
     if (n === 25) await page.getByRole("button", { name: "Later" }).click();
   }
-  await page.getByRole("button", { name: "Download now" }).waitFor({ timeout: 3000 });
+  await page.getByRole("button", { name: "Get Tandem free" }).first().waitFor({ timeout: 3000 });
   await page.getByRole("button", { name: "Save my swipes first" }).waitFor();
   assert.equal(await page.getByRole("button", { name: "I'm in", exact: true }).count(), 0, "no swipe buttons after the hard stop");
   await page.getByText(`${LIMIT}/${LIMIT}`).waitFor();

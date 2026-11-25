@@ -57,8 +57,13 @@ export default function PhoneSheet({ variant = "normal", rights = 3, sender = "Y
   useSheetKeys(box, onClose);
 
   const sendErrors = (err) => {
-    if (err.data?.code === "BLOCKED") { setScreen("blocked"); track("app_prompt_shown", { type: "phone_blocked" }); }
-    else if (err.status === 429 || err.status === 503) setError("Hang on a sec. Too many requests. Try again in a minute.");
+    // Handoff "Error codes": the backend's names are BLOCKED, COOLDOWN, PHONE_LIMIT, SMS_BUDGET
+    const code = err.data?.code;
+    track("otp_failed", { code: code || err.status });
+    if (code === "BLOCKED" || code === "OTP_BLOCKED") { setScreen("blocked"); track("app_prompt_shown", { type: "phone_blocked" }); }
+    else if (code === "SMS_BUDGET" || code === "OTP_GLOBAL_CAP" || err.status === 503) setError("We can't send codes right now. Try again in a bit.");
+    else if (code === "COOLDOWN" || code === "OTP_COOLDOWN") setError(`Hang on a sec. You can ask for a new code in ${err.data?.retryAfterSeconds ?? 30} seconds.`);
+    else if (err.status === 429) setError("Hang on a sec. Too many requests. Try again in a minute.");
     else setError("Couldn't send the code. Try again.");
   };
 

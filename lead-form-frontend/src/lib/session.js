@@ -1,11 +1,21 @@
 import { call } from "./tandemApi";
 
 // The web login, shared by the deck (/swipe, /, city pages) and the shared link page (/l/links, /e/, /r).
-export const SESSION_KEY = "webSwipeSession";
-const PENDING_REFERRAL_KEY = "webPendingReferral"; // a friend's code from /l/links or /r, credited after login
+// Browser storage keys: handoff "What the browser stores" (tdm.*)
+export const SESSION_KEY = "tdm.token";
+const PENDING_REFERRAL_KEY = "tdm.invite"; // a friend's code from /l/links or /r, credited after login
 
-export const readJson = (key, fallback) => { try { return JSON.parse(localStorage.getItem(key) || "null") ?? fallback; } catch { return fallback; } };
-export const writeJson = (key, v) => { try { v == null ? localStorage.removeItem(key) : localStorage.setItem(key, JSON.stringify(v)); } catch { /* storage blocked */ } };
+// Every localStorage call is wrapped: in private mode or a locked-down in-app browser it throws. Then
+// values live in memory, so the deck keeps working and the cap holds for the session only.
+const mem = new Map();
+export const readJson = (key, fallback) => {
+  try { const v = localStorage.getItem(key); if (v != null) return JSON.parse(v) ?? fallback; } catch { /* blocked */ }
+  return mem.has(key) ? mem.get(key) : fallback;
+};
+export const writeJson = (key, v) => {
+  if (v == null) mem.delete(key); else mem.set(key, v);
+  try { v == null ? localStorage.removeItem(key) : localStorage.setItem(key, JSON.stringify(v)); } catch { /* memory only */ }
+};
 
 export function loadSession() {
   const s = readJson(SESSION_KEY, null);

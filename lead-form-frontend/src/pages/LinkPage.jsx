@@ -287,7 +287,8 @@ export default function LinkPage() {
                 </p>
               </>
             )}
-            <div style={{ marginTop: stage === "referral" ? "16px" : 0 }}>
+            {/* The deck fills a bounded column (handoff Layout); 100dvh minus header and the line above */}
+            <div style={{ marginTop: stage === "referral" ? "16px" : 0, height: "calc(100dvh - 180px)", minHeight: "460px", display: "flex", flexDirection: "column" }}>
               <SwipeDeck city={city} />
             </div>
           </>
