@@ -47,8 +47,9 @@ export default function CityPicker({ city, onChange }) {
 
   return (
     <>
-      <button onClick={() => setOpen(true)} aria-haspopup="dialog" aria-label={`City: ${city}. Change city`} className="glass" style={chip(false)}>
-        <span style={{ color: T.green, display: "inline-flex" }}>{pin}</span>{city}
+      {/* Handoff header: 44px pill with a yellow pin */}
+      <button onClick={() => setOpen(true)} aria-haspopup="dialog" aria-label={`City: ${city}. Change city`} className="city-chip">
+        <span className="pin">{pin}</span>{city}
         <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><path d="M6 9l6 6 6-6" /></svg>
       </button>
 

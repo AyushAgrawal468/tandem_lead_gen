@@ -15,8 +15,6 @@
     "check:prerender": "node scripts/check-prerender.mjs"
   },
   "dependencies": {
-    "@gsap/react": "^2.1.2",
-    "gsap": "^3.13.0",
     "helmet": "^8.1.0",
     "input-otp": "^1.5.0",
     "plugin-react": "^0.0.1-security",

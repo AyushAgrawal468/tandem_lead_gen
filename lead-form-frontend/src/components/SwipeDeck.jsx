@@ -9,7 +9,9 @@ import { shareLink, shareText, canNativeShare } from "../lib/share";
 import { track, identify } from "../lib/analytics";
 import { call, AuthError } from "../lib/tandemApi";
 import { SESSION_KEY, readJson, writeJson, loadSession, sessionFrom, creditReferral } from "../lib/session";
-import { SwipeCard, EventDetails } from "./EventCard";
+import { EventDetails } from "./EventCard";
+import { Deck } from "./deck/Deck";
+import { SwipeButtons } from "./deck/SwipeButtons";
 import { fromPublic, fromPersonal, T, font } from "../lib/card";
 
 const SWIPES_KEY = "webSwipes"; // swipes made before OTP, replayed in order after verifying
@@ -25,23 +27,6 @@ const btn = (active = true) => ({
   width: "100%", minHeight: "48px", padding: "14px", borderRadius: "999px", border: "none", fontFamily: font, fontWeight: 700,
   fontSize: "16px", cursor: active ? "pointer" : "default", background: T.high, color: T.bg, opacity: active ? 1 : 0.4,
 });
-
-// Not now / Never / I'm in (handoff "Swipe directions on the web") in the app's button styles:
-// a text button, the red pill ("Stop event") and the white pill with the colour edge ("Apply"). Arrow keys on desktop.
-function ActionButtons({ onAct, disabled }) {
-  const base = { height: "48px", borderRadius: "999px", fontFamily: font, fontWeight: 700, fontSize: "15px",
-    cursor: disabled ? "default" : "pointer", opacity: disabled ? 0.4 : 1, whiteSpace: "nowrap" };
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-      <button onClick={() => onAct("LEFT")} disabled={disabled} aria-keyshortcuts="ArrowLeft"
-        style={{ ...base, flex: "0 0 auto", padding: "0 14px", background: "none", border: "none", color: T.high }}>Not now</button>
-      <button onClick={() => onAct("DOWN")} disabled={disabled} aria-keyshortcuts="ArrowDown"
-        style={{ ...base, flex: 1, padding: "0 16px", border: "none", background: T.fail, color: "#fff" }}>Never</button>
-      <button onClick={() => onAct("RIGHT")} disabled={disabled} aria-keyshortcuts="ArrowRight" className="pill"
-        style={{ ...base, flex: 1.3, padding: "0 16px" }}>I'm in</button>
-    </div>
-  );
-}
 
 /**
  * The live deck (handoff 2.2 to 2.7): cards first, phone step, replay, share, app prompts. Used by
@@ -67,8 +52,9 @@ export default function SwipeDeck({ city }) {
   const [stuck, setStuck] = useState(false); // "Open in browser"
   const [returnVisit, setReturnVisit] = useState(false); // logged-in visitor who came back already capped
   const firstLoad = useRef(true);
+  const desk = typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches;
   const navigate = useNavigate();
-  const deckRef = useRef(null);
+  const commitRef = useRef(null); // the Deck's commit: buttons on event details swipe the same card
   const pendingAction = useRef(null);
   const loading = useRef(false);
   const replaying = useRef(false);
@@ -253,7 +239,7 @@ export default function SwipeDeck({ city }) {
   const act = (action) => {
     if (!top || capped) return;
     if (details) { pendingAction.current = action; window.history.back(); return; }
-    deckRef.current?.fly(action);
+    commitRef.current?.(action.toLowerCase());
   };
 
   // Details is a state of the deck with its own history entry: back returns to the same card, no new URL
@@ -268,21 +254,12 @@ export default function SwipeDeck({ city }) {
       setDetails(null);
       const a = pendingAction.current;
       pendingAction.current = null;
-      if (a) setTimeout(() => deckRef.current?.fly(a), 50);
+      if (a) setTimeout(() => commitRef.current?.(a.toLowerCase()), 50);
     };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
   }, []);
 
-  useEffect(() => {
-    const onKey = (e) => {
-      if (phoneAsk || sendCard || showPopup || match || e.target.closest?.("input, textarea") || document.getElementById("city-title")) return;
-      const a = { ArrowRight: "RIGHT", ArrowLeft: "LEFT", ArrowDown: "DOWN" }[e.key];
-      if (a) { e.preventDefault(); act(a); }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  });
 
   const left = totalUpcoming == null ? 0 : Math.max(0, totalUpcoming - used);
   const panel = { textAlign: "center", padding: "48px 16px", background: T.surface1, borderRadius: "16px" };
@@ -299,9 +276,9 @@ export default function SwipeDeck({ city }) {
   );
 
   return (
-    <div style={{ color: T.high, fontFamily: font }}>
-        <section aria-label={`Plans in ${city}`}>
-          <div style={{ position: "relative" }}>
+    <div style={{ color: T.high, fontFamily: font, display: "flex", flexDirection: "column", gap: "14px", flex: "1 1 auto", minHeight: 0 }}>
+        <section aria-label={`Plans in ${city}`} style={{ display: "flex", flexDirection: "column", gap: "14px", flex: "1 1 auto", minHeight: 0 }}>
+          <div className={top && !capped ? undefined : "deck-scroll"} style={{ position: "relative", display: "flex", flexDirection: "column", flex: "1 1 auto", minHeight: 0 }}>
             {capped ? (
               session && returnVisit ? (
               <div>
@@ -329,18 +306,18 @@ export default function SwipeDeck({ city }) {
               )
             ) : top ? (
               <>
-                {/* Cards behind the top one peek out rotated, as in the app's Discover stack */}
-                {queue.slice(1, 3).map((c, i) => (
-                  <div key={c.id} aria-hidden="true" style={{ position: "absolute", inset: 0, zIndex: 1 - i, pointerEvents: "none",
-                    transform: `rotate(${i ? -3 : 3}deg) scale(0.95)`, transformOrigin: "50% 100%", borderRadius: "20px",
-                    background: i ? "#1A1B1D" : "#222326", border: `1px solid ${T.line}` }} />
-                ))}
-                <SwipeCard key={top.id} ref={deckRef} card={top} onAction={onAction} onOpen={openDetails} onShare={() => share(top)} />
+                <Deck cards={queue} index={0} commitRef={commitRef} desk={desk}
+                  locked={!!(phoneAsk || sendCard || match || showPopup || details)}
+                  onSwipe={(dir) => onAction(dir.toUpperCase())} onOpenDetails={openDetails} onShare={share} />
               </>
             ) : feed === "loading" ? (
-              <div aria-busy="true" style={{ background: T.surface1, borderRadius: "16px", padding: "12px" }}>
-                <div style={{ height: "min(calc((min(100vw, 420px) - 56px) * 4 / 3), calc(100dvh - 502px))", minHeight: "240px", borderRadius: "10px", background: T.surface2 }} />
-                <p style={{ color: T.low, fontSize: "14px", margin: "14px 2px 6px" }}>Finding what's on in {city}...</p>
+              // J1-06a: skeleton card, round buttons visible but disabled
+              <div aria-busy="true" style={{ display: "flex", flexDirection: "column", gap: "14px", flex: "1 1 auto", minHeight: 0 }}>
+                <div className="card" style={{ flex: "1 1 auto", height: "auto", minHeight: 0 }}>
+                  <div className="card-poster" />
+                  <p style={{ color: T.low, fontSize: "14px", margin: "14px 16px 16px" }}>Finding what's on in {city}...</p>
+                </div>
+                <SwipeButtons disabled desk={desk} onLeft={() => {}} onDown={() => {}} onRight={() => {}} />
               </div>
             ) : feed === "error" ? (
               <div style={panel}>
@@ -362,17 +339,14 @@ export default function SwipeDeck({ city }) {
               {softAt && !phoneAsk && !sendCard && !match && (
                 <SoftPrompt at={softAt} onGetApp={() => { setSoftAt(null); getApp(`soft_${softAt}`); }} onLater={() => setSoftAt(null)} />
               )}
-              <p style={{ color: T.low, fontSize: "12px", textAlign: "center", margin: "12px 0" }}>Swipe or tap. Swipe up to send it to a friend.</p>
-              <ActionButtons onAct={act} />
             </>
           )}
 
-          <div style={{ marginTop: "16px", display: "flex", alignItems: "center", gap: "10px" }}>
-            <div role="progressbar" aria-label="Web swipes used" aria-valuemin={0} aria-valuemax={WEB_SWIPE_LIMIT} aria-valuenow={Math.min(used, WEB_SWIPE_LIMIT)}
-              style={{ flex: 1, height: "4px", borderRadius: "2px", background: T.surface2, overflow: "hidden" }}>
-              <div style={{ width: `${Math.min(100, (used / WEB_SWIPE_LIMIT) * 100)}%`, height: "100%", background: T.green, transition: "width 0.15s" }} />
+          <div className="progress">
+            <div className="bar" role="progressbar" aria-label="Web swipes used" aria-valuemin={0} aria-valuemax={WEB_SWIPE_LIMIT} aria-valuenow={Math.min(used, WEB_SWIPE_LIMIT)}>
+              <div className="fill" style={{ width: `${Math.min(100, (used / WEB_SWIPE_LIMIT) * 100)}%` }} />
             </div>
-            <span style={{ color: T.low, fontSize: "12px" }}>{Math.min(used, WEB_SWIPE_LIMIT)}/{WEB_SWIPE_LIMIT}</span>
+            {Math.min(used, WEB_SWIPE_LIMIT)}/{WEB_SWIPE_LIMIT}
           </div>
         </section>
 
@@ -380,7 +354,7 @@ export default function SwipeDeck({ city }) {
 
       {details && (
         <EventDetails card={details} onBack={() => window.history.back()} onShare={() => share(details)}
-          actions={<div style={{ maxWidth: "420px", margin: "0 auto" }}><ActionButtons onAct={act} disabled={capped} /></div>} />
+          actions={<SwipeButtons desk={desk} disabled={capped} onLeft={() => act("LEFT")} onDown={() => act("DOWN")} onRight={() => act("RIGHT")} />} />
       )}
 
       {toast && (

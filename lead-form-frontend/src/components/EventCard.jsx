@@ -1,16 +1,11 @@
-import React, { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
-import gsap from "gsap";
-import { Draggable } from "gsap/Draggable";
-import { useGSAP } from "@gsap/react";
-import { T, font, metaLine } from "../lib/card";
+import React, { useEffect, useRef } from "react";
+import { T, font } from "../lib/card";
 import TandemE from "../assets/swipe/tandem-e.svg";
-import { SWIPE_PX, SWIPE_VELOCITY } from "../lib/funnel";
 
-gsap.registerPlugin(Draggable, useGSAP);
+// Event details (handoff: a state of the deck with history.pushState, boards J1-43, J1-D43, J2-43).
+// The swipe deck itself lives in components/deck (handoff "Swipe engine").
 
-const EASE_OUT = "cubic-bezier(0.2, 0.8, 0.2, 1)";
-
-// ---------- card face ----------
+const EASE_OUT = "cubic-bezier(0.23, 1, 0.32, 1)";
 
 function Poster({ card, style }) {
   return (
@@ -24,130 +19,6 @@ function Poster({ card, style }) {
   );
 }
 
-// Poster is 3:4, but shrinks on short screens (in-app browsers) so the buttons stay on screen
-const POSTER_H = "min(calc((min(100vw, 420px) - 56px) * 4 / 3), calc(100dvh - 502px))";
-
-// The card's round Tandem button (the app's gradient "e") = "Send to a friend" on the web (design brief)
-export function ShareButton({ onShare, size = 48 }) {
-  return (
-    <button onClick={(e) => { e.stopPropagation(); onShare(); }} aria-label="Send to a friend"
-      style={{ flexShrink: 0, width: `${size}px`, height: `${size}px`, padding: 0, borderRadius: "50%", border: "none", cursor: "pointer", background: "none",
-        filter: "drop-shadow(0 6px 16px rgba(0,200,190,0.35))" }}>
-      <img src={TandemE} alt="" draggable={false} style={{ width: "100%", height: "100%", display: "block" }} />
-    </button>
-  );
-}
-
-export function CardFace({ card, onShare }) {
-  return (
-    <div data-event-card="" style={{ background: `linear-gradient(180deg, #26282B, ${T.surface1})`, border: `1px solid ${T.line}`, borderRadius: "20px",
-      overflow: "hidden", boxShadow: "0 24px 48px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3)" }}>
-      <div style={{ padding: "10px 10px 0" }}>
-        <Poster card={card} style={{ height: POSTER_H, minHeight: "240px", borderRadius: "14px" }} />
-      </div>
-      <div style={{ padding: "14px 16px 18px", display: "flex", alignItems: "flex-end", gap: "12px" }}>
-        <div style={{ flex: 1, minWidth: 0 }}>
-        <h2 className="wide text-[18px] md:text-[20px]" style={{ fontWeight: 700, color: T.high, lineHeight: 1.25, margin: 0,
-          display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{card.title}</h2>
-        {metaLine(card) && <p style={{ color: T.low, fontSize: "14px", lineHeight: 1.5, margin: "4px 0 0" }}>{metaLine(card)}</p>}
-        {card.price && <p style={{ color: T.green, fontSize: "14px", lineHeight: 1.5, margin: "2px 0 0" }}>{card.price}</p>}
-        </div>
-        {onShare && <ShareButton onShare={onShare} />}
-      </div>
-    </div>
-  );
-}
-
-// ---------- the draggable top card ----------
-
-const LABELS = {
-  RIGHT: { text: "I'm in", color: T.green, pos: { top: "28px", left: "24px" }, rot: -12 },
-  LEFT: { text: "Not now", color: T.mid, pos: { top: "28px", right: "24px" }, rot: 12 },
-  DOWN: { text: "Never", color: T.fail, pos: { bottom: "120px", left: "50%" }, rot: 0 },
-  UP: { text: "Send to a friend", color: "#A77DFF", pos: { bottom: "120px", left: "50%" }, rot: 0 },
-};
-const OFF = { RIGHT: { x: 700, rotation: 12 }, LEFT: { x: -700, rotation: -12 }, DOWN: { y: 900, rotation: 0 } };
-const reducedMotion = () => typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-
-/**
- * Top card of the deck (handoff 2.2): drag right (I'm in), left (Not now), down (Never) with GSAP
- * Draggable for touch and mouse. Up opens Send to a friend (the Tandem button) and springs back. A tap opens details.
- * The parent calls ref.fly(action) for buttons and arrow keys; onAction fires once the card is off.
- */
-export const SwipeCard = forwardRef(function SwipeCard({ card, onAction, onOpen, onShare }, ref) {
-  const el = useRef(null);
-  const labels = useRef({});
-  const flying = useRef(false);
-
-  const showLabels = (x, y) => {
-    const down = y > 0 && y > Math.abs(x), up = y < 0 && -y > Math.abs(x);
-    const o = { RIGHT: !down && !up && x > 0 ? x / SWIPE_PX : 0, LEFT: !down && !up && x < 0 ? -x / SWIPE_PX : 0,
-      DOWN: down ? y / SWIPE_PX : 0, UP: up && onShare ? -y / SWIPE_PX : 0 };
-    for (const k in o) if (labels.current[k]) labels.current[k].style.opacity = Math.min(1, o[k]);
-  };
-
-  const fly = (action) => {
-    if (flying.current || !el.current) return;
-    flying.current = true;
-    for (const k in LABELS) if (labels.current[k]) labels.current[k].style.opacity = k === action ? 1 : 0;
-    const done = () => onAction(action);
-    if (reducedMotion()) gsap.to(el.current, { opacity: 0, duration: 0.2, onComplete: done });
-    else gsap.to(el.current, { ...OFF[action], opacity: 0, duration: 0.25, ease: "power1.in", onComplete: done });
-  };
-  useImperativeHandle(ref, () => ({ fly }));
-
-  useGSAP(() => {
-    let last = { x: 0, y: 0, t: 0 }, v = { x: 0, y: 0 };
-    const [d] = Draggable.create(el.current, {
-      type: "x,y",
-      zIndexBoost: false, // the default lifts the card to z-index 1000+, over the sticky header
-      minimumMovement: 6,
-      onPress() { last = { x: this.x, y: this.y, t: performance.now() }; v = { x: 0, y: 0 }; },
-      onDrag() {
-        const now = performance.now(), dt = Math.max(1, now - last.t);
-        v = { x: (this.x - last.x) / dt, y: (this.y - last.y) / dt };
-        last = { x: this.x, y: this.y, t: now };
-        if (!reducedMotion()) gsap.set(el.current, { rotation: Math.max(-12, Math.min(12, this.x / 20)) });
-        showLabels(this.x, this.y);
-      },
-      onDragEnd() {
-        const { x, y } = this;
-        // Distance first, then a fast flick; an up drag never counts
-        const action =
-          y > SWIPE_PX && y > Math.abs(x) ? "DOWN"
-          : x > SWIPE_PX ? "RIGHT" : x < -SWIPE_PX ? "LEFT"
-          : v.y > SWIPE_VELOCITY && v.y > Math.abs(v.x) ? "DOWN"
-          : v.x > SWIPE_VELOCITY ? "RIGHT" : v.x < -SWIPE_VELOCITY ? "LEFT" : null;
-        if (action) { fly(action); return; }
-        // Up is the app's Tandem swipe: on the web it opens "Send to a friend" (the round button); the card stays
-        if (onShare && -y > SWIPE_PX && -y > Math.abs(x)) onShare();
-        showLabels(0, 0);
-        gsap.to(el.current, { x: 0, y: 0, rotation: 0, duration: reducedMotion() ? 0 : 0.2, ease: "power2.out" });
-      },
-      onClick() {
-        // The share button sits on the card; its tap must not open the details page too
-        if (!flying.current && !this.pointerEvent?.target?.closest?.("button")) onOpen?.();
-      },
-    });
-    return () => d.kill();
-  }, { scope: el });
-
-  return (
-    <div ref={el} role="group" aria-label={card.title}
-      style={{ position: "relative", zIndex: 2, touchAction: "none", userSelect: "none", cursor: "grab", animation: `deckIn 0.2s ${EASE_OUT}` }}>
-      {Object.entries(LABELS).map(([k, l]) => (
-        <span key={k} ref={(n) => { labels.current[k] = n; }} aria-hidden="true"
-          style={{ position: "absolute", zIndex: 3, opacity: 0, pointerEvents: "none", ...l.pos,
-            transform: `${k === "DOWN" ? "translateX(-50%) " : ""}rotate(${l.rot}deg)`,
-            border: `3px solid ${l.color}`, color: l.color, background: "rgba(17,17,17,0.6)",
-            fontWeight: 800, fontSize: "22px", padding: "2px 12px", borderRadius: "8px", whiteSpace: "nowrap" }}>
-          {l.text}
-        </span>
-      ))}
-      <CardFace card={card} onShare={onShare} />
-    </div>
-  );
-});
 
 // ---------- event details page (design screen 43) ----------
 
@@ -203,7 +74,7 @@ export function EventDetails({ card, onBack, actions, onShare }) {
           <Poster card={card} style={{ aspectRatio: "3 / 4", width: "100%", maxHeight: "72vh", borderRadius: "18px" }} />
         </div>
         <div>
-          <h1 className="wide text-[24px] md:text-[32px]" style={{ fontWeight: 800, lineHeight: 1.1, margin: "20px 0 16px" }}>{card.title}</h1>
+          <h1 className="wide text-[24px] md:text-[32px]" style={{ fontWeight: 800, lineHeight: 1.1, margin: "20px 0 16px" }}>{card.fullTitle || card.title}</h1>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
             {when && <Tile icon="calendar" tint="#C1F546" label="Date">{when}</Tile>}
             {card.area && <Tile icon="pin" tint="#4FA3FF" label="Location">{card.area}</Tile>}

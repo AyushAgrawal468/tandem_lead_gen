@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import SwipeDeck from "../components/SwipeDeck";
+import DeckScreen from "../components/DeckScreen";
 import Seo from "../components/Seo";
 import { SiteHeader } from "../components/SiteChrome";
 import { initialCity } from "../lib/city";
@@ -20,18 +20,16 @@ export default function SwipePage() {
   const [creator] = useState(creatorName);
   return (
     <div className="aurora" style={{ minHeight: "100dvh", background: T.bg, color: T.high, fontFamily: font }}>
-      <Seo title="Swipe on things to do near you | Tandem" path="/swipe"
+      <Seo title="Swipe on things to do near you | Tandem" path="/"
         description="See what's on in your city, swipe right on what you'd do, and get matched with friends who want the same plan." />
-      <main style={{ maxWidth: "420px", margin: "0 auto", padding: "0 16px calc(24px + env(safe-area-inset-bottom))" }}>
+      <main className="page">
         <SiteHeader city={city} onCity={setCity} />
-        <h1 className="wide" style={{ fontSize: "24px", fontWeight: 800, lineHeight: 1.15, margin: "20px 0 0" }}>
-          {creator ? `Saw ${creator}'s reel? Here's what's on in ${city}.` : `What's on in ${city} this week`}
-        </h1>
-        {/* The crawlable paragraph (snapshot rule 3) */}
-        <p style={{ color: T.mid, fontSize: "14px", lineHeight: 1.5, margin: "4px 0 12px" }}>
+        <DeckScreen city={city}
+          h1={creator ? `Saw ${creator}'s reel? Here's what's on in ${city}.` : "Swipe on things to do. Match with friends who want the same."} />
+        {/* The crawlable paragraph (snapshot rule 3), under the deck screen */}
+        <p style={{ color: T.mid, fontSize: "14px", lineHeight: 1.5, margin: "24px 0 32px", maxWidth: "640px" }}>
           Tandem shows you what's on in your city, from gigs and comedy to treks and food walks. Swipe right on what you'd actually do. When a friend wants the same plan, you both get matched.
         </p>
-        <SwipeDeck city={city} />
       </main>
     </div>
   );

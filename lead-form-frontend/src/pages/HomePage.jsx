@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Helmet } from "react-helmet";
-import SwipeDeck from "../components/SwipeDeck";
+import DeckScreen from "../components/DeckScreen";
 import Seo, { SITE } from "../components/Seo";
 import { SiteHeader, SiteFooter, StoreBadges } from "../components/SiteChrome";
 import { initialCity, SUPPORTED_CITIES } from "../lib/city";
@@ -83,23 +83,16 @@ export default function HomePage() {
         <script>{`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA_ID}');`}</script>
       </Helmet>
 
-      <main className="px-4 md:px-6" style={{ maxWidth: "1120px", margin: "0 auto" }}>
-        <SiteHeader city={city} onCity={setCity} getApp />
+      <main className="page">
+        <SiteHeader city={city} onCity={setCity} />
 
-        <div className="md:grid md:grid-cols-[1.1fr_1fr] md:gap-16 md:items-center mt-5 md:mt-8">
-          <div>
-            <h1 className="wide text-[29px] xs:text-[31px] md:text-[64px]" style={{ fontWeight: 800, lineHeight: 1.05, margin: 0 }}>
-              Swipe on things to do. Match with friends who want the same.
-            </h1>
-            <p className="text-[15px] md:text-[19px]" style={{ ...body, fontSize: undefined, margin: "12px 0 0", maxWidth: "500px" }}>
+        <DeckScreen city={city} h1="Swipe on things to do. Match with friends who want the same."
+          aside={<>
+            <p style={{ ...body, fontSize: "18px", margin: "0 0 32px", maxWidth: "500px" }}>
               No more "let's plan something" that never happens. Swipe on what you'd actually do, and the app matches you with friends who want the same.
             </p>
-            <div className="hidden md:block" style={{ marginTop: "36px" }}><StoreBadges width={300} /></div>
-          </div>
-          <div className="mt-5 md:mt-0" style={{ maxWidth: "420px", width: "100%", marginLeft: "auto", marginRight: "auto" }}>
-            <SwipeDeck city={city} />
-          </div>
-        </div>
+            <StoreBadges width={300} />
+          </>} />
 
         <HowItWorks />
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 400px), 1fr))", gap: "48px 72px", marginTop: "96px" }}>

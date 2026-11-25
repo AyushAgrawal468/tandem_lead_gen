@@ -465,26 +465,12 @@ button.waitlist-join-btn:focus {
 
 /* ---------- Site look (matches the app: header glow, wide headlines, pill buttons) ---------- */
 
-/* The app's header glow (teal, slate blue, moss) behind the top of the page, softer again at the bottom */
+/* Page glow (handoff tokens): mint top-left, purple top-right, on every page root */
 .aurora { position: relative; isolation: isolate; }
-.aurora::before, .aurora::after { content: ""; position: absolute; left: 0; right: 0; z-index: -1; pointer-events: none; }
-.aurora::before {
-  top: 0; height: 760px;
+.aurora::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 420px; z-index: -1; pointer-events: none;
   background:
-    radial-gradient(60% 55% at 12% 0%, rgba(16, 122, 108, 0.55), transparent 70%),
-    radial-gradient(50% 50% at 55% 0%, rgba(62, 84, 104, 0.55), transparent 72%),
-    radial-gradient(45% 50% at 95% 4%, rgba(86, 98, 44, 0.5), transparent 70%);
-  -webkit-mask-image: linear-gradient(#000 35%, transparent);
-  mask-image: linear-gradient(#000 35%, transparent);
-}
-.aurora::after {
-  bottom: 0; height: 420px;
-  -webkit-mask-image: linear-gradient(transparent, #000 60%);
-  mask-image: linear-gradient(transparent, #000 60%);
-  background:
-    radial-gradient(55% 60% at 20% 100%, rgba(16, 122, 108, 0.28), transparent 70%),
-    radial-gradient(50% 60% at 85% 100%, rgba(131, 73, 255, 0.22), transparent 70%);
-}
+    radial-gradient(420px 260px at 10% -60px, rgba(0,255,200,0.10), transparent 70%),
+    radial-gradient(380px 260px at 100% -40px, rgba(131,73,255,0.11), transparent 70%); }
 
 /* Headlines: Anek Latin set wide, like the app's titles */
 .wide { font-stretch: 118%; font-variation-settings: "wdth" 118; letter-spacing: -0.01em; }

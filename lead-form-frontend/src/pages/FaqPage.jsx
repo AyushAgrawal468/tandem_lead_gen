@@ -11,7 +11,7 @@ export default function FaqPage() {
       <Seo title="Tandem FAQ: how matching, pricing and privacy work" path="/faq" jsonLd={faqJsonLd(FAQ_ORDER)}
         description="How Tandem works, what it costs, which cities it's in, and what your friends can and can't see." />
       <div className="px-4 md:px-6" style={{ maxWidth: "1120px", margin: "0 auto" }}>
-        <SiteHeader getApp />
+        <SiteHeader />
       <main style={{ maxWidth: "720px", margin: "0 auto", paddingTop: "48px" }}>
         <h1 className="wide text-[34px] md:text-[52px]" style={{ fontWeight: 800, lineHeight: 1.05, margin: "0 0 12px" }}>Tandem FAQ</h1>
         <p style={{ color: T.low, fontSize: "16px", margin: "0 0 16px" }}>How matching, pricing and privacy work.</p>

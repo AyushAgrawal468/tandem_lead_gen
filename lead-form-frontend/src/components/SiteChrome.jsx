@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import StoreButtons from "../assets/store-buttons.svg";
 import Wordmark from "../assets/tandem-wordmark.svg";
 import CityPicker from "./CityPicker";
+import { DesktopAppPrompt } from "./AppPrompts";
 import { T, font } from "../lib/card";
 
 const APP_STORE = "https://apps.apple.com/in/app/tandem-events-experiences/id6756263621";
@@ -22,20 +23,36 @@ export function StoreBadges({ width = 336 }) {
   );
 }
 
-/** Design screens 1 and 36: the app wordmark, FAQ link, city chip (pages with a deck), Get the app (pages with the footer). */
-export function SiteHeader({ city, onCity, getApp = false }) {
+/**
+ * Handoff "Header": phone 60px, wordmark left and city chip right, nothing else (fits at 320px; FAQ is
+ * in the footer). From 640px: 64px with a bottom border, city chip next to the wordmark, FAQ and
+ * "Get Tandem free" (outline pill) on the right.
+ */
+export function SiteHeader({ city, onCity }) {
+  const [qr, setQr] = useState(false);
+  // AppPrompt rule: decide by pointer, not user agent. Touch → /download (the right store, with UTM);
+  // mouse → the store badges in the footer, or the QR prompt on pages without one
+  const getTandem = (e) => {
+    if (window.matchMedia("(pointer: coarse)").matches) return;
+    e.preventDefault();
+    const footer = document.getElementById("get-app");
+    if (footer) footer.scrollIntoView({ behavior: "smooth" }); else setQr(true);
+  };
+  const chip = onCity && <CityPicker city={city} onChange={onCity} />;
   return (
-    <header className="site-header" style={{ fontFamily: font }}>
-      <Link to="/" aria-label="Tandem home" style={{ display: "flex", alignItems: "center" }}>
-        <img src={Wordmark} alt="tandem" width="138" height="32" className="h-[26px] md:h-[30px]" style={{ width: "auto", display: "block" }} />
-      </Link>
-      <nav style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-        <Link to="/faq" style={{ color: T.high, fontSize: "15px", textDecoration: "none", opacity: 0.85 }}>FAQ</Link>
-        {onCity && <CityPicker city={city} onChange={onCity} />}
-        {/* Desktop only: scrolls to the footer's store badges (/download would send Mac users to Play) */}
-        {getApp && <a href="#get-app" className="pill hidden md:inline-flex" style={{ alignItems: "center", height: "40px", padding: "0 18px", borderRadius: "999px",
-          fontSize: "14px", fontWeight: 700, textDecoration: "none" }}>Get the app</a>}
+    <header className="hdr">
+      <div className="hdr-left">
+        <Link to="/" aria-label="Tandem home" style={{ display: "flex", alignItems: "center", minHeight: "44px" }}>
+          <img src={Wordmark} alt="tandem" width="138" height="32" className="hdr-wordmark" />
+        </Link>
+        {chip && <span className="hidden sm:inline-flex">{chip}</span>}
+      </div>
+      {chip && <span className="sm:hidden">{chip}</span>}
+      <nav className="hdr-right" aria-label="Main">
+        <Link to="/faq" className="hdr-link">FAQ</Link>
+        <a href={`/download${typeof window !== "undefined" ? window.location.search : ""}`} onClick={getTandem} className="outline-pill">Get Tandem free</a>
       </nav>
+      {qr && <DesktopAppPrompt onClose={() => setQr(false)} />}
     </header>
   );
 }

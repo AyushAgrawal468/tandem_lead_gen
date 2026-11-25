@@ -14,7 +14,7 @@ const SHELL_TITLE = "Tandem - Social Planning App"; // index.html's own title: a
 // route → copy that must be in the raw HTML (the H1), and whether the page carries JSON-LD
 const PAGES = {
   "/": { h1: "Swipe on things to do", jsonLd: true },
-  "/swipe": { h1: "What's on in", jsonLd: false },
+  "/swipe": { h1: "Swipe on things to do", jsonLd: false, canonical: "/" }, // handoff: /swipe is canonical to /
   "/faq": { h1: "Tandem FAQ", jsonLd: true },
   "/bengaluru": { h1: "Things to do in Bengaluru", jsonLd: true },
   "/mumbai": { h1: "Things to do in Mumbai", jsonLd: true },
@@ -33,11 +33,11 @@ async function load(route) {
 const attr = (html, re) => html.match(re)?.[1]?.trim() || "";
 const text = (s) => s.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/g, " ").replace(/<[^>]+>/g, " ").replace(/&#x27;|&#39;/g, "'").replace(/&amp;/g, "&").replace(/\s+/g, " ");
 
-function checkPage(route, html, { h1, jsonLd }) {
+function checkPage(route, html, { h1, jsonLd, canonical = route }) {
   const title = attr(html, /<title[^>]*>([^<]*)<\/title>/i);
   assert.ok(title && !title.startsWith(SHELL_TITLE), `not prerendered (title "${title}")`);
   assert.ok(attr(html, /<meta\s+name="description"\s+content="([^"]*)"/i), "meta description missing");
-  assert.equal(attr(html, /<link\s+rel="canonical"\s+href="([^"]*)"/i), SITE + (route === "/" ? "/" : route), "canonical");
+  assert.equal(attr(html, /<link\s+rel="canonical"\s+href="([^"]*)"/i), SITE + canonical, "canonical");
   assert.ok(attr(html, /<meta\s+property="og:title"\s+content="([^"]*)"/i), "og:title missing");
   assert.ok(attr(html, /<meta\s+property="og:description"\s+content="([^"]*)"/i), "og:description missing");
   assert.ok(!/<meta\s+name="robots"\s+content="[^"]*noindex/i.test(html), "page is noindex");

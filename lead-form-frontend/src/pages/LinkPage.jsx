@@ -9,7 +9,10 @@ import { initialCity, matchCity } from "../lib/city";
 import { isPhone } from "../lib/app";
 import { track, identify } from "../lib/analytics";
 import { shareLink, shareText, whatsappUrl } from "../lib/share";
-import { CardFace } from "../components/EventCard";
+import { EventCard } from "../components/deck/EventCard";
+
+// The handoff card fills its frame (poster flexes), so it needs a height here
+const Card = ({ card }) => <div style={{ height: "min(520px, 62dvh)" }}><EventCard event={card} /></div>;
 import SwipeDeck from "../components/SwipeDeck";
 import PhoneSheet from "../components/PhoneSheet";
 import SendSheet from "../components/SendSheet";
@@ -198,7 +201,7 @@ export default function LinkPage() {
               : <><h1 style={h1}>{card.title}</h1><p style={body}>{[card.day, card.area, card.price].filter(Boolean).join(" · ")}</p></>}
             <div style={{ borderRadius: "16px", overflow: "hidden", background: T.surface1 }}>
               {mode === "invite" && <Strip sender={sender} text={`${sender.firstName} is in`} />}
-              <CardFace card={card} />
+              <Card card={card} />
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "16px" }}>
               <button onClick={imIn} disabled={busy} style={{ ...pill(true), opacity: busy ? 0.4 : 1 }}>{busy ? "Saving…" : "I'm in"}</button>
@@ -219,7 +222,7 @@ export default function LinkPage() {
             </p>
             <div style={{ position: "relative" }}>
               <Chip text={stage === "saved" ? "Saved" : "You're in"} />
-              <CardFace card={card} />
+              <Card card={card} />
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "16px" }}>
               <button onClick={() => getApp(stage)} style={pill(true)}>Get the app</button>
@@ -240,7 +243,7 @@ export default function LinkPage() {
           <>
             <h1 style={h1}>This is your invite</h1>
             <p style={body}>Send it to someone you'd go with.</p>
-            <CardFace card={card} />
+            <Card card={card} />
             <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "16px" }}>
               <a href={whatsappUrl(shareText(card, shareLink(eventId, code)))} target="_blank" rel="noopener noreferrer" style={pill(true)}
                 onClick={() => track("share_tapped", { eventId, channel: "whatsapp", own: true })}>Send on WhatsApp</a>
@@ -254,7 +257,7 @@ export default function LinkPage() {
           <>
             <h1 style={h1}>You've used your 35 web swipes</h1>
             <p style={body}>Save {card.title} in the app, and see which friends want to go.</p>
-            <CardFace card={card} />
+            <Card card={card} />
             <button onClick={() => getApp("event_swipes_used_up")} style={{ ...pill(true), marginTop: "16px" }}>Get the app</button>
             <OpenTandemLink onStuck={() => setStuck(true)} />
           </>
