@@ -4,6 +4,7 @@ import { EventCard } from "./EventCard";
 import { SwipeButtons } from "./SwipeButtons";
 import { Stamp } from "./parts";
 import { catOf } from "./categories";
+import { loadPixel } from "../../lib/analytics";
 
 const sessionStorageGet = (k) => { try { return sessionStorage.getItem(k); } catch { return null; } };
 const sessionStorageSet = (k, v) => { try { sessionStorage.setItem(k, v); } catch { /* blocked */ } };
@@ -12,10 +13,16 @@ const sessionStorageSet = (k, v) => { try { sessionStorage.setItem(k, v); } catc
 // Additions: commitRef (event details' buttons swipe the same card), the category glow behind the
 // stack, the coach hint, and preloading the next two posters.
 export function Deck({ cards, index, onSwipe, onOpenDetails, onShare, locked, desk, hideNever, commitRef }) {
+  // How the swipe was made (analytics "swiped": drag, button, key); set just before each commit path
+  const method = useRef("drag");
   const { card, back, stamps, commit, cardHandlers, deckHandlers } =
-    useSwipe({ onCommit: onSwipe, onTap: () => onOpenDetails(cards[index]), disabled: locked });
+    useSwipe({ onCommit: (dir) => onSwipe(dir, method.current), onTap: () => onOpenDetails(cards[index]), disabled: locked });
+  const commitBy = (how) => (dir) => { method.current = how; commit(dir); };
   const top = cards[index], next = cards[index + 1];
-  if (commitRef) commitRef.current = commit;
+  if (commitRef) commitRef.current = commitBy("button"); // event details' buttons
+
+  // Handoff "Performance": the Meta Pixel loads after the first card renders
+  useEffect(() => { if (top) loadPixel(); }, [!!top]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Coach hint: if nobody touches the deck in 1.5 s, nudge the top card 24px right and back, once
   // (never with reduced motion)
@@ -38,7 +45,8 @@ export function Deck({ cards, index, onSwipe, onOpenDetails, onShare, locked, de
 
   return (
     <section className="deck" tabIndex={0} aria-label="Event cards. Use the arrow keys or the buttons below." {...deckHandlers}
-      onPointerDownCapture={() => { touched.current = true; }} onKeyDownCapture={() => { touched.current = true; }}>
+      onPointerDownCapture={() => { touched.current = true; method.current = "drag"; }}
+      onKeyDownCapture={() => { touched.current = true; method.current = "key"; }}>
       <div className="deck-stack" style={{ "--glow": top ? catOf(top.category).color : "transparent" }}>
         {next && <div className="deck-back" ref={back} aria-hidden="true" style={{ transform: "translateY(8px) scale(0.95)" }}>
           <EventCard event={next} desk={desk} /></div>}
@@ -50,7 +58,7 @@ export function Deck({ cards, index, onSwipe, onOpenDetails, onShare, locked, de
         )}
       </div>
       <SwipeButtons desk={desk} disabled={locked} hideNever={hideNever}
-        onLeft={() => commit("left")} onDown={() => commit("down")} onRight={() => commit("right")} />
+        onLeft={() => commitBy("button")("left")} onDown={() => commitBy("button")("down")} onRight={() => commitBy("button")("right")} />
     </section>
   );
 }

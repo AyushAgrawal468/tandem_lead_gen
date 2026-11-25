@@ -22,7 +22,7 @@ export function OpenTandemLink({ onStuck }) {
   return (
     <p style={{ textAlign: "center", fontSize: "14px", color: T.mid, margin: "14px 0 0" }}>
       Already have it?{" "}
-      <a href={href} onClick={() => { track("open_tandem_tapped"); whenStuck(onStuck); }} style={{ color: T.green, textDecoration: "none", fontWeight: 700 }}>Open Tandem</a>
+      <a href={href} onClick={() => { track("open_tandem_tapped", { platform: /iPhone|iPad|iPod/i.test(navigator.userAgent) ? "ios" : "android" }); whenStuck(onStuck); }} style={{ color: T.green, textDecoration: "none", fontWeight: 700 }}>Open Tandem</a>
     </p>
   );
 }

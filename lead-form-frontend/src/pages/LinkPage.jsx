@@ -7,13 +7,16 @@ import { SESSION_KEY, writeJson, loadSession, sessionFrom, rememberReferral, cre
 import { fromPublic, metaLine, T, font } from "../lib/card";
 import { initialCity, matchCity } from "../lib/city";
 import { isPhone } from "../lib/app";
-import { track, identify } from "../lib/analytics";
+import { loadPixel, track, identify } from "../lib/analytics";
 import { shareLink, shareText, whatsappUrl } from "../lib/share";
 import { EventCard } from "../components/deck/EventCard";
 import { SwipeButtons } from "../components/deck/SwipeButtons";
 
 // The handoff card fills its frame (poster flexes), so it needs a height here
-const Card = ({ card }) => <div style={{ height: "min(520px, 62dvh)" }}><EventCard event={card} /></div>;
+function Card({ card }) {
+  useEffect(() => { loadPixel(); }, []); // the Meta Pixel loads after the first card renders
+  return <div style={{ height: "min(520px, 62dvh)" }}><EventCard event={card} /></div>;
+}
 import SwipeDeck from "../components/SwipeDeck";
 import PhoneSheet from "../components/PhoneSheet";
 import SendSheet from "../components/SendSheet";
@@ -66,6 +69,8 @@ const Chip = ({ text }) => (
  * "I'm in" is the first action, always: no "Open in app" at the top, or the acceptance and the
  * referral credit would be lost. noindex comes from the route wrapper (3.3).
  */
+// Analytics "link type" for Journey 2 events
+const LINK = { invite: "l", event: "e", referral: "r" };
 const desk = typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches;
 
 export default function LinkPage() {
@@ -106,7 +111,7 @@ export default function LinkPage() {
     opened.current = true;
     logClick(mode, code, eventId);
     rememberReferral(code);
-    track("invite_opened", { mode, eventId, hasCode: !!code });
+    track("invite_opened", { link: LINK[mode], event_id: eventId });
     (async () => {
       let d = { event: null, sender: null };
       try {
@@ -128,7 +133,7 @@ export default function LinkPage() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const getApp = (from) => {
-    track("install_cta_clicked", { from });
+    track("install_cta_clicked", { type: from, platform: isPhone() ? "phone" : "desktop" });
     if (isPhone()) navigate(`/download${search}`);
     else { setShowPopup(true); track("app_prompt_shown", { type: "desktop_qr", from }); }
   };
@@ -144,9 +149,9 @@ export default function LinkPage() {
         setStage("usedup"); track("app_prompt_shown", { type: "event_swipes_used_up" });
         return;
       }
-      if (await creditReferral(s)) track("referral_credited", { from: mode });
-      track("invite_accepted", { mode, eventId });
-      if (r.match) { setMatch(r.match); track("match_shown", { eventId }); }
+      if (await creditReferral(s)) track("referral_credited", { link: LINK[mode], event_id: eventId });
+      track("invite_accepted", { link: LINK[mode], event_id: eventId });
+      if (r.match) { setMatch(r.match); track("match_shown", { event_id: eventId }); }
       setStage(mode === "invite" ? "accepted" : "saved");
     } catch (err) {
       if (err instanceof AuthError) { writeJson(SESSION_KEY, null); setSession(null); setPhoneOpen(true); }
@@ -155,13 +160,13 @@ export default function LinkPage() {
   };
 
   const imIn = () => (session ? accept(session) : setPhoneOpen(true));
-  const notNow = () => { setPhoneOpen(false); setStage("notnow"); track("otp_skipped", { variant: mode }); };
+  const notNow = () => { setPhoneOpen(false); setStage("notnow"); track("otp_skipped", { trigger: "invite" }); };
 
   const onVerified = async (d) => {
     const s = sessionFrom(d);
     writeJson(SESSION_KEY, s); setSession(s); setPhoneOpen(false);
     identify(s.userId);
-    track("otp_verified", { variant: mode });
+    track("otp_verified", { trigger: "invite" });
     if (mode === "invite" && s.referralCode === code) return setStage("own");
     if (await isAccepted(s)) return setStage("already");
     accept(s);
@@ -249,7 +254,7 @@ export default function LinkPage() {
             <Card card={card} />
             <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "16px" }}>
               <a href={whatsappUrl(shareText(card, shareLink(eventId, code)))} target="_blank" rel="noopener noreferrer" style={pill(true)}
-                onClick={() => track("share_tapped", { eventId, channel: "whatsapp", own: true })}>Send on WhatsApp</a>
+                onClick={() => track("share_tapped", { event_id: eventId, channel: "whatsapp", own: true })}>Send on WhatsApp</a>
               <button onClick={copyOwn} style={pill(false)}>Copy link</button>
             </div>
             {note && <p role="status" style={{ color: T.mid, fontSize: "14px", textAlign: "center" }}>{note}</p>}

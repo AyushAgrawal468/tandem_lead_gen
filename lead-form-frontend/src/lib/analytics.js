@@ -3,7 +3,8 @@
 const POSTHOG_KEY = import.meta.env.VITE_POSTHOG_KEY || "";
 const POSTHOG_HOST = (import.meta.env.VITE_POSTHOG_HOST || "https://eu.i.posthog.com").replace(/\/$/, "");
 const SENTRY_DSN = import.meta.env.VITE_SENTRY_DSN || "";
-const FIRST_TOUCH_KEY = "firstTouch";
+const FIRST_TOUCH_KEY = "tdm.first_touch"; // handoff "What the browser stores"
+const PIXEL_ID = "1522341666207458";
 const UTM = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"];
 
 const prerender = () => new URLSearchParams(window.location.search).has("prerender");
@@ -53,7 +54,26 @@ export function initAnalytics() {
     } catch { /* bad DSN: no Sentry */ }
   }
   if (POSTHOG_KEY && !window.location.hostname.startsWith("demo.")) loadPostHog(); // no demo data in PostHog
-  track("link_opened", { path: window.location.pathname, ...Object.fromEntries(new URLSearchParams(window.location.search)), $set_once: setOnce() });
+  const q = new URLSearchParams(window.location.search), ua = navigator.userAgent;
+  track("link_opened", {
+    route: window.location.pathname, ...Object.fromEntries(UTM.map((k) => [k, q.get(k)]).filter(([, v]) => v)),
+    city: q.get("city"), referrer: document.referrer || null,
+    in_app_browser: /Instagram/i.test(ua) ? "instagram" : /FBAN|FBAV|FB_IAB/i.test(ua) ? "facebook" : "none",
+    $set_once: setOnce(),
+  });
+  // Pages without a deck (FAQ, legal) still count a PageView, a few seconds in
+  setTimeout(loadPixel, 4000);
+}
+
+/** Handoff "Performance": the Meta Pixel loads after the first card renders (the deck calls this). Once. */
+export function loadPixel() {
+  if (typeof window === "undefined" || window.fbq || prerender()) return;
+  const n = window.fbq = function (...a) { n.callMethod ? n.callMethod(...a) : n.queue.push(a); };
+  if (!window._fbq) window._fbq = n;
+  n.push = n; n.loaded = true; n.version = "2.0"; n.queue = [];
+  loadScript("https://connect.facebook.net/en_US/fbevents.js");
+  window.fbq("init", PIXEL_ID);
+  window.fbq("track", "PageView");
 }
 
 // Meta Pixel (loaded site-wide from index.html): the three funnel events it needs

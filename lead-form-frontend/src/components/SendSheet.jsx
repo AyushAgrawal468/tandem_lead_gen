@@ -21,7 +21,7 @@ export default function SendSheet({ card, referralCode, onClose, onSent }) {
   const text = shareText(card, link);
 
   const copy = async () => {
-    track("share_tapped", { eventId: card.id, channel: "copy_link", verified: !!referralCode });
+    track("share_tapped", { event_id: card.id, channel: "copy", verified: !!referralCode });
     try { await navigator.clipboard.writeText(link); onSent("Link copied."); } catch { onSent("Couldn't copy the link."); }
   };
 
@@ -43,7 +43,7 @@ export default function SendSheet({ card, referralCode, onClose, onSent }) {
         <h2 id="send-title" className="text-[22px] md:text-[24px]" style={{ fontWeight: 700, lineHeight: 1.2, margin: "0 0 6px" }}>Know someone who'd go to {card.title}?</h2>
         <p style={{ color: T.mid, fontSize: "16px", lineHeight: 1.5, margin: "0 0 16px" }}>Send it to them. If they're in, it's a plan.</p>
         <a href={whatsappUrl(text)} target="_blank" rel="noopener noreferrer" autoFocus style={pill(true)}
-          onClick={() => { track("share_tapped", { eventId: card.id, channel: "whatsapp", verified: !!referralCode }); onSent("Sent. When they say they're in, you'll see it in the app."); }}>
+          onClick={() => { track("share_tapped", { event_id: card.id, channel: "whatsapp", verified: !!referralCode }); onSent("Sent. When they say they're in, you'll see it in the app."); }}>
           <span style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
             <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 8.4 0 1 1 21 11.5z" /></svg>
             Send on WhatsApp

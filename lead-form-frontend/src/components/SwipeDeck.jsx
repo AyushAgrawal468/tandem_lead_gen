@@ -192,13 +192,13 @@ export default function SwipeDeck({ city, onCity }) {
   }, [session?.token]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Called once the card has flown off (the Deck's onSwipe)
-  const onAction = async (direction) => {
+  const onAction = async (direction, method) => {
     const card = queue[0];
     if (!card) return;
     const next = queue[1];
     setQueue((q) => q.slice(1));
     if (direction === "RIGHT") writeJson(K.lastRight, { id: card.id, title: card.title, day: card.day, time: card.time, area: card.area, price: card.price, poster: card.poster });
-    track("swiped", { event_id: card.id, direction, count: s.count + 1 });
+    track("swiped", { event_id: card.id, direction, method, count: s.count + 1 });
     setSaid(`Saved as ${LABEL[direction]}. ${Math.min(s.count + 1, LIMIT)} of ${LIMIT}.${next ? ` Next: ${next.title}.` : ""}`);
     if (!session) { dispatch({ type: "SWIPED", direction, eventId: card.id }); return; }
 
@@ -320,7 +320,7 @@ export default function SwipeDeck({ city, onCity }) {
           ) : top ? (
             <Deck cards={queue} index={0} commitRef={commitRef} desk={desk}
               locked={!!sheetOpen || (overlay && overlay.type.startsWith("soft")) || showPopup || !!details}
-              onSwipe={(dir) => onAction(dir.toUpperCase())} onOpenDetails={openDetails} onShare={share} />
+              onSwipe={(dir, method) => onAction(dir.toUpperCase(), method)} onOpenDetails={openDetails} onShare={share} />
           ) : feed === "loading" ? (
             // J1-06a: skeleton card, round buttons visible but disabled
             <div aria-busy="true" style={{ display: "flex", flexDirection: "column", gap: "14px", flex: "1 1 auto", minHeight: 0 }}>
