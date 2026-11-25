@@ -64,9 +64,10 @@ const forCard = (c, raw, startsAt, price) => ({
 export function fromPublic(e) {
   return forCard({
     id: e.eventId, title: e.title, poster: e.poster || e.imageUrl,
-    day: e.displayDate || dayFrom(e.startsAt), time: formatTime(e.eventTime), area: areaOf(e.location),
+    day: e.displayDate || dayFrom(e.startsAt), time: formatTime(e.eventTime), area: e.area ?? areaOf(e.location),
     price: priceText(e.price, e.displayPrice), description: descText(e.description, e.additionalDescription),
-  }, e.category, e.startsAt, e.price);
+    venue: e.venue || null, endsAt: e.endsAt || null,
+  }, e.categoryKey || e.category, e.startsAt, e.price);
 }
 
 /** Personal web feed (POST /events/web/feed) EventAdditionalDetails → deck card. */

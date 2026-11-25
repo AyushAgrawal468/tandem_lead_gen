@@ -235,6 +235,8 @@ export default function SwipeDeck({ city, onCity }) {
     setSaveAsk(false);
     dispatch({ type: "VERIFIED" });
     await flush(sess);
+    // The server's count wins (GET /events/web/swipesRemaining; the reloaded feed reports it too)
+    try { serverCount((await call("/events/web/swipesRemaining", { token: sess.token })).remainingSwipes); } catch { /* older backend */ }
     setSession(sess);
     if (await creditReferral(sess)) track("referral_credited", { link: "r" });
   };
