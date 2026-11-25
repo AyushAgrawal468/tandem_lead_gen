@@ -52,7 +52,7 @@ export function initAnalytics() {
       loadScript(`https://js.sentry-cdn.com/${new URL(SENTRY_DSN).username}.min.js`);
     } catch { /* bad DSN: no Sentry */ }
   }
-  if (POSTHOG_KEY) loadPostHog();
+  if (POSTHOG_KEY && !window.location.hostname.startsWith("demo.")) loadPostHog(); // no demo data in PostHog
   track("link_opened", { path: window.location.pathname, ...Object.fromEntries(new URLSearchParams(window.location.search)), $set_once: setOnce() });
 }
 
