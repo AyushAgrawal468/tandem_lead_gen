@@ -17,7 +17,7 @@ import { SwipeButtons } from "./deck/SwipeButtons";
 import { fromPublic, fromPersonal, T, font } from "../lib/card";
 
 // Handoff "What the browser stores"
-const K = { swipes: "tdm.swipes", count: "tdm.count", rights: "tdm.rights", asked: "tdm.asked", shareAsked: "tdm.shareAsked",
+const K = { swipes: "tdm.swipes", count: "tdm.count", neverToast: "tdm.neverToast", rights: "tdm.rights", asked: "tdm.asked", shareAsked: "tdm.shareAsked",
   softShown: "tdm.softShown", seen: "tdm.seen", pending: "tdm.pending", lastRight: "tdm.lastRight" };
 const SEEN_MS = 30 * 864e5; // tdm.seen entries last 30 days
 const LIMIT = FUNNEL.SWIPE_LIMIT;
@@ -69,6 +69,9 @@ export default function SwipeDeck({ city, onCity }) {
   const top = queue[0];
   const overlay = s.queue[0];
   const capped = s.screen === "hardStop";
+
+  // Coming back with swipes left (KIT toasts: "Return visit, not capped")
+  useEffect(() => { if (s.count > 0 && s.count < LIMIT) setToast("Welcome back. Pick up where you left off."); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Persist what the reducer owns: counts and asks are lifetime, never cleared
   useEffect(() => {
@@ -215,6 +218,7 @@ export default function SwipeDeck({ city, onCity }) {
     setQueue((q) => q.slice(1));
     if (direction === "RIGHT") writeJson(K.lastRight, { id: card.id, title: card.title, day: card.day, time: card.time, area: card.area, price: card.price, poster: card.poster });
     track("swiped", { event_id: card.id, direction, method, count: s.count + 1 });
+    if (direction === "DOWN" && !readJson(K.neverToast, false)) { writeJson(K.neverToast, true); setToast("Got it. You'll see less like this."); }
     setSaid(`Saved as ${LABEL[direction]}. ${Math.min(s.count + 1, LIMIT)} of ${LIMIT}.${next ? ` Next: ${next.title}.` : ""}`);
     // Any answer to the invite card clears it; an unverified I'm in keeps it for the replay's inviteRef
     if (card.invite && (session || direction !== "RIGHT")) clearInvite();
@@ -238,7 +242,7 @@ export default function SwipeDeck({ city, onCity }) {
       if (err.data?.code === "SWIPE_LIMIT") { dispatch({ type: "SERVER_COUNT", used: LIMIT }); return; }
       dispatch({ type: "SWIPED", direction, eventId: card.id });
       writeJson(K.pending, [...readJson(K.pending, []), sw]);
-      setToast(err.status === 429 ? "Hang on a sec. Saving that swipe in a moment." : "Couldn't save that swipe. Trying again.");
+      setToast(err.status === 429 ? "Hang on a sec. Too many requests. Try again in a minute." : "Couldn't save that swipe. Trying again.");
       flush();
     }
   };
@@ -324,18 +328,17 @@ export default function SwipeDeck({ city, onCity }) {
               // J1-16a / J1-16b / J1-17: hard stop, verified or not, normal or quick look
               <div style={panel}>
                 <p style={stopTitle}>
-                  {left >= FUNNEL.HARD_STOP_LOW && !quickLook ? `${left}+ more plans in ${city} are waiting in the app` : "That was a quick look. Keep going in the app."}
+                  {left >= FUNNEL.HARD_STOP_LOW && !quickLook ? `${left}+ more plans in ${city} are waiting in the app` : "Keep going in the app"}
                 </p>
                 <p style={{ color: T.mid, fontSize: "16px", lineHeight: 1.5, margin: "0 0 24px" }}>
-                  {session
-                    ? `You've used your ${LIMIT} web swipes, and they're saved. Get Tandem and allow contacts to see which friends want the same.`
-                    : `You've used your ${LIMIT} web swipes. Get Tandem to keep going, or save these swipes with your number first.`}
+                  {!session ? `You've used your ${LIMIT} web swipes. Download Tandem to keep going, or save these swipes with your number first.`
+                    : left >= FUNNEL.HARD_STOP_LOW && !quickLook ? `You've used your ${LIMIT} web swipes, and all ${LIMIT} are saved.`
+                    : `You've used your ${LIMIT} web swipes, and they're saved. New plans land every day, and the app shows you first.`}
                 </p>
                 <button onClick={() => getApp("hard_stop")} className="pill" style={btn()}>Get Tandem free</button>
                 {!session && <button onClick={() => { setSaveAsk(true); track("phone_ask_shown", { trigger: "hard_stop" }); }}
                   style={{ ...btn(), background: T.surface2, color: T.high, marginTop: "10px" }}>Save my swipes first</button>}
-                <OpenTandemLink onStuck={() => setStuck(true)} />
-                <Bridge />
+                {session && <><OpenTandemLink onStuck={() => setStuck(true)} /><Bridge /></>}
               </div>
             )
           ) : top ? (
@@ -354,9 +357,9 @@ export default function SwipeDeck({ city, onCity }) {
           ) : feed === "error" ? (
             // J1-06b
             <div style={panel}>
-              <p style={{ fontSize: "22px", fontWeight: 800, margin: "0 0 6px" }}>Couldn't load plans.</p>
-              <p style={{ color: T.mid, fontSize: "16px", margin: "0 0 20px" }}>Check your connection.</p>
-              <button onClick={() => loadMore(true)} className="pill" style={btn()}>Try again</button>
+              <p style={{ fontSize: "22px", fontWeight: 800, margin: "0 0 6px" }}>Couldn't load plans</p>
+              <p style={{ color: T.mid, fontSize: "16px", margin: "0 0 20px" }}>Check your connection and try again.</p>
+              <button onClick={() => loadMore(true)} className="pill" style={btn()}>Retry</button>
             </div>
           ) : (
             // J1-18: end of deck
@@ -366,9 +369,9 @@ export default function SwipeDeck({ city, onCity }) {
               <button onClick={() => getApp("end_of_deck")} className="pill" style={btn()}>Get Tandem free</button>
               {onCity && (
                 <>
-                  <p style={{ color: T.low, fontSize: "14px", margin: "24px 0 10px" }}>Or see what's on in another city</p>
+                  <p style={{ color: T.low, fontSize: "14px", margin: "24px 0 10px" }}>Try another city</p>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", justifyContent: "center" }}>
-                    {SUPPORTED_CITIES.filter((c) => c !== city).map((c) => (
+                    {SUPPORTED_CITIES.filter((c) => c !== city).slice(0, 4).map((c) => (
                       <button key={c} onClick={() => onCity(c)} className="city-chip">{c}</button>
                     ))}
                   </div>
@@ -403,7 +406,7 @@ export default function SwipeDeck({ city, onCity }) {
       {(toast || overlay?.type === "youreIn") && !sheetOpen && (
         <div role="status" className="deck-toast toast-in">
           {overlay?.type === "youreIn"
-            ? (overlay.saved ? `You're in. ${overlay.saved} swipes saved.` : "You're in. Swipe right on anything you'd do.")
+            ? (overlay.saved ? `You're in. ${overlay.saved} swipes saved to your number. Sign in to the app with this number to see which friends want the same.` : "You're in. Swipe right on anything you'd do.")
             : toast}
         </div>
       )}

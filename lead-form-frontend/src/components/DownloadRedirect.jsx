@@ -28,7 +28,7 @@ export default function DownloadRedirect() {
           <p style={{ color: T.mid, fontSize: "16px", margin: "0 0 28px" }}>Scan with your phone camera.</p>
           <div style={{ marginBottom: "24px" }}><QrCode size={220} /></div>
           <div style={{ display: "flex", justifyContent: "center" }}><StoreBadges /></div>
-          <Bridge />
+          <Bridge compact />
         </div>
       </main>
     </div>

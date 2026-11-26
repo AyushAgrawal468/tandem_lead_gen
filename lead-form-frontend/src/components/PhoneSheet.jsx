@@ -16,11 +16,11 @@ const pill = (main, active = true) => ({
 });
 const textBtn = { background: "none", border: "none", padding: "4px 0", color: T.green, fontFamily: font, fontSize: "14px", cursor: "pointer" };
 
-// Copy from the handoff's "Every screen and its copy"
+// Copy from the design canvas (KIT-Copy, boards J1-07 to J1-11, J2-24, J2-30)
 const ASK = {
-  normal: ({ rights }) => ["Save your picks", `You're in for ${rights} plans. Add your number to save them. Your swipes come with you when you get the app.`],
-  picky: () => ["Picky. We like that.", "Add your number to save your swipes and get better picks."],
-  save: () => ["Save your picks", "Add your number to save them. Your swipes come with you when you get the app."],
+  normal: ({ rights }) => ["Save your picks", `You're in for ${rights} plans. Add your number and they'll be waiting when you sign in to the app.`],
+  picky: () => ["Picky. We like that.", "Add your number to save your swipes. Sign in to the app with it later and they come with you."],
+  save: () => ["Save your picks", "Add your number and they'll be waiting when you sign in to the app."],
   // Journey 2 (shared link page, 3.4)
   invite: ({ sender }) => [`Tell ${sender} you're in`, `Add your number to say yes. ${sender} sees it in Tandem.`],
   event: () => ["Save this plan", "Add your number to save it. Get the app to see which friends want to go."],
@@ -118,14 +118,18 @@ export default function PhoneSheet({ variant = "normal", rights = 3, sender = "Y
       <div ref={box} role="dialog" aria-modal="true" aria-labelledby="phone-title" onClick={(e) => e.stopPropagation()}
         className="sheet">
         <span className="sheet-handle" aria-hidden="true" />
+        {(screen === "phone" || screen === "code") && (
+          <p style={{ margin: "0 0 6px", fontSize: "13px", fontWeight: 700, color: T.low }}>{screen === "phone" ? "Step 1 of 2: your number" : "Step 2 of 2: the code"}</p>
+        )}
         <h2 id="phone-title" className="text-[22px] md:text-[24px]" style={{ fontWeight: 700, lineHeight: 1.2, margin: "0 0 6px" }}>{title}</h2>
         <p style={{ color: T.mid, fontSize: "16px", lineHeight: 1.5, margin: "0 0 16px" }}>{body}</p>
 
         {screen === "phone" && (
           <form onSubmit={(e) => { e.preventDefault(); send(); }}>
+            <label htmlFor="phone-input" style={{ display: "block", margin: "0 0 6px", fontSize: "14px", fontWeight: 700, color: T.mid }}>Mobile number</label>
             <div style={{ display: "flex", gap: "8px" }}>
               <span style={{ padding: "14px", borderRadius: "8px", background: T.surface2, color: T.low, fontSize: "16px" }}>+91</span>
-              <input aria-label="Phone number" type="tel" inputMode="numeric" autoComplete="tel-national" maxLength={10} value={phone} autoFocus
+              <input id="phone-input" type="tel" inputMode="numeric" autoComplete="tel-national" maxLength={10} value={phone} autoFocus
                 aria-invalid={touched && !valid} aria-describedby="phone-error"
                 onChange={(e) => { setPhone(e.target.value.replace(/\D/g, "")); setError(""); }} onBlur={() => setTouched(true)}
                 placeholder="10-digit number"
@@ -145,6 +149,7 @@ export default function PhoneSheet({ variant = "normal", rights = 3, sender = "Y
 
         {screen === "code" && (
           <>
+            <p style={{ margin: "0 0 6px", fontSize: "14px", fontWeight: 700, color: T.mid }}>4-digit code</p>
             <div key={shake} className={codeError ? "otp-shake" : undefined}>
               <OTPInput maxLength={CODE_LENGTH} value={code} onChange={(v) => { setCode(v); if (codeError) setError(""); }} onComplete={verify}
                 pattern={REGEXP_ONLY_DIGITS} autoComplete="one-time-code" inputMode="numeric" autoFocus aria-label="4-digit code" disabled={busy}
@@ -161,27 +166,29 @@ export default function PhoneSheet({ variant = "normal", rights = 3, sender = "Y
                 )} />
             </div>
             <p role="alert" style={{ color: T.fail, fontSize: "14px", minHeight: "21px", margin: "8px 0 0" }}>{error}</p>
-            <div style={{ margin: "4px 0 14px" }}>
+            <div style={{ margin: "4px 0 14px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               {wait > 0
                 ? <span style={{ color: T.low, fontSize: "14px" }}>Resend in 0:{String(wait).padStart(2, "0")}</span>
                 : <button onClick={resend} style={textBtn}>Resend code</button>}
+              <button onClick={() => { setScreen("phone"); setCode(""); setError(""); }} style={textBtn}>Change number</button>
             </div>
             <button onClick={() => verify()} disabled={code.length < CODE_LENGTH || busy} style={pill(true, code.length === CODE_LENGTH && !busy)}>
-              {busy ? "Verifying…" : "Verify"}
+              {busy ? "Verifying…" : "Verify and save"}
             </button>
           </>
         )}
 
         {screen === "blocked" && (
           <>
-            <button onClick={onGetApp} style={pill(true)} autoFocus>Get the app</button>
+            <button onClick={onGetApp} style={pill(true)} autoFocus>Get Tandem free</button>
+            <p style={{ color: T.low, fontSize: "14px", textAlign: "center", margin: "10px 0 0" }}>Sign in there with the same number.</p>
             <OpenTandemLink onStuck={onStuck} />
           </>
         )}
 
         {screen === "slow" && (
           <>
-            <button onClick={onGetApp} style={pill(true)} autoFocus>Get the app</button>
+            <button onClick={onGetApp} style={pill(true)} autoFocus>Get Tandem free</button>
             <button onClick={() => { setScreen("code"); setError(""); }} style={{ ...pill(false), marginTop: "10px" }}>Keep waiting</button>
             <OpenTandemLink onStuck={onStuck} />
           </>

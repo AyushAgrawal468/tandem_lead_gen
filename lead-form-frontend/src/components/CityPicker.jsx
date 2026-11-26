@@ -58,7 +58,7 @@ export default function CityPicker({ city, onChange }) {
           <div role="dialog" aria-modal="true" aria-labelledby="city-title" onClick={(e) => e.stopPropagation()}
             className="sheet">
             <span className="sheet-handle" aria-hidden="true" />
-            <h2 id="city-title" style={{ fontSize: "22px", fontWeight: 700, color: T.text, marginBottom: "16px" }}>Pick your city</h2>
+            <h2 id="city-title" style={{ fontSize: "22px", fontWeight: 700, color: T.text, marginBottom: "16px" }}>Choose your city</h2>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
               <button onClick={nearMe} disabled={locating} autoFocus style={{ ...chip(false), border: `1px solid ${T.low}` }}>
                 <span style={{ color: T.purple, display: "inline-flex" }}>{pin}</span>{locating ? "Finding you…" : "Near me"}
@@ -66,6 +66,8 @@ export default function CityPicker({ city, onChange }) {
               {SUPPORTED_CITIES.map((c) => (
                 <button key={c} onClick={() => pick(c)} aria-pressed={c === city} style={chip(c === city)}>{c}</button>
               ))}
+              {/* ponytail: a line for now; J1-19 (not supported + waitlist) replaces it */}
+              <button onClick={() => setNote("We're only in these cities for now. More soon.")} style={chip(false)}>Other city</button>
             </div>
             {note && <p role="status" style={{ color: T.fail, fontSize: "14px", marginTop: "14px" }}>{note}</p>}
           </div>

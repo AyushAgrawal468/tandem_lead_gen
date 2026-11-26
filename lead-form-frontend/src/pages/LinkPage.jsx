@@ -207,8 +207,8 @@ export default function LinkPage() {
         {stage === "card" && card && (
           <>
             {mode === "invite"
-              ? <><h1 style={h1}>{sender.firstName} is in for this</h1><p style={body}>{[card.title, card.day, card.area].filter(Boolean).join(" · ")}</p></>
-              : <><h1 style={h1}>{card.title}</h1><p style={body}>{[card.day, card.area, card.price].filter(Boolean).join(" · ")}</p></>}
+              ? <><h1 style={h1}>{sender.firstName} is in for this</h1><p style={body}>{[card.title, card.day, card.price].filter(Boolean).join(" · ")}</p></>
+              : <><h1 style={h1}>{card.title}</h1><p style={body}>{[card.day, card.price].filter(Boolean).join(" · ")}</p></>}
             <div style={{ borderRadius: "16px", overflow: "hidden", background: T.surface1 }}>
               {mode === "invite" && <Strip sender={sender} text={`${sender.firstName} is in`} />}
               <Card card={card} />
@@ -226,7 +226,7 @@ export default function LinkPage() {
               {stage === "accepted" ? `You're in for ${card.title}` : stage === "saved" ? `Saved: ${card.title}` : "You're already in"}
             </h1>
             <p style={body}>
-              {stage === "accepted" ? `${sender.firstName} will see it in Tandem. Get the app to plan it together, and allow contacts to find more friends.`
+              {stage === "accepted" ? `${sender.firstName} will see it in Tandem.`
                 : stage === "saved" ? "Get the app and allow contacts to see which friends want to go."
                 : `${sender ? sender.firstName : "Your friend"} can see it in Tandem. Plan the rest in the app.`}
             </p>
@@ -235,7 +235,14 @@ export default function LinkPage() {
               <Card card={card} />
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "16px" }}>
-              <button onClick={() => getApp(stage)} style={pill(true)}>Get the app</button>
+              <button onClick={() => getApp(stage)} style={pill(true)}>
+                {stage === "saved" || !sender ? "Get Tandem free" : `Plan it with ${sender.firstName} in Tandem`}
+              </button>
+              {stage !== "already" && (
+                <p style={{ color: T.mid, fontSize: "14px", textAlign: "center", margin: 0 }}>
+                  {stage === "saved" ? "Sign in with the same number. Your plan is saved there." : `Free. Sign in with the same number to plan it with ${sender.firstName}.`}
+                </p>
+              )}
               {stage !== "already" && (
                 <button onClick={() => navigate(`/swipe?city=${encodeURIComponent(city)}`)} style={pill(false)}>
                   {stage === "saved" ? `See more in ${city}` : `Keep swiping in ${city}`}
@@ -268,7 +275,7 @@ export default function LinkPage() {
             <h1 style={h1}>You've used your 35 web swipes</h1>
             <p style={body}>Save {card.title} in the app, and see which friends want to go.</p>
             <Card card={card} />
-            <button onClick={() => getApp("event_swipes_used_up")} style={{ ...pill(true), marginTop: "16px" }}>Get the app</button>
+            <button onClick={() => getApp("event_swipes_used_up")} style={{ ...pill(true), marginTop: "16px" }}>Get Tandem free</button>
             <OpenTandemLink onStuck={() => setStuck(true)} />
           </>
         )}

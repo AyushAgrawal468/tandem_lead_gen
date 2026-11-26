@@ -7,7 +7,7 @@ import { track } from "../lib/analytics";
 import { StoreBadges } from "./SiteChrome";
 import AppIcon from "../assets/t-logo.svg";
 
-// Handoff 2.6: app prompts. Copy from "Every screen and its copy".
+// App prompts. Copy from the design canvas (KIT-Copy, boards J1-14, J1-15, J1-16, J1-21).
 const pill = (main) => ({
   display: "block", width: "100%", boxSizing: "border-box", textAlign: "center", textDecoration: "none", minHeight: "48px", padding: "14px",
   borderRadius: "999px", border: "none", fontFamily: font, fontWeight: 700, fontSize: "16px", cursor: "pointer",
@@ -31,25 +31,28 @@ export function OpenTandemLink({ onStuck }) {
  * every app button. Steps 2 and 3 wait on the doc's open decisions (swipes shown at first sign-in;
  * "we never message your contacts"), so their copy is marked to confirm with Shreyas.
  */
-export function Bridge() {
-  const step = (n, body, icon) => (
+export function Bridge({ compact = false }) {
+  // compact: titles only (boards J1-16c inside Instagram, desktop QR prompts)
+  const step = (n, title, sub, icon) => (
     <li style={{ display: "flex", gap: "12px", alignItems: "center", textAlign: "left" }}>
       <span aria-hidden="true" style={{ flex: "none", width: "36px", height: "36px", borderRadius: icon ? "10px" : "50%", display: "grid", placeItems: "center",
         background: icon ? "#F2F2F2" : T.surface2, color: T.high, fontWeight: 800, fontSize: "14px" }}>
         {icon ? <img src={AppIcon} alt="" style={{ height: "22px" }} /> : n}
       </span>
-      <span style={{ fontSize: "14px", lineHeight: 1.4, color: T.mid }}>{body}</span>
+      <span style={{ fontSize: "14px", lineHeight: 1.4, color: T.mid }}>
+        <strong style={{ color: T.high }}>{title}</strong>{!compact && <><br />{sub}</>}
+      </span>
     </li>
   );
   return (
     <div style={{ marginTop: "20px", padding: "16px", borderRadius: "16px", background: "rgba(255,255,255,0.03)", border: `1px solid ${T.line}` }}>
       <p style={{ margin: "0 0 12px", fontSize: "13px", fontWeight: 800, color: "#C1F546", textAlign: "left" }}>After you install</p>
       <ol style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: "10px" }}>
-        {step(1, <><strong style={{ color: T.high }}>Open Tandem</strong> and sign in with the same number.</>, true)}
+        {step(1, "Install Tandem", "Free. Look for this icon.", true)}
         {/* [confirm] open decision: does the app show web swipes at first sign-in? */}
-        {step(2, "Your web swipes are already there.")}
-        {/* [confirm] open decision: "we never message your contacts" on every app path */}
-        {step(3, "Allow contacts to see which friends want the same. We never message your contacts.")}
+        {step(2, "Sign in with the same number", "Your swipes are already there.")}
+        {/* [confirm] open decision: the contacts line must match what the app really does */}
+        {step(3, "Allow contacts", "That is how Tandem finds friends who picked the same plans.")}
       </ol>
     </div>
   );
@@ -73,7 +76,7 @@ export function DesktopAppPrompt({ onClose }) {
         <p style={{ color: T.mid, fontSize: "16px", margin: "0 0 20px" }}>Scan with your phone camera.</p>
         <div style={{ marginBottom: "20px" }}><QrCode size={200} /></div>
         <div style={{ display: "flex", justifyContent: "center" }}><StoreBadges /></div>
-        <Bridge />
+        <Bridge compact />
       </div>
     </div>
   );
@@ -98,13 +101,13 @@ export function OpenInBrowser({ onClose }) {
 
 /** Design screen 14: dismissible banner above the buttons at 10 and 25 swipes; the deck stays usable. */
 export function SoftPrompt({ at, onGetApp, onLater }) {
-  const text = at >= 25 ? "25 swipes in. Only the app can match you with friends."
-    : "10 swipes in. Get the app and allow contacts to see which friends want the same.";
+  const text = at >= 25 ? "25 swipes in, and 10 left on the web. Only the app can match you with friends."
+    : "10 swipes in. Some of your friends may want the same plans. The app shows you who.";
   return (
     <div role="status" className="toast-in" style={{ background: T.surface1, borderRadius: "12px", padding: "12px 14px", margin: "12px 0 0", display: "flex", alignItems: "center", gap: "12px" }}>
       <p style={{ flex: 1, fontSize: "14px", lineHeight: 1.5, color: T.high, margin: 0 }}>{text}</p>
       <button onClick={onLater} style={{ background: "none", border: "none", color: T.mid, fontFamily: font, fontSize: "14px", cursor: "pointer", padding: "8px 4px" }}>Later</button>
-      <button onClick={onGetApp} className="pill" style={{ background: T.high, color: T.bg, border: "none", borderRadius: "999px", fontFamily: font, fontWeight: 700, fontSize: "14px", padding: "10px 14px", cursor: "pointer", whiteSpace: "nowrap" }}>Get the app</button>
+      <button onClick={onGetApp} className="pill" style={{ background: T.high, color: T.bg, border: "none", borderRadius: "999px", fontFamily: font, fontWeight: 700, fontSize: "14px", padding: "10px 14px", cursor: "pointer", whiteSpace: "nowrap" }}>Get Tandem free</button>
     </div>
   );
 }
@@ -133,8 +136,9 @@ export function MatchScreen({ match, card, onGetApp, onKeepSwiping, onStuck }) {
       <div className="match-text" style={{ maxWidth: "388px", width: "100%", textAlign: "center" }}>
         <h2 id="match-title" className="text-[28px] md:text-[36px]" style={{ fontWeight: 700, lineHeight: 1.15, margin: "0 0 8px" }}>{friend} is in too!</h2>
         <p style={{ color: T.mid, fontSize: "16px", margin: "0 0 24px" }}>{card?.title}{card?.day ? `, ${card.day}` : ""}. Plan it together in the app.</p>
-        <button onClick={onGetApp} style={pill(true)} autoFocus>Get the app</button>
-        <button onClick={onKeepSwiping} style={{ ...pill(false), marginTop: "10px" }}>Keep swiping</button>
+        <button onClick={onGetApp} style={pill(true)} autoFocus>Plan it in Tandem</button>
+        <p style={{ color: T.low, fontSize: "14px", margin: "10px 0 0" }}>Free on iPhone and Android. Sign in with the same number.</p>
+        <button onClick={onKeepSwiping} style={{ ...pill(false), marginTop: "14px" }}>Keep swiping</button>
         <OpenTandemLink onStuck={onStuck} />
       </div>
     </div>
