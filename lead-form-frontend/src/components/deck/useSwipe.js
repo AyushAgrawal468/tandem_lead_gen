@@ -1,12 +1,13 @@
 // useSwipe.js (handoff "Swipe engine", word for word): one top card. Pointer handlers go on the CARD,
-// keyboard on the DECK. Only addition: a 'dragging' class, so the card's yellow tag hides while dragging.
+// keyboard on the DECK. Additions: a 'dragging' class, so the card's yellow tag hides while dragging; and
+// panY (homepage, city pages): the card moves sideways only, a vertical drag scrolls the page (touch-action: pan-y).
 import { useRef, useCallback, useEffect } from 'react';
 
 const C = { DIST: 100, VEL: 0.5, MIN: 30, UP: 0.25, ROT_DIV: 20, ROT_MAX: 12, FLY_MS: 220, SNAP_MS: 200, TAP_PX: 8, TAP_MS: 300, VEL_WINDOW: 100 };
 const EASE = 'cubic-bezier(0.23, 1, 0.32, 1)';
 const BACK_REST = 'translateY(8px) scale(0.95)';
 
-export function useSwipe({ onCommit, onTap, disabled }) {
+export function useSwipe({ onCommit, onTap, disabled, panY }) {
   const card = useRef(null), back = useRef(null);
   const sR = useRef(null), sL = useRef(null), sD = useRef(null);
   const stamps = { right: sR, left: sL, down: sD };
@@ -62,7 +63,7 @@ export function useSwipe({ onCommit, onTap, disabled }) {
     if (e.pointerId !== s.current.id) return;
     const mx = e.clientX - s.current.x0, my = e.clientY - s.current.y0;
     s.current.moved = Math.max(s.current.moved, Math.hypot(mx, my));
-    s.current.dx = mx; s.current.dy = my < 0 ? my * C.UP : my;
+    s.current.dx = mx; s.current.dy = panY ? 0 : my < 0 ? my * C.UP : my;
     // Keep only the last 100ms of samples: a flick is judged on how it ends, not on a rest before it.
     const now = performance.now(), tr = s.current.trail;
     tr.push({ x: e.clientX, y: e.clientY, t: now });

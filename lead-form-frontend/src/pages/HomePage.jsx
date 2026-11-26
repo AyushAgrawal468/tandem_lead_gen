@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import DeckScreen from "../components/DeckScreen";
@@ -8,8 +8,8 @@ import { CategoryBadge, PosterFallback } from "../components/deck/parts";
 import QrCode from "../components/QrCode";
 import { initialCity, SUPPORTED_CITIES } from "../lib/city";
 import { STEPS, QA, CITY_PAGES } from "../lib/faq";
-import { T, font, fromPublic } from "../lib/card";
-import { call } from "../lib/tandemApi";
+import { T, font } from "../lib/card";
+import { useCityFeed } from "../lib/feed";
 
 const GA_ID = "G-XTYRTQY6R7";
 
@@ -30,37 +30,37 @@ const JSON_LD = {
   ],
 };
 
-const PRERENDER = typeof window !== "undefined" && new URLSearchParams(window.location.search).has("prerender");
 const istDay = (d) => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(d);
 
 // "550+" from total_upcoming: rounded down so the number never overstates the feed
 const plansCount = (n) => (n >= 100 ? `${Math.floor(n / 50) * 50}+` : n >= 20 ? `${Math.floor(n / 10) * 10}+` : String(n));
-
-/**
- * First page of the public feed, for the live count and the weekend rail. Skipped in the prerender
- * snapshot (it never holds live events). ponytail: the deck loads the same page too; share it if it matters.
- */
-function useCityFeed(city) {
-  const [feed, setFeed] = useState(null);
-  useEffect(() => {
-    if (PRERENDER) return;
-    let off = false;
-    setFeed(null);
-    call(`/events/public/feed?city=${encodeURIComponent(city)}`)
-      .then((d) => !off && setFeed({ total: d.total_upcoming, cards: (d.events || []).map((e) => ({ ...fromPublic(e), startsAt: e.startsAt })).filter((c) => c.id) }))
-      .catch(() => {});
-    return () => { off = true; };
-  }, [city]);
-  return feed;
-}
 
 function LiveCount({ feed, city }) {
   if (!feed?.total) return null;
   return <p className="live-count"><b>{plansCount(feed.total)}</b>plans in {city} this week, from the live feed</p>;
 }
 
+/** One feed card as a link (weekend rail, FAQ aside). */
+export function RailCard({ c, to }) {
+  return (
+    <Link to={to} className="rail-card" aria-label={[c.title, c.day].filter(Boolean).join(", ")}>
+      <div className="rail-poster">
+        <PosterFallback title={c.title} category={c.category} />
+        {c.poster && <img src={c.poster} alt="" loading="lazy" onError={(e) => { e.currentTarget.style.display = "none"; }} />}
+      </div>
+      <CategoryBadge category={c.category} />
+      {c.tag && <span className="card-tag">{c.tag}</span>}
+      <div className="rail-info">
+        <b>{c.title}</b>
+        {c.day && <span>{c.day}</span>}
+        {c.price && <span className="price">{c.price}</span>}
+      </div>
+    </Link>
+  );
+}
+
 /** "This weekend in {city}": feed cards starting by this Sunday (IST). Fewer than 3 → the next ones, titled "Coming up". */
-function WeekendRail({ feed, city }) {
+export function WeekendRail({ feed, city }) {
   if (!feed?.cards.length) return null;
   const now = new Date();
   const sunday = istDay(new Date(now.getTime() + ((7 - new Date(istDay(now)).getUTCDay()) % 7) * 864e5));
@@ -74,23 +74,7 @@ function WeekendRail({ feed, city }) {
         <Link to={to}>Swipe them all</Link>
       </div>
       <ul className="rail">
-        {cards.map((c) => (
-          <li key={c.id}>
-            <Link to={to} className="rail-card" aria-label={[c.title, c.day].filter(Boolean).join(", ")}>
-              <div className="rail-poster">
-                <PosterFallback title={c.title} category={c.category} />
-                {c.poster && <img src={c.poster} alt="" loading="lazy" onError={(e) => { e.currentTarget.style.display = "none"; }} />}
-              </div>
-              <CategoryBadge category={c.category} />
-              {c.tag && <span className="card-tag">{c.tag}</span>}
-              <div className="rail-info">
-                <b>{c.title}</b>
-                {c.day && <span>{c.day}</span>}
-                {c.price && <span className="price">{c.price}</span>}
-              </div>
-            </Link>
-          </li>
-        ))}
+        {cards.map((c) => <li key={c.id}><RailCard c={c} to={to} /></li>)}
       </ul>
     </section>
   );
@@ -179,7 +163,7 @@ export default function HomePage() {
       <main className="page">
         <SiteHeader city={city} onCity={setCity} />
 
-        <DeckScreen city={city} onCity={setCity} h1="Swipe on things to do. Match with friends who want the same."
+        <DeckScreen city={city} onCity={setCity} scrollable h1="Swipe on things to do. Match with friends who want the same."
           aside={<>
             <p style={{ color: T.mid, fontSize: "18px", lineHeight: 1.55, margin: "0 0 16px", maxWidth: "500px" }}>{SUB}</p>
             <div style={{ marginBottom: "24px" }}><LiveCount feed={feed} city={city} /></div>

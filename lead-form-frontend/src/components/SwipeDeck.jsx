@@ -44,7 +44,7 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
  * handoff's reducer; overlays show one at a time (match, phone ask, you're in, send to friend, soft
  * prompts). Used by /, /swipe and the city pages. The page owns the city (header chip) and heading.
  */
-export default function SwipeDeck({ city, onCity }) {
+export default function SwipeDeck({ city, onCity, panY }) {
   const [s, dispatch] = useReducer(reducer, null, () => initial(stored()));
   const [session, setSession] = useState(loadSession);
   const [queue, setQueue] = useState([]); // cards still to swipe; queue[0] is the top card
@@ -354,7 +354,7 @@ export default function SwipeDeck({ city, onCity }) {
               </div>
             )
           ) : top ? (
-            <Deck cards={queue} index={0} commitRef={commitRef} desk={desk}
+            <Deck cards={queue} index={0} commitRef={commitRef} desk={desk} panY={panY}
               locked={!!sheetOpen || (overlay && overlay.type.startsWith("soft")) || showPopup || !!details}
               onSwipe={(dir, method) => onAction(dir.toUpperCase(), method)} onOpenDetails={openDetails} onShare={share} />
           ) : feed === "loading" ? (

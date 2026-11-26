@@ -1,32 +1,51 @@
-import React from "react";
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import Seo from "../components/Seo";
 import { SiteHeader, SiteFooter } from "../components/SiteChrome";
-import { QA, STEPS, FAQ_ORDER, faqJsonLd } from "../lib/faq";
+import { RailCard } from "./HomePage";
+import { useCityFeed } from "../lib/feed";
+import { initialCity } from "../lib/city";
+import { QA, FAQ_ORDER, faqJsonLd } from "../lib/faq";
 import { T, font } from "../lib/card";
 
-/** /faq (handoff 3.1 / design screen 38): each question an H2, answered in its first sentence, no accordions. */
+// First sentence in bright text, the rest muted (canvas J3-38)
+const split = (a) => { const i = a.indexOf(". "); return i < 0 ? [a, ""] : [a.slice(0, i + 1), a.slice(i + 1)]; };
+
+/**
+ * /faq (canvas J3-38 / J3-D38): each question an H2, answered in its first sentence, no accordions.
+ * Then "See what's on in {city}" with a live card (desktop, sticky on the right) and "See plans".
+ */
 export default function FaqPage() {
+  const [city, setCity] = useState(initialCity);
+  const feed = useCityFeed(city);
+  const to = `/swipe?city=${encodeURIComponent(city)}`;
   return (
     <div className="aurora" style={{ minHeight: "100dvh", background: T.bg, color: T.high, fontFamily: font }}>
       <Seo title="Tandem FAQ: how matching, pricing and privacy work" path="/faq" jsonLd={faqJsonLd(FAQ_ORDER)}
         description="How Tandem works, what it costs, which cities it's in, and what your friends can and can't see." />
-      <div className="px-4 md:px-6" style={{ maxWidth: "1120px", margin: "0 auto" }}>
-        <SiteHeader />
-      <main style={{ maxWidth: "720px", margin: "0 auto", paddingTop: "48px" }}>
-        <h1 className="wide text-[34px] md:text-[52px]" style={{ fontWeight: 800, lineHeight: 1.05, margin: "0 0 12px" }}>Tandem FAQ</h1>
-        <p style={{ color: T.low, fontSize: "16px", margin: "0 0 16px" }}>How matching, pricing and privacy work.</p>
-        {FAQ_ORDER.map((k, i) => (
-          <section key={k} style={{ padding: "28px 0", borderBottom: i < FAQ_ORDER.length - 1 ? `1px solid ${T.line}` : "none" }}>
-            <h2 className="wide text-[21px] md:text-[24px]" style={{ fontWeight: 700, lineHeight: 1.2, margin: "0 0 10px" }}>{QA[k][0]}</h2>
-            <p style={{ color: T.mid, fontSize: "16px", lineHeight: 1.5, margin: 0 }}>{QA[k][1]}</p>
-            {k === "how" && (
-              <ol style={{ color: T.mid, fontSize: "16px", lineHeight: 1.5, margin: "8px 0 0", paddingLeft: "20px" }}>
-                {STEPS.map(([title, text]) => <li key={title}><strong style={{ color: T.high }}>{title}</strong> {text}</li>)}
-              </ol>
-            )}
-          </section>
-        ))}
-      </main>
+      <div className="page">
+        <SiteHeader city={city} onCity={setCity} />
+        <main className="faq">
+          <div className="faq-main">
+            <h1>Tandem FAQ</h1>
+            <div>
+              {FAQ_ORDER.map((k) => {
+                const [lead, rest] = split(QA[k][1]);
+                return (
+                  <article key={k}>
+                    <h2>{QA[k][0]}</h2>
+                    <p><b>{lead}</b>{rest}</p>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+          <aside className="faq-aside">
+            <b>See what's on in {city}</b>
+            {feed?.cards[0] && <div className="desk-only"><RailCard c={feed.cards[0]} to={to} /></div>}
+            <Link to={to} className="btn-primary">See plans</Link>
+          </aside>
+        </main>
       </div>
       <SiteFooter />
     </div>

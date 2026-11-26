@@ -7,9 +7,10 @@ import SwipeDeck from "./SwipeDeck";
  * The deck screen (handoff "DeckHeading" + "Layout by breakpoint"): the big words "Swipe. Match. Go."
  * (decorative, aria-hidden, "Match." outlined), then the real h1 sentence or the reel's creator line,
  * then the live deck. Phone and tablet: one column, exactly the screen's height. Desktop: copy left,
- * deck right (420 x 660). `aside` shows under the h1 on desktop only.
+ * deck right (420 x 660). `aside` shows under the h1 on desktop only. `scrollable` (homepage, city pages):
+ * a vertical drag on the card scrolls the page instead of swiping Never.
  */
-export default function DeckScreen({ city, onCity, h1, aside }) {
+export default function DeckScreen({ city, onCity, h1, aside, scrollable }) {
   // Heading by source (canvas LP-00-Map, J1-02b), read after mount so the prerendered HTML keeps the plain H1:
   // a reel (utm_campaign in the creator map) → the creator line; a poster or QR (utm_medium=offline) → "You scanned it."
   // Coming back before the cap is a toast in the deck ("Welcome back. Pick up where you left off.").
@@ -27,7 +28,7 @@ export default function DeckScreen({ city, onCity, h1, aside }) {
         {aside && <div className="desk-only">{aside}</div>}
       </div>
       <div className="deck-col">
-        <SwipeDeck city={city} onCity={onCity} />
+        <SwipeDeck city={city} onCity={onCity} panY={scrollable} />
       </div>
     </div>
   );

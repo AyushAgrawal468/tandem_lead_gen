@@ -100,6 +100,7 @@ button:not([disabled]):active, a:active { transform: scale(0.97); }
   opacity: 0.22; filter: blur(48px); pointer-events: none; transition: background 300ms ease; } /* glow in the top card's category colour */
 .deck-top, .deck-back { position: absolute; inset: 0; }
 .deck-top { z-index: 2; will-change: transform; cursor: grab; touch-action: none; }
+.deck-top.pan-y, .deck-top.pan-y .card { touch-action: pan-y; }
 .deck-top:active { cursor: grabbing; }
 .deck-back { z-index: 1; transform-origin: 50% 100%; pointer-events: none; }
 .stamp { position: absolute; padding: 4px 12px; border: 3px solid; border-radius: 10px; font: 800 30px/1.1 var(--font);
@@ -118,6 +119,31 @@ button:not([disabled]):active, a:active { transform: scale(0.97); }
    640-1023: the same phone layout in a centred 480px column, desktop header (64px)
    >= 1024: two columns in a 1200px container, deck column 420 x 660 */
 .page { max-width: 1200px; margin: 0 auto; padding: 0 16px; box-sizing: border-box; }
+/* Primary button (canvas KIT): light fill, mint-to-purple 3px bottom edge */
+.btn-primary { min-height: 52px; padding: 0 22px; border-radius: var(--r-pill); display: inline-flex; align-items: center; justify-content: center;
+  box-sizing: border-box; border: solid transparent; border-width: 0 0 3px; font: 700 16px/1 var(--font); color: var(--bg); text-decoration: none; cursor: pointer;
+  background: linear-gradient(var(--text-1), var(--text-1)) padding-box, linear-gradient(90deg, var(--mint), var(--purple)) border-box; }
+
+/* FAQ (canvas J3-38 / J3-D38): questions left, a sticky "See what's on" box right on desktop */
+.faq { display: flex; flex-wrap: wrap; gap: 32px 80px; align-items: flex-start; padding: 32px 0 48px; }
+.faq-main { flex: 999 1 640px; min-width: 0; display: flex; flex-direction: column; gap: 24px; }
+.faq h1 { margin: 0; font-size: 44px; line-height: 0.96; font-stretch: 118%; font-weight: 800; letter-spacing: -0.02em; overflow-wrap: break-word; }
+.faq article { padding: 22px 0; border-top: 1px solid var(--surface-1); display: flex; flex-direction: column; gap: 10px; }
+.faq h2 { margin: 0; font-size: 22px; line-height: 1.18; font-stretch: 112%; font-weight: 700; }
+.faq article p { margin: 0; font-size: var(--body); line-height: 1.55; color: var(--text-2); max-width: 64ch; }
+.faq article p b { font-weight: 400; color: var(--text-1); }
+.faq-aside { flex: 1 1 320px; background: var(--surface-1); border-radius: 18px; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+.faq-aside > b { font-size: 18px; line-height: 1.25; font-stretch: 112%; }
+.faq-aside .rail-card { height: 300px; }
+@media (min-width: 1024px) {
+  .faq { padding: 64px 16px 64px; }
+  .faq h1 { font-size: 72px; line-height: 0.94; }
+  .faq article { padding: 28px 0; }
+  .faq h2 { font-size: 26px; }
+  .faq article p { font-size: 18px; }
+  .faq-aside { position: sticky; top: 32px; border-radius: 20px; padding: 24px; gap: 16px; }
+  .faq-aside > b { font-size: 20px; }
+}
 .deck-screen { height: calc(100dvh - 60px); display: flex; flex-direction: column; gap: 12px; padding-bottom: 14px; box-sizing: border-box; }
 .deck-copy { flex: none; display: flex; flex-direction: column; gap: 8px; padding-top: 4px; }
 .desk-only { display: none; }

@@ -13,7 +13,7 @@ const cities = `${SUPPORTED_CITIES.slice(0, -1).join(", ")} and ${SUPPORTED_CITI
 
 export const QA = {
   what: ["What is Tandem?", "Tandem is an app where you swipe on things to do in your city and get matched with friends who want to do the same thing."],
-  how: ["How does Tandem work?", "You swipe on plans in your city, your friends swipe too, and when you both want the same plan, Tandem matches you. Then you plan it together in the app."],
+  how: ["How does Tandem work?", STEPS.flat().join(" ")],
   groupChat: ["Why not just use the group chat?", "In a group chat, someone has to pitch a plan and chase replies, and most plans die there. On Tandem, everyone swipes on their own, and only the plans more than one of you want come up."],
   free: ["Is Tandem free?", "Yes. Tandem is free, with ads. Plus (₹149 a month) and Premium (₹199 a month) remove ads and add more features. Invite a friend and you both get a month of Premium free."],
   cities: ["Which cities is Tandem in?", `${cities}.`],

@@ -12,11 +12,11 @@ const sessionStorageSet = (k, v) => { try { sessionStorage.setItem(k, v); } catc
 // Handoff "Swipe engine" Deck.jsx: only two cards are ever in the DOM. Buttons sit OUTSIDE the drag surface.
 // Additions: commitRef (event details' buttons swipe the same card), the category glow behind the
 // stack, the coach hint, and preloading the next two posters.
-export function Deck({ cards, index, onSwipe, onOpenDetails, onShare, locked, desk, hideNever, commitRef }) {
+export function Deck({ cards, index, onSwipe, onOpenDetails, onShare, locked, desk, hideNever, commitRef, panY }) {
   // How the swipe was made (analytics "swiped": drag, button, key); set just before each commit path
   const method = useRef("drag");
   const { card, back, stamps, commit, cardHandlers, deckHandlers } =
-    useSwipe({ onCommit: (dir) => onSwipe(dir, method.current), onTap: () => onOpenDetails(cards[index]), disabled: locked });
+    useSwipe({ onCommit: (dir) => onSwipe(dir, method.current), onTap: () => onOpenDetails(cards[index]), disabled: locked, panY });
   const commitBy = (how) => (dir) => { method.current = how; commit(dir); };
   const top = cards[index], next = cards[index + 1];
   if (commitRef) commitRef.current = commitBy("button"); // event details' buttons
@@ -51,7 +51,7 @@ export function Deck({ cards, index, onSwipe, onOpenDetails, onShare, locked, de
         {next && <div className="deck-back" ref={back} aria-hidden="true" style={{ transform: "translateY(8px) scale(0.95)" }}>
           <EventCard event={next} desk={desk} /></div>}
         {top && (
-          <div className="deck-top" ref={card} key={top.id} {...cardHandlers}>
+          <div className={panY ? "deck-top pan-y" : "deck-top"} ref={card} key={top.id} {...cardHandlers}>
             <EventCard event={top} desk={desk} strip={top.strip} onShare={() => onShare(top)} />
             <Stamp ref={stamps.right} kind="right" /><Stamp ref={stamps.left} kind="left" /><Stamp ref={stamps.down} kind="down" />
           </div>
