@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { SUPPORTED_CITIES, matchCity, rememberCity, cityFromGps } from "../lib/city";
+import { SUPPORTED_CITIES, matchCity, rememberCity, cityFromGps, nearestCities } from "../lib/city";
+import Waitlist from "./Waitlist";
 
 // Design brief: chips are pills, Surface 2 unselected, Purple selected with white text; sheet on Surface 1
 const T = { surface1: "#252525", surface2: "#414141", purple: "#8349FF", text: "#F2F2F2", low: "#969696", fail: "#F3543F" };
@@ -23,6 +24,7 @@ export default function CityPicker({ city, onChange }) {
   const [open, setOpen] = useState(false);
   const [locating, setLocating] = useState(false);
   const [note, setNote] = useState("");
+  const [waitlist, setWaitlist] = useState(null); // { city, near } for J1-19a
 
   useEffect(() => {
     if (!open) return;
@@ -31,16 +33,17 @@ export default function CityPicker({ city, onChange }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
-  const pick = (c) => { rememberCity(c); onChange(c); setOpen(false); setNote(""); };
+  const pick = (c) => { rememberCity(c); onChange(c); setOpen(false); setNote(""); setWaitlist(null); };
+  const closeWaitlist = useCallback(() => setWaitlist(null), []);
 
   const nearMe = async () => {
     setLocating(true); setNote("");
     try {
-      const found = await cityFromGps();
-      const live = matchCity(found);
-      // ponytail: "not live there" is a line for now; design screen 19 (waitlist) replaces it later
+      const { name, lat, lon } = await cityFromGps();
+      const live = matchCity(name);
       if (live) pick(live);
-      else setNote(found ? `We're not in ${found} yet. Pick a nearby city.` : "Couldn't find your city. Pick one instead.");
+      else if (name) { setOpen(false); setWaitlist({ city: name, near: nearestCities(lat, lon) }); } // J1-19a
+      else setNote("Couldn't find your city. Pick one instead.");
     } catch (err) {
       setNote(err.message);
     } finally { setLocating(false); }
@@ -68,14 +71,15 @@ export default function CityPicker({ city, onChange }) {
               {SUPPORTED_CITIES.map((c) => (
                 <button key={c} onClick={() => pick(c)} aria-pressed={c === city} style={chip(c === city)}>{c}</button>
               ))}
-              {/* ponytail: a line for now; J1-19 (not supported + waitlist) replaces it */}
-              <button onClick={() => setNote("We're only in these cities for now. More soon.")} style={chip(false)}>Other city</button>
+              {/* No GPS here: the waitlist screen asks which city */}
+              <button onClick={() => { setOpen(false); setWaitlist({ city: "", near: [] }); }} style={chip(false)}>Other city</button>
             </div>
             {note && <p role="status" style={{ color: T.fail, fontSize: "14px", marginTop: "14px" }}>{note}</p>}
           </div>
         </div>,
         document.body
       )}
+      {waitlist && createPortal(<Waitlist {...waitlist} onPick={pick} onClose={closeWaitlist} />, document.body)}
     </>
   );
 }

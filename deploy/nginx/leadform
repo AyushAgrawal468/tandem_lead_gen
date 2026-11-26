@@ -70,8 +70,8 @@ server {
           proxy_set_header Host $host;
       }
 
-      # 1.3: waitlist and location saves, per real visitor IP. Generous: carrier IPs are shared
-      location ~ ^/api/(leads|location)(;.*|/)?$ {
+      # 1.3: lead, location and city-waitlist saves, per real visitor IP. Generous: carrier IPs are shared
+      location ~ ^/api/(leads|location|waitlist)(;.*|/)?$ {
           limit_req zone=forms burst=20 nodelay;
           limit_req_status 429;
           proxy_pass http://localhost:8080;

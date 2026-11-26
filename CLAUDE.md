@@ -95,6 +95,7 @@ Standard Spring Boot layered architecture: `Controller → Service → Repositor
 |---|---|---|---|
 | `POST` | `/api/leads` | None | Submit waitlist lead (name, email, mobile, sessionId) |
 | `POST` | `/api/location` | None | Save user geolocation (lat, lon, accuracy, sessionId) |
+| `POST` | `/api/waitlist` | None (nginx `forms` rate limit) | City-not-supported waitlist `{mobile, city}` → `waitlist` table, unique per (mobile, city); 204, never echoes the number (`Waitlist.jsx`, canvas J1-19a/b) |
 | `POST` | `/api/referral/{code}` | None (nginx rate limit) | Record a referral click with device fingerprint |
 | `POST` | `/api/referral/attribute` | `X-Attribution-Secret` (old `X-API-KEY` until its `app_config` row is deleted) | Deferred attribution: match an app install to a referral click |
 | `POST` | `/api/event-link/{eventId}` | None (nginx rate limit) | Record an event share link click with device fingerprint |

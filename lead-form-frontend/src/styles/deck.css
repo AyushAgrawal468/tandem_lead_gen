@@ -133,6 +133,36 @@ button:not([disabled]):active, a:active { transform: scale(0.97); }
 .dl-qr { flex: 0 0 auto; background: var(--surface-1); border-radius: 28px; padding: 28px; }
 @media (min-width: 1024px) { .dl-copy h1 { font-size: 72px; line-height: 0.94; } }
 
+/* City not supported + waitlist (canvas J1-19a/b): full screen, the app column */
+.wl { position: fixed; inset: 0; z-index: 2100; overflow-y: auto; outline: none; color: var(--text-1); font-family: var(--font);
+  background: radial-gradient(420px 260px at 10% -60px, rgba(0,255,200,0.10), transparent 70%), radial-gradient(380px 260px at 100% -40px, rgba(131,73,255,0.11), transparent 70%), var(--bg); }
+.wl-in { max-width: 480px; min-height: 100%; margin: 0 auto; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px;
+  padding: 0 16px calc(24px + env(safe-area-inset-bottom)); }
+.wl-hdr { height: 60px; flex: none; display: flex; align-items: center; justify-content: space-between; }
+.wl-hdr img { display: block; height: 26px; width: auto; }
+.wl-x { width: 44px; height: 44px; margin-right: -10px; border: 0; background: none; color: var(--text-2); display: grid; place-items: center; cursor: pointer; }
+.wl-copy { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+.wl-copy h1 { margin: 0; font-size: 36px; line-height: 1; font-stretch: 118%; font-weight: 800; letter-spacing: -0.02em; overflow-wrap: break-word; }
+.wl-copy p { margin: 0; font-size: var(--body); line-height: 1.5; color: var(--text-2); }
+.wl-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.wl-chips button { height: 44px; padding: 0 16px; border-radius: var(--r-pill); border: 0; background: var(--surface-2); color: var(--text-1); font: 700 14px var(--font); cursor: pointer; }
+.wl-form { background: var(--surface-1); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+.wl-field { display: flex; flex-direction: column; gap: 6px; }
+.wl-field label { font-size: 14px; line-height: 1.5; font-weight: 700; color: var(--text-2); }
+.wl-field input { flex: 1 1 auto; min-width: 0; height: 54px; box-sizing: border-box; padding: 0 16px; border-radius: 8px; border: 1px solid transparent;
+  background: var(--surface-2); color: var(--text-1); font: 16px var(--font); outline: none; }
+.wl-field input:focus { border-color: var(--text-1); }
+.wl-cc { height: 54px; padding: 0 16px; border-radius: 8px; background: var(--surface-2); display: flex; align-items: center; font-size: 16px; font-weight: 700; }
+.wl-legal { margin: 0; font-size: 12px; line-height: 1.5; color: var(--text-3); }
+.wl-legal a { color: var(--text-2); text-decoration: underline; }
+.wl-err { margin: 0; font-size: 14px; color: var(--fail); }
+.wl .btn-primary { width: 100%; }
+.btn-primary:disabled { opacity: 0.5; cursor: default; }
+.wl-toast { position: fixed; left: 16px; right: 16px; bottom: calc(300px + env(safe-area-inset-bottom)); max-width: 448px; margin: 0 auto;
+  background: #2E2E2E; border: 1px solid var(--surface-2); border-radius: 14px; padding: 12px 14px; display: flex; gap: 12px; align-items: center;
+  font-size: 14px; line-height: 1.5; color: var(--text-2); box-shadow: 0 12px 30px rgba(0,0,0,0.5); }
+.wl-toast > span { width: 24px; height: 24px; flex: none; border-radius: 50%; background: var(--success); display: grid; place-items: center; }
+
 /* 404 (canvas J3-39): a greyed, tilted card */
 .ghost { height: 340px; display: flex; flex-direction: column; transform: rotate(-4deg); margin: 16px 24px 0; }
 .ghost .card { flex: 1 1 auto; }
