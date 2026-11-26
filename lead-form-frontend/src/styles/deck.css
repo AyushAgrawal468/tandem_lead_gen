@@ -124,6 +124,15 @@ button:not([disabled]):active, a:active { transform: scale(0.97); }
   box-sizing: border-box; border: solid transparent; border-width: 0 0 3px; font: 700 16px/1 var(--font); color: var(--bg); text-decoration: none; cursor: pointer;
   background: linear-gradient(var(--text-1), var(--text-1)) padding-box, linear-gradient(90deg, var(--mint), var(--purple)) border-box; }
 
+/* Download, desktop (canvas J3-D40) */
+.dl { max-width: 1000px; min-height: calc(100dvh - 64px); margin: 0 auto; padding: 56px 16px; box-sizing: border-box;
+  display: flex; flex-wrap: wrap; align-items: center; align-content: center; gap: 48px 80px; }
+.dl-copy { flex: 1 1 440px; min-width: 0; display: flex; flex-direction: column; gap: 18px; }
+.dl-copy h1 { margin: 0; font-size: 44px; line-height: 0.96; font-stretch: 118%; font-weight: 800; letter-spacing: -0.02em; overflow-wrap: break-word; }
+.dl-copy p { margin: 0; font-size: 18px; line-height: 1.5; color: var(--text-2); }
+.dl-qr { flex: 0 0 auto; background: var(--surface-1); border-radius: 28px; padding: 28px; }
+@media (min-width: 1024px) { .dl-copy h1 { font-size: 72px; line-height: 0.94; } }
+
 /* 404 (canvas J3-39): a greyed, tilted card */
 .ghost { height: 340px; display: flex; flex-direction: column; transform: rotate(-4deg); margin: 16px 24px 0; }
 .ghost .card { flex: 1 1 auto; }

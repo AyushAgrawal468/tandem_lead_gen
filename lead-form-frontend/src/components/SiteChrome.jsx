@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import StoreButtons from "../assets/store-buttons.svg";
 import Wordmark from "../assets/tandem-wordmark.svg";
@@ -52,7 +53,8 @@ export function SiteHeader({ city, onCity }) {
         <Link to="/faq" className="hdr-link">FAQ</Link>
         <a href={`/download${typeof window !== "undefined" ? window.location.search : ""}`} onClick={getTandem} className="outline-pill">Get Tandem free</a>
       </nav>
-      {qr && <DesktopAppPrompt onClose={() => setQr(false)} />}
+      {/* Portal: the header's backdrop-filter would trap a fixed modal inside the header */}
+      {qr && createPortal(<DesktopAppPrompt onClose={() => setQr(false)} />, document.body)}
     </header>
   );
 }

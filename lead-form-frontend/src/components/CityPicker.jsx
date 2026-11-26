@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { SUPPORTED_CITIES, matchCity, rememberCity, cityFromGps } from "../lib/city";
 
 // Design brief: chips are pills, Surface 2 unselected, Purple selected with white text; sheet on Surface 1
@@ -53,7 +54,8 @@ export default function CityPicker({ city, onChange }) {
         <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><path d="M6 9l6 6 6-6" /></svg>
       </button>
 
-      {open && (
+      {/* Portal: the header's backdrop-filter would make it the box a fixed sheet is placed in */}
+      {open && createPortal(
         <div onClick={() => setOpen(false)} className="sheet-backdrop" style={{ zIndex: 2000 }}>
           <div role="dialog" aria-modal="true" aria-labelledby="city-title" onClick={(e) => e.stopPropagation()}
             className="sheet">
@@ -71,7 +73,8 @@ export default function CityPicker({ city, onChange }) {
             </div>
             {note && <p role="status" style={{ color: T.fail, fontSize: "14px", marginTop: "14px" }}>{note}</p>}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
