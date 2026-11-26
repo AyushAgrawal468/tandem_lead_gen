@@ -239,6 +239,8 @@ button:not([disabled]):active, a:active { transform: scale(0.97); }
 
 /* ---------- homepage sections (canvas J3-36 phone / J3-D36 desktop) ---------- */
 .home { display: flex; flex-direction: column; gap: 64px; padding-top: 32px; }
+/* Tablet (canvas J3-T36): the phone layout in the same centred 480px column as the deck */
+@media (min-width: 640px) and (max-width: 1023px) { .home { max-width: 448px; margin: 0 auto; } .home .rail { margin: 0; padding: 4px 0 12px; } }
 .home h2 { margin: 0; font-size: 28px; line-height: 1.04; font-stretch: 112%; font-weight: 700; }
 .home h2.big { font-size: var(--h2-phone); line-height: 1; font-stretch: 118%; font-weight: 800; letter-spacing: -0.02em; }
 .home .lead { margin: 0; font-size: var(--body); line-height: 1.55; color: var(--text-2); max-width: 62ch; }
