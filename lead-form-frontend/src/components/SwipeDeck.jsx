@@ -44,7 +44,7 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
  * handoff's reducer; overlays show one at a time (match, phone ask, you're in, send to friend, soft
  * prompts). Used by /, /swipe and the city pages. The page owns the city (header chip) and heading.
  */
-export default function SwipeDeck({ city, onCity, panY }) {
+export default function SwipeDeck({ city, onCity, panY, onSignedIn }) {
   const [s, dispatch] = useReducer(reducer, null, () => initial(stored()));
   const [session, setSession] = useState(loadSession);
   const [queue, setQueue] = useState([]); // cards still to swipe; queue[0] is the top card
@@ -73,6 +73,9 @@ export default function SwipeDeck({ city, onCity, panY }) {
   const capped = s.screen === "hardStop";
 
   // Coming back with swipes left (KIT toasts: "Return visit, not capped")
+  // LP-09: the page shows "Signed in as {masked} · {n} swipes saved" above the heading
+  useEffect(() => { onSignedIn?.(session?.masked ? { masked: session.masked, count: s.count } : null); }, [session, s.count]); // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => { if (s.count > 0 && s.count < LIMIT) setToast("Welcome back. Pick up where you left off."); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Persist what the reducer owns: counts and asks are lifetime, never cleared
@@ -251,8 +254,8 @@ export default function SwipeDeck({ city, onCity, panY }) {
 
   // After verify: replay every stored swipe through saveAction in order, one at a time, then clear
   // them; the reloaded personal feed reports the server's count. A replay match shows before You're in.
-  const onVerified = async (data) => {
-    const sess = sessionFrom(data);
+  const onVerified = async (data, masked) => {
+    const sess = sessionFrom(data, masked);
     identify(sess.userId);
     track("otp_verified", { is_new_user: !!data.is_new_user });
     writeJson(K.pending, [...readJson(K.pending, []), ...s.swipes]);

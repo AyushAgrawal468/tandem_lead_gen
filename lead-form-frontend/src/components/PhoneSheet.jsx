@@ -93,7 +93,7 @@ export default function PhoneSheet({ variant = "normal", rights = 3, sender = "Y
     setBusy(true); setError("");
     try {
       const data = await call("/auth/verify-otp", { method: "POST", body: { phone, countryCode: "91", otp: value, platform: "WEB" } });
-      onVerified(data);
+      onVerified(data, masked(phone)); // masked number for "Signed in as" (LP-09)
     } catch (err) {
       const d = err.data || {};
       if (d.code === "BLOCKED" || d.statusId === "BLOCKED") { setScreen("blocked"); track("app_prompt_shown", { type: "phone_blocked" }); }

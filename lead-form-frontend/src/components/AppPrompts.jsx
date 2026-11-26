@@ -6,6 +6,7 @@ import { useSheetKeys } from "../lib/useSheetKeys";
 import { track } from "../lib/analytics";
 import { StoreBadges } from "./SiteChrome";
 import AppIcon from "../assets/t-logo.svg";
+import { loadSession } from "../lib/session";
 
 // App prompts. Copy from the design canvas (KIT-Copy, boards J1-14, J1-15, J1-16, J1-21).
 const pill = (main) => ({
@@ -50,7 +51,7 @@ export function Bridge({ compact = false }) {
       <ol style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: "10px" }}>
         {step(1, "Install Tandem", "Free. Look for this icon.", true)}
         {/* [confirm] open decision: does the app show web swipes at first sign-in? */}
-        {step(2, "Sign in with the same number", "Your swipes are already there.")}
+        {step(2, `Sign in with ${loadSession()?.masked || "the same number"}`, "Your swipes are already there.")}
         {/* [confirm] open decision: the contacts line must match what the app really does */}
         {step(3, "Allow contacts", "That is how Tandem finds friends who picked the same plans.")}
       </ol>

@@ -19,16 +19,21 @@ export default function DeckScreen({ city, onCity, h1, aside, scrollable }) {
     const q = new URLSearchParams(window.location.search), ft = firstTouch();
     setState({ creator: FUNNEL.CREATORS[q.get("utm_campaign") || ft.utm_campaign], scanned: (q.get("utm_medium") || ft.utm_medium) === "offline" });
   }, []);
+  const [signedIn, setSignedIn] = useState(null); // LP-09, from SwipeDeck
   const line = state.creator ? `Saw ${state.creator}'s reel? Here's what's on in ${city}.` : state.scanned ? "You scanned it. Now swipe it." : h1;
   return (
     <div className="deck-screen">
       <div className="deck-copy">
+        {signedIn && (
+          <p className="signed-in"><span>Signed in as {signedIn.masked}</span>
+            {signedIn.count > 0 && <b>{signedIn.count} {signedIn.count === 1 ? "swipe" : "swipes"} saved</b>}</p>
+        )}
         <div className="big-words" aria-hidden="true"><span>Swipe.</span><span className="outline">Match.</span><span>Go.</span></div>
         <h1 className="deck-h1">{line}</h1>
         {aside && <div className="desk-only">{aside}</div>}
       </div>
       <div className="deck-col">
-        <SwipeDeck city={city} onCity={onCity} panY={scrollable} />
+        <SwipeDeck city={city} onCity={onCity} panY={scrollable} onSignedIn={setSignedIn} />
       </div>
     </div>
   );

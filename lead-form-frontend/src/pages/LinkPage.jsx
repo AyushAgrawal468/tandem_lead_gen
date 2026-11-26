@@ -164,8 +164,8 @@ export default function LinkPage() {
   const imIn = () => (session ? accept(session) : setPhoneOpen(true));
   const notNow = () => { setPhoneOpen(false); setStage("notnow"); track("otp_skipped", { trigger: "invite" }); };
 
-  const onVerified = async (d) => {
-    const s = sessionFrom(d);
+  const onVerified = async (d, masked) => {
+    const s = sessionFrom(d, masked);
     writeJson(SESSION_KEY, s); setSession(s); setPhoneOpen(false);
     identify(s.userId);
     track("otp_verified", { trigger: "invite" });

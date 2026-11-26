@@ -24,10 +24,10 @@ export function loadSession() {
   return s && s.expiresAt > Date.now() ? s : null;
 }
 
-/** verify-otp response → the stored session. */
-export function sessionFrom(data) {
+/** verify-otp response (+ the masked number, "98••••43210") → the stored session. */
+export function sessionFrom(data, masked = null) {
   return {
-    token: data.access_token, userId: data.user_id, referralCode: data.referral_code || null,
+    token: data.access_token, userId: data.user_id, referralCode: data.referral_code || null, masked,
     expiresAt: Date.now() + ((data.expires_in || 600) - 30) * 1000,
   };
 }
