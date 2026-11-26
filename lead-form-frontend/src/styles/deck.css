@@ -124,6 +124,14 @@ button:not([disabled]):active, a:active { transform: scale(0.97); }
   box-sizing: border-box; border: solid transparent; border-width: 0 0 3px; font: 700 16px/1 var(--font); color: var(--bg); text-decoration: none; cursor: pointer;
   background: linear-gradient(var(--text-1), var(--text-1)) padding-box, linear-gradient(90deg, var(--mint), var(--purple)) border-box; }
 
+/* 404 (canvas J3-39): a greyed, tilted card */
+.ghost { height: 340px; display: flex; flex-direction: column; transform: rotate(-4deg); margin: 16px 24px 0; }
+.ghost .card { flex: 1 1 auto; }
+.ghost .card-poster { filter: grayscale(1); opacity: 0.45; }
+.ghost .card-title, .ghost .card-date, .ghost .card-price { color: var(--text-3); }
+.ghost .cat-badge { display: none; }
+.nf-h1 { margin: 0; font-size: 36px; line-height: 1; font-stretch: 118%; font-weight: 800; letter-spacing: -0.02em; overflow-wrap: break-word; }
+
 /* FAQ (canvas J3-38 / J3-D38): questions left, a sticky "See what's on" box right on desktop */
 .faq { display: flex; flex-wrap: wrap; gap: 32px 80px; align-items: flex-start; padding: 32px 0 48px; }
 .faq-main { flex: 999 1 640px; min-width: 0; display: flex; flex-direction: column; gap: 24px; }
