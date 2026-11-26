@@ -14,6 +14,7 @@ import { SESSION_KEY, readJson, writeJson, loadSession, sessionFrom, creditRefer
 import { EventDetails } from "./EventCard";
 import { Deck } from "./deck/Deck";
 import { SwipeButtons } from "./deck/SwipeButtons";
+import { XIcon } from "./deck/parts";
 import { fromPublic, fromPersonal, T, font } from "../lib/card";
 
 // Handoff "What the browser stores"
@@ -50,6 +51,7 @@ export default function SwipeDeck({ city, onCity }) {
   const [cursor, setCursor] = useState(null); // next public-feed page, null when there is none
   const [feed, setFeed] = useState("loading"); // loading | ready | error
   const [details, setDetails] = useState(null);
+  const [invite, setInvite] = useState(null); // LP-08: the pending invite's card, shown as a strip until answered or dismissed
   const [saveAsk, setSaveAsk] = useState(false); // "Save my swipes first" from the hard stop
   const [sendCard, setSendCard] = useState(null); // card in the Send sheet (share button)
   const [showPopup, setShowPopup] = useState(false);
@@ -121,7 +123,7 @@ export default function SwipeDeck({ city, onCity }) {
         add(cards);
         setCursor(next);
       }
-      if (reset) await inviteFirst();
+      if (reset) await loadInvite();
       setFeed("ready");
     } catch (err) {
       if (err instanceof AuthError) signOut("Session expired, please log in again.");
@@ -129,15 +131,15 @@ export default function SwipeDeck({ city, onCity }) {
     } finally { loading.current = false; }
   }, [session, city, cursor]);
 
-  // LP-08: a pending invite (from /l/links) goes first, with the sender's strip. Gone or started → dropped.
-  const inviteFirst = async () => {
+  // LP-08: a pending invite (from /l/links) shows as a strip above the deck. Gone or started → dropped.
+  const loadInvite = async () => {
     const inv = pendingInvite();
     if (!inv) return;
     try {
       const d = await call(`/events/public/link?eventId=${encodeURIComponent(inv.eventId)}&code=${encodeURIComponent(inv.code)}`);
       if (!d.event || d.eventOver) { clearInvite(); return; }
       const card = { ...fromPublic(d.event), strip: d.sender?.firstName || "A friend", invite: inv };
-      setQueue((q) => [card, ...q.filter((c) => c.id !== card.id)]);
+      setInvite(card);
     } catch { /* the deck works without it */ }
   };
 
@@ -313,6 +315,16 @@ export default function SwipeDeck({ city, onCity }) {
   return (
     <div style={{ position: "relative", color: T.high, fontFamily: font, display: "flex", flexDirection: "column", gap: "14px", flex: "1 1 auto", minHeight: 0 }}>
       <section aria-label={`Plans in ${city}`} style={{ display: "flex", flexDirection: "column", gap: "14px", flex: "1 1 auto", minHeight: 0 }}>
+        {/* LP-08: tap puts the invite card on top (it carries the friend strip); x drops the invite */}
+        {invite && !capped && (
+          <div className="invite-strip">
+            <button onClick={() => { setQueue((q) => [invite, ...q.filter((c) => c.id !== invite.id)]); setInvite(null); }}>
+              <span className="avatar">{invite.strip[0]}</span>
+              <span><b>{invite.strip} is in for {invite.title}.</b> Tap to answer.</span>
+            </button>
+            <button onClick={() => { clearInvite(); setInvite(null); }} aria-label="Dismiss invite" className="invite-x"><XIcon /></button>
+          </div>
+        )}
         <div className={top && !capped ? undefined : "deck-scroll"} style={{ position: "relative", display: "flex", flexDirection: "column", flex: "1 1 auto", minHeight: 0 }}>
           {capped ? (
             session && returnVisit ? (

@@ -192,6 +192,7 @@ button:not([disabled]):active, a:active { transform: scale(0.97); }
 .card-strip { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: var(--purple); color: #fff;
   font: 700 14px var(--font); flex: none; }
 .card-strip .avatar { width: 24px; height: 24px; border-radius: 50%; background: rgba(17,17,17,0.35); display: grid; place-items: center; font-size: 12px; }
+.card-strip ~ .cat-badge, .card-strip ~ .card-tag { top: 66px; } /* below the friend strip (44px) */
 
 /* ---------- homepage sections (canvas J3-36 phone / J3-D36 desktop) ---------- */
 .home { display: flex; flex-direction: column; gap: 64px; padding-top: 32px; }
@@ -275,3 +276,52 @@ button:not([disabled]):active, a:active { transform: scale(0.97); }
   .band { padding: 56px; }
   .band .big-words span { font-size: 110px; }
 }
+
+/* ---------- event details (canvas J1-43 phone, J1-D43 desktop, J2-43 invite strip) ---------- */
+.ed { position: fixed; inset: 0; z-index: 1500; background: var(--bg); color: var(--text-1); font-family: var(--font); overflow-y: auto; outline: none;
+  animation: detailsIn 0.25s var(--ease-out); }
+.ed-head { position: sticky; top: 0; z-index: 2; height: 56px; padding: 0 8px; display: flex; align-items: center; gap: 4px;
+  background: rgba(17,17,17,0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+.ed-head span { font-size: 16px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ed-back { width: 48px; height: 48px; flex: none; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--text-1); display: grid; place-items: center; cursor: pointer; }
+.ed-back-link { display: none; }
+.ed-body { padding-bottom: calc(140px + env(safe-area-inset-bottom)); }
+.ed-main { display: flex; flex-direction: column; gap: 18px; }
+.ed-poster { position: relative; height: 300px; overflow: hidden; background: var(--surface-1); }
+.ed-poster > * { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.ed-poster .poster-fallback { font-size: 40px; }
+.ed-info { padding: 0 16px; display: flex; flex-direction: column; gap: 14px; }
+.ed-info h1 { margin: 0; font-size: 24px; line-height: 1.18; font-stretch: 112%; font-weight: 700; }
+.ed-row { display: flex; gap: 12px; align-items: center; font-size: var(--body); line-height: 1.5; }
+.ed-row svg { flex: none; color: var(--text-2); }
+.ed-price { font-size: var(--body); line-height: 1.5; font-weight: 700; color: var(--mint); }
+.ed-desc { margin: 0; font-size: var(--body); line-height: 1.5; color: var(--text-2); white-space: pre-line; overflow-wrap: anywhere; }
+.ed-strip { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 14px; background: #1C1530; border: 1px solid var(--purple);
+  font-size: var(--body); font-weight: 700; }
+.ed-strip .avatar { width: 36px; height: 36px; font-size: 14px; }
+.ed-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 3; display: flex; gap: 8px; align-items: center;
+  padding: 12px 16px calc(20px + env(safe-area-inset-bottom)); background: var(--bg); border-top: 1px solid #222; }
+.ed-bar > div { flex: 1 1 auto; }
+.ed-bar .share-btn { width: 52px; height: 52px; }
+@media (min-width: 1024px) {
+  .ed-head { display: none; }
+  .ed-body { max-width: 1080px; margin: 0 auto; padding: 32px 32px 64px; display: flex; flex-direction: column; gap: 24px; }
+  .ed-back-link { display: inline-flex; align-items: center; gap: 6px; align-self: flex-start; padding: 8px 0; border: 0; background: none;
+    color: var(--text-2); font: 700 14px var(--font); cursor: pointer; }
+  .ed-main { flex-direction: row; flex-wrap: wrap; gap: 56px; align-items: flex-start; }
+  .ed-poster { flex: 0 1 460px; height: 580px; border-radius: 20px; }
+  .ed-info { flex: 1 1 400px; min-width: 0; padding: 8px 0 0; gap: 18px; }
+  .ed-info h1 { font-size: 44px; line-height: 1.04; font-stretch: 118%; font-weight: 800; letter-spacing: -0.02em; }
+  .ed-price { font-size: 18px; }
+  .ed-desc { line-height: 1.6; max-width: 60ch; }
+  .ed-bar { position: static; padding: 0; margin-top: 8px; max-width: 500px; background: none; border: 0; }
+}
+
+/* LP-08: pending invite strip above the deck */
+.invite-strip { flex: none; display: flex; align-items: center; background: #1C1530; border: 1px solid var(--purple); border-radius: 14px; }
+.invite-strip > button { border: 0; background: none; color: var(--text-1); font-family: var(--font); cursor: pointer; }
+.invite-strip > button:first-child { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 10px; padding: 10px 4px 10px 12px;
+  text-align: left; font-size: var(--small); line-height: 1.4; }
+.invite-strip .avatar { width: 32px; height: 32px; flex: none; font-size: 14px; }
+.invite-x { width: 44px; height: 44px; flex: none; padding: 0; display: grid; place-items: center; color: var(--text-2) !important; }
+.invite-x svg { width: 18px; height: 18px; }

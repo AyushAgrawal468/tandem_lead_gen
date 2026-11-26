@@ -107,6 +107,13 @@ async function journey2(page) {
   await page.locator("#phone-title").waitFor({ timeout: 3000 }); // no session: the phone step
   await closeSheetIfOpen(page);
 
+  // LP-08: the unanswered invite waits as a strip above the deck; tapping it puts the card on top
+  await page.unrouteAll({ behavior: "ignoreErrors" });
+  await fakeApi(page, { event: event(40), city: "Bengaluru", eventOver: false, sender: SENDER });
+  await page.goto(`${BASE}/`);
+  await page.getByText("Riya is in for Test plan 40.").click();
+  await page.locator(".deck-top .card-strip").waitFor({ timeout: 3000 });
+
   await page.unrouteAll({ behavior: "ignoreErrors" });
   await fakeApi(page);
   await page.goto(`${BASE}/e/e2e0001`);
