@@ -116,7 +116,7 @@ export function HowItWorks({ cards }) {
   );
 }
 
-function GroupChat() {
+function GroupChat({ card }) {
   return (
     <section className="home-sec">
       <h2 className="big">{QA.groupChat[0]}</h2>
@@ -133,8 +133,10 @@ function GroupChat() {
         <figure style={{ background: "var(--mint-deep)", border: `1px solid ${T.green}`, gap: "12px" }}>
           <figcaption style={{ margin: 0 }}>Tandem, same Thursday</figcaption>
           <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-            <div style={{ width: "56px", height: "72px", borderRadius: "10px", background: T.purple, flex: "none" }} />
-            <div><b style={{ fontSize: "18px" }}>Arjun is in too!</b><div style={{ fontSize: "14px", color: T.mid }}>Coffee Conversations, every Saturday</div></div>
+            <div style={{ width: "56px", height: "72px", borderRadius: "10px", background: T.purple, flex: "none", overflow: "hidden" }}>
+              {card?.poster && <img src={card.poster} alt="" loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />}
+            </div>
+            <div><b style={{ fontSize: "18px" }}>Arjun is in too!</b><div style={{ fontSize: "14px", color: T.mid }}>{card ? [card.title, card.day].filter(Boolean).join(", ") : "Coffee Conversations, every Saturday"}</div></div>
           </div>
           <div style={{ height: "40px", borderRadius: "999px", background: T.green, color: T.bg, fontSize: "14px", fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center" }}>Plan it in the app</div>
         </figure>
@@ -181,7 +183,7 @@ export default function HomePage() {
           </div>
           <WeekendRail feed={feed} city={city} />
           <HowItWorks cards={railCards(feed).cards} />
-          <GroupChat />
+          <GroupChat card={railCards(feed).cards.find((c) => c.poster)} />
           <div className="home-split">
             <section className="home-sec">
               <h2 className="big">{QA.free[0]}</h2>

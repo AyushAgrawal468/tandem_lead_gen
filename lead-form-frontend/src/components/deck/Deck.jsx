@@ -25,18 +25,28 @@ export function Deck({ cards, index, onSwipe, onOpenDetails, onShare, locked, de
   useEffect(() => { if (top) loadPixel(); }, [!!top]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Coach (canvas J1-01): if nobody touches the deck in 1.5 s, "Drag right if you would go" shows on the first card
-  // (once per browser). The first card then keeps nudging 24px right and back every 4 s, so it reads as swipeable,
-  // until the first touch, key or swipe. Reduced motion keeps the pill and drops the nudge.
+  // (once per browser). The card then jiggles right and left every 4 s until the first touch, key or swipe, and
+  // again each time the deck scrolls back into view. Reduced motion keeps the pill and drops the movement.
   const touched = useRef(false);
   const [coach, setCoach] = useState(false);
   const firstId = useRef(top?.id);
   useEffect(() => {
     const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const nudge = () => {
-      if (touched.current || !card.current || still) return;
-      card.current.animate([{ transform: "translateX(0)" }, { transform: "translateX(24px) rotate(1.2deg)" }, { transform: "translateX(0)" }],
-        { duration: 700, easing: "cubic-bezier(0.23, 1, 0.32, 1)" });
+    // Right, then left, then home: it reads as "this goes both ways"
+    const jiggle = () => {
+      if (!card.current || still) return;
+      card.current.animate([{ transform: "translateX(0)" }, { transform: "translateX(24px) rotate(1.2deg)" },
+        { transform: "translateX(-24px) rotate(-1.2deg)" }, { transform: "translateX(0)" }],
+        { duration: 1000, easing: "cubic-bezier(0.37, 0, 0.63, 1)" });
     };
+    const nudge = () => { if (!touched.current) jiggle(); };
+    // Coming back to the deck (scrolled away and back) jiggles it again, even after a swipe
+    let away = false;
+    const io = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting) away = true;
+      else if (away) { away = false; jiggle(); }
+    }, { threshold: 0.6 });
+    if (card.current) io.observe(card.current.parentElement);
     let every;
     const t = setTimeout(() => {
       if (touched.current || !card.current) return;
@@ -44,7 +54,7 @@ export function Deck({ cards, index, onSwipe, onOpenDetails, onShare, locked, de
       nudge();
       every = setInterval(() => (touched.current ? clearInterval(every) : nudge()), 4000);
     }, 1500);
-    return () => { clearTimeout(t); clearInterval(every); };
+    return () => { clearTimeout(t); clearInterval(every); io.disconnect(); };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
   if (top?.id !== firstId.current) { touched.current = true; if (coach) setCoach(false); } // first card is gone: no more nudges
 

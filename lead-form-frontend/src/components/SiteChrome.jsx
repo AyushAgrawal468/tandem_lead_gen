@@ -60,6 +60,7 @@ export function SiteHeader({ city, onCity }) {
 
 /** Footer (canvas J3-36 / J3-D36, all content pages): app line + badges, one row of links, the wordmark cut off at the bottom. */
 export function SiteFooter() {
+  const [copied, setCopied] = useState(false);
   return (
     <div className="foot-wrap">
       <footer id="get-app" className="foot">
@@ -68,8 +69,10 @@ export function SiteFooter() {
             <Link to="/faq">Questions? Read the FAQ.</Link>
             <Link to="/legal/privacy-policy">Privacy Policy</Link>
             <Link to="/legal/terms-and-conditions">Terms</Link>
-            <a href={`mailto:${CONTACT}`}>Contact</a>
+            {/* mailto does nothing without a mail app, so the address is also copied and shown */}
+            <a href={`mailto:${CONTACT}`} onClick={() => { navigator.clipboard?.writeText(CONTACT).catch(() => {}); setCopied(true); setTimeout(() => setCopied(false), 4000); }}>Contact</a>
           </nav>
+          {copied && <p role="status" className="foot-note">Email us at {CONTACT} (copied)</p>}
         </div>
       </footer>
       <div className="foot-mark" aria-hidden="true" style={{ WebkitMaskImage: `url(${JSON.stringify(Wordmark)})`, maskImage: `url(${JSON.stringify(Wordmark)})` }} />

@@ -1,10 +1,22 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { PosterFallback, SendIcon } from "./deck/parts";
 
 // Event details (handoff: a state of the deck with history.pushState). Canvas J1-43 (phone: header,
 // full-width poster, title, date, venue, price, full description, fixed buttons), J1-D43 (desktop:
 // "Back to the deck", poster left, details and buttons right) and J2-43 (the friend strip on an invite).
 // The swipe deck itself lives in components/deck (handoff "Swipe engine").
+
+// Long descriptions start at 5 lines with "Read more"; short ones show in full
+function Description({ text }) {
+  const [open, setOpen] = useState(false);
+  const long = text.length > 320 || text.split(/\n/).length > 5;
+  return (
+    <div>
+      <p className={long && !open ? "ed-desc clamp" : "ed-desc"}>{text}</p>
+      {long && <button type="button" className="ed-more" aria-expanded={open} onClick={() => setOpen(!open)}>{open ? "Show less" : "Read more"}</button>}
+    </div>
+  );
+}
 
 const Icon = ({ d }) => (
   <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d={d} /></svg>
@@ -44,7 +56,7 @@ export function EventDetails({ card, onBack, actions, onShare }) {
             {when && <div className="ed-row"><Icon d={CALENDAR} />{when}</div>}
             {where && <div className="ed-row"><Icon d={PIN} />{where}</div>}
             {card.price && <div className="ed-price">{card.price}</div>}
-            {card.description && <p className="ed-desc">{card.description}</p>}
+            {card.description && <Description text={card.description} />}
             <div className="ed-bar">
               <div>{actions}</div>
               {onShare && <button onClick={onShare} aria-label="Send to a friend" className="share-btn"><SendIcon /></button>}
