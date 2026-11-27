@@ -60,7 +60,7 @@ export default function SwipeDeck({ city, onCity, panY, onSignedIn, stripSlot })
   const [said, setSaid] = useState(""); // the polite live region
   const [totalUpcoming, setTotalUpcoming] = useState(null);
   const [stuck, setStuck] = useState(false);
-  const [returnVisit, setReturnVisit] = useState(false); // came back already capped
+  const [returnVisit, setReturnVisit] = useState(() => readJson(K.count, 0) >= LIMIT); // came back already capped (J1-22/22b, LP-06/06b)
   const navigate = useNavigate();
   const commitRef = useRef(null); // the Deck's commit: event details' buttons swipe the same card
   const pendingAction = useRef(null);
@@ -315,6 +315,7 @@ export default function SwipeDeck({ city, onCity, panY, onSignedIn, stripSlot })
   const panel = { textAlign: "center", padding: "40px 16px", background: T.surface1, border: `1px solid ${T.line}`, borderRadius: "22px",
     flex: "1 0 auto", display: "flex", flexDirection: "column" };
   const push = <div aria-hidden="true" style={{ flex: "1 1 auto", minHeight: "8px" }} />;
+  const panelCompact = { ...panel, textAlign: "left", padding: "16px", background: "var(--card-2)", border: "1px solid var(--line-chat)", borderRadius: "20px", gap: "12px" };
   const stopTitle = { fontSize: "28px", lineHeight: 1.1, fontWeight: 800, fontStretch: "112%", margin: "0 0 8px" };
   const lastRight = readJson(K.lastRight, null);
   const sheetOpen = (overlay && overlay.type !== "youreIn") || sendCard || saveAsk;
@@ -335,38 +336,39 @@ export default function SwipeDeck({ city, onCity, panY, onSignedIn, stripSlot })
         )}
         <div className={top && !capped ? undefined : "deck-scroll"} style={{ position: "relative", display: "flex", flexDirection: "column", flex: "1 1 auto", minHeight: 0 }}>
           {capped ? (
-            session && returnVisit ? (
-              // J1-22: return after the cap
-              <div style={panel}>
-                <p style={stopTitle}>Welcome back</p>
-                <p style={{ color: T.mid, fontSize: "16px", lineHeight: 1.5, margin: "0 0 24px" }}>Your swipes are saved. Get the app to keep going and see who's in.</p>
-                {push}
-                <button onClick={() => getApp("return")} className="pill" style={btn()}>Get Tandem free</button>
-                <OpenTandemLink onStuck={() => setStuck(true)} />
-                <Bridge />
-              </div>
-            ) : (
-              // J1-16a / J1-16b / J1-17: hard stop, verified or not, normal or quick look
-              <div style={panel}>
-                <div className="stop-stack" aria-hidden="true">
-                  <i /><i /><i /><i />
-                  <b><span>{left >= FUNNEL.HARD_STOP_LOW && !quickLook ? `${left}+` : "New"}</span>plans</b>
+            (() => {
+              // One panel for the cap: J1-16a/b, J1-17 (hard stop) and J1-22/22b (return visit). /swipe gets the fanned
+              // cards; the homepage and city hero (panY) get the compact tile row (LP-05/LP-06). Install steps sit above the buttons.
+              const big = left >= FUNNEL.HARD_STOP_LOW && !quickLook;
+              const title = returnVisit ? "Welcome back" : big ? `${left}+ more plans in ${city} are waiting in the app` : "Keep going in the app";
+              const body = !session ? `You've used your ${LIMIT} web swipes. Download Tandem to keep going, or save these swipes with your number first.`
+                : returnVisit ? "Your swipes are saved. Get the app to keep going and see who's in."
+                : big ? `You've used your ${LIMIT} web swipes, and all ${LIMIT} are saved.`
+                : `You've used your ${LIMIT} web swipes, and they're saved. New plans land every day, and the app shows you first.`;
+              const tile = big ? `${left}+` : "New";
+              return (
+                <div style={panY ? panelCompact : panel}>
+                  {panY ? (
+                    <div className="end-head">
+                      <span className="end-tile" aria-hidden="true">{returnVisit ? LIMIT : tile}</span>
+                      <div><h2>{title}</h2><p>{body}</p></div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="stop-stack" aria-hidden="true"><i /><i /><i /><i /><b><span>{tile}</span>plans</b></div>
+                      <p style={stopTitle}>{title}</p>
+                      <p style={{ color: T.mid, fontSize: "16px", lineHeight: 1.5, margin: "0 0 24px" }}>{body}</p>
+                    </>
+                  )}
+                  {session && <Bridge />}
+                  {push}
+                  <button onClick={() => getApp(returnVisit ? "return" : "hard_stop")} className="pill" style={btn()}>Get Tandem free</button>
+                  {!session && <button onClick={() => { setSaveAsk(true); track("phone_ask_shown", { trigger: returnVisit ? "return" : "hard_stop" }); }}
+                    style={{ ...btn(), background: T.surface2, color: T.high, marginTop: "10px" }}>Save my swipes first</button>}
+                  {session && <OpenTandemLink onStuck={() => setStuck(true)} />}
                 </div>
-                <p style={stopTitle}>
-                  {left >= FUNNEL.HARD_STOP_LOW && !quickLook ? `${left}+ more plans in ${city} are waiting in the app` : "Keep going in the app"}
-                </p>
-                <p style={{ color: T.mid, fontSize: "16px", lineHeight: 1.5, margin: "0 0 24px" }}>
-                  {!session ? `You've used your ${LIMIT} web swipes. Download Tandem to keep going, or save these swipes with your number first.`
-                    : left >= FUNNEL.HARD_STOP_LOW && !quickLook ? `You've used your ${LIMIT} web swipes, and all ${LIMIT} are saved.`
-                    : `You've used your ${LIMIT} web swipes, and they're saved. New plans land every day, and the app shows you first.`}
-                </p>
-                {push}
-                <button onClick={() => getApp("hard_stop")} className="pill" style={btn()}>Get Tandem free</button>
-                {!session && <button onClick={() => { setSaveAsk(true); track("phone_ask_shown", { trigger: "hard_stop" }); }}
-                  style={{ ...btn(), background: T.surface2, color: T.high, marginTop: "10px" }}>Save my swipes first</button>}
-                {session && <><OpenTandemLink onStuck={() => setStuck(true)} /><Bridge /></>}
-              </div>
-            )
+              );
+            })()
           ) : top ? (
             <Deck cards={queue} index={0} commitRef={commitRef} desk={desk} panY={panY}
               beforeButtons={(overlay?.type === "soft10" || overlay?.type === "soft25") && (

@@ -7,7 +7,8 @@ export const initial = (stored) => ({
   verified: !!stored.token, asked: stored.asked ?? false,
   shareAsked: stored.shareAsked ?? false, softShown: stored.softShown ?? [],
   queue: [],                             // overlays waiting, shown one at a time
-  screen: 'deck',                        // deck | hardStop | endOfDeck | cityNotSupported | feedError
+  // Already at the cap on load (a signed-out return; signed-in ones also get SERVER_COUNT): straight to the hard stop
+  screen: (stored.count ?? 0) >= FUNNEL.SWIPE_LIMIT ? 'hardStop' : 'deck', // deck | hardStop | endOfDeck | cityNotSupported | feedError
 });
 
 // Every overlay type is listed, so nothing sorts by accident.

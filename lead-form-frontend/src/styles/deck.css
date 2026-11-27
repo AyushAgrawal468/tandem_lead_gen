@@ -510,3 +510,11 @@ button:not([disabled]):active, a:active { transform: scale(0.97); }
 .match-text p { margin: 0; font-size: 16px; line-height: 1.5; color: var(--text-2); }
 .match-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 24px; }
 .match-actions > p { margin: 2px 0 0; text-align: center; font-size: 12px; line-height: 1.5; color: var(--text-3); }
+
+/* Cap panel in the homepage/city hero (canvas LP-05/LP-06): tile + title row */
+.end-head { display: flex; gap: 14px; align-items: center; }
+.end-tile { width: 72px; height: 96px; flex: none; border-radius: 12px; background: var(--surface-1); display: grid; place-items: center;
+  font-size: 22px; line-height: 0.9; font-stretch: 118%; font-weight: 800; letter-spacing: -0.02em; }
+.end-head > div { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.end-head h2 { margin: 0; font-size: 20px; line-height: 1.15; font-stretch: 112%; font-weight: 700; }
+.end-head p { margin: 0; font-size: 14px; line-height: 1.45; color: var(--text-2); }
