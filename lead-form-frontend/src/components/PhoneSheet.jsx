@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { OTPInput, REGEXP_ONLY_DIGITS } from "input-otp";
 import { call } from "../lib/tandemApi";
-import { T, font } from "../lib/card";
+import { T, font, PRIMARY } from "../lib/card";
 import { useSheetKeys } from "../lib/useSheetKeys";
 import { OpenTandemLink } from "./AppPrompts";
 import { track } from "../lib/analytics";
@@ -13,6 +13,7 @@ const CODE_LENGTH = 4;
 const pill = (main, active = true) => ({
   width: "100%", minHeight: "48px", padding: "14px", borderRadius: "999px", border: "none", fontFamily: font, fontWeight: 700, fontSize: "16px",
   cursor: active ? "pointer" : "default", opacity: active ? 1 : 0.4, background: main ? T.high : T.surface2, color: main ? T.bg : T.high,
+  ...(main ? PRIMARY : {}),
 });
 const textBtn = { background: "none", border: "none", padding: "4px 0", color: T.green, fontFamily: font, fontSize: "14px", cursor: "pointer" };
 
@@ -30,7 +31,7 @@ const masked = (p) => `${p.slice(0, 2)}••••${p.slice(-4)}`;
 
 /**
  * Handoff 2.3 / design screens 7-11: phone ask, code entry, phone blocked, code not arriving.
- * Bottom sheet on phones, centred modal on desktop. Not now, Escape and a backdrop tap all close it.
+ * Bottom sheet on phones, centred modal on desktop. Not now (number step), Escape and a backdrop tap close it.
  */
 export default function PhoneSheet({ variant = "normal", rights = 3, sender = "Your friend", onClose, onVerified, onGetApp, onStuck }) {
   const [screen, setScreen] = useState("phone"); // phone | code | blocked | slow
@@ -119,16 +120,22 @@ export default function PhoneSheet({ variant = "normal", rights = 3, sender = "Y
         className="sheet">
         <span className="sheet-handle" aria-hidden="true" />
         {(screen === "phone" || screen === "code") && (
-          <p style={{ margin: "0 0 6px", fontSize: "13px", fontWeight: 700, color: T.low }}>{screen === "phone" ? "Step 1 of 2: your number" : "Step 2 of 2: the code"}</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: "6px", margin: "0 0 18px" }}>
+            <div aria-hidden="true" style={{ display: "flex", gap: "4px", width: "64px" }}>
+              <span style={{ flex: "1 1 0", height: "3px", borderRadius: "3px", background: T.green }} />
+              <span style={{ flex: "1 1 0", height: "3px", borderRadius: "3px", background: screen === "code" ? T.green : T.surface2 }} />
+            </div>
+            <p style={{ margin: 0, fontSize: "12px", lineHeight: 1.5, color: T.low }}>{screen === "phone" ? "Step 1 of 2: your number" : "Step 2 of 2: the code"}</p>
+          </div>
         )}
-        <h2 id="phone-title" className="text-[22px] md:text-[24px]" style={{ fontWeight: 700, lineHeight: 1.2, margin: "0 0 6px" }}>{title}</h2>
+        <h2 id="phone-title" className="text-[22px] md:text-[24px]" style={{ fontWeight: 700, lineHeight: 1.18, fontStretch: "112%", margin: "0 0 8px" }}>{title}</h2>
         <p style={{ color: T.mid, fontSize: "16px", lineHeight: 1.5, margin: "0 0 16px" }}>{body}</p>
 
         {screen === "phone" && (
           <form onSubmit={(e) => { e.preventDefault(); send(); }}>
             <label htmlFor="phone-input" style={{ display: "block", margin: "0 0 6px", fontSize: "14px", fontWeight: 700, color: T.mid }}>Mobile number</label>
             <div style={{ display: "flex", gap: "8px" }}>
-              <span style={{ padding: "14px", borderRadius: "8px", background: T.surface2, color: T.low, fontSize: "16px" }}>+91</span>
+              <span style={{ height: "54px", boxSizing: "border-box", padding: "0 16px", borderRadius: "8px", background: T.surface2, color: T.high, fontSize: "16px", fontWeight: 700, display: "flex", alignItems: "center" }}>+91</span>
               <input id="phone-input" type="tel" inputMode="numeric" autoComplete="tel-national" maxLength={10} value={phone} autoFocus
                 aria-invalid={touched && !valid} aria-describedby="phone-error"
                 onChange={(e) => { setPhone(e.target.value.replace(/\D/g, "")); setError(""); }} onBlur={() => setTouched(true)}
@@ -149,16 +156,15 @@ export default function PhoneSheet({ variant = "normal", rights = 3, sender = "Y
 
         {screen === "code" && (
           <>
-            <p style={{ margin: "0 0 6px", fontSize: "14px", fontWeight: 700, color: T.mid }}>4-digit code</p>
             <div key={shake} className={codeError ? "otp-shake" : undefined}>
               <OTPInput maxLength={CODE_LENGTH} value={code} onChange={(v) => { setCode(v); if (codeError) setError(""); }} onComplete={verify}
                 pattern={REGEXP_ONLY_DIGITS} autoComplete="one-time-code" inputMode="numeric" autoFocus aria-label="4-digit code" disabled={busy}
                 render={({ slots }) => (
-                  <div style={{ display: "flex", gap: "10px" }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: "10px" }}>
                     {slots.map((s, i) => (
-                      <div key={i} style={{ width: "56px", height: "56px", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center",
-                        fontSize: "24px", fontWeight: 700, color: codeError ? T.fail : T.high, background: codeError ? "var(--fail-tint)" : T.surface2,
-                        border: `1px solid ${codeError ? T.fail : s.isActive ? T.mid : "transparent"}` }}>
+                      <div key={i} style={{ height: "64px", borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center",
+                        fontSize: "28px", fontWeight: 800, fontStretch: "112%", color: codeError ? T.fail : T.high, background: codeError ? "var(--fail-tint)" : T.surface2,
+                        border: `1.5px solid ${codeError ? T.fail : s.isActive ? T.high : "transparent"}` }}>
                         {s.char ?? (s.hasFakeCaret ? <span style={{ width: "2px", height: "24px", background: T.high }} /> : null)}
                       </div>
                     ))}
@@ -170,7 +176,7 @@ export default function PhoneSheet({ variant = "normal", rights = 3, sender = "Y
               {wait > 0
                 ? <span style={{ color: T.low, fontSize: "14px" }}>Resend in 0:{String(wait).padStart(2, "0")}</span>
                 : <button onClick={resend} style={textBtn}>Resend code</button>}
-              <button onClick={() => { setScreen("phone"); setCode(""); setError(""); }} style={textBtn}>Change number</button>
+              <button onClick={() => { setScreen("phone"); setCode(""); setError(""); }} style={{ ...textBtn, color: T.mid, fontWeight: 700 }}>Change number</button>
             </div>
             <button onClick={() => verify()} disabled={code.length < CODE_LENGTH || busy} style={pill(true, code.length === CODE_LENGTH && !busy)}>
               {busy ? "Verifying…" : "Verify and save"}
@@ -194,7 +200,8 @@ export default function PhoneSheet({ variant = "normal", rights = 3, sender = "Y
           </>
         )}
 
-        {(screen === "phone" || screen === "code") && (
+        {/* Code step (J1-09a) has no Not now: Escape or a backdrop tap still close it */}
+        {screen === "phone" && (
           <button onClick={onClose} style={{ ...pill(false), marginTop: "10px" }}>Not now</button>
         )}
       </div>

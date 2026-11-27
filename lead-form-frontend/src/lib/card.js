@@ -81,3 +81,9 @@ export function fromPersonal(d) {
 }
 
 export const metaLine = (c) => [[c.day, c.time].filter(Boolean).join(", "), c.area].filter(Boolean).join("  •  ");
+
+/** Primary button fill (canvas KIT): light pill with a mint-to-purple 3px bottom edge. Spread into a button style. */
+export const PRIMARY = {
+  background: "linear-gradient(var(--text-1), var(--text-1)) padding-box, linear-gradient(90deg, var(--mint), var(--purple)) border-box",
+  border: "solid transparent", borderWidth: "0 0 3px",
+};

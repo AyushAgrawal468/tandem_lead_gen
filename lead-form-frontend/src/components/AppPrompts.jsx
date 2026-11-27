@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import QrCode from "./QrCode";
-import { T, font } from "../lib/card";
+import { T, font, PRIMARY } from "../lib/card";
 import { openTandemUrl, whenStuck } from "../lib/app";
 import { useSheetKeys } from "../lib/useSheetKeys";
 import { track } from "../lib/analytics";
@@ -13,6 +13,7 @@ const pill = (main) => ({
   display: "block", width: "100%", boxSizing: "border-box", textAlign: "center", textDecoration: "none", minHeight: "48px", padding: "14px",
   borderRadius: "999px", border: "none", fontFamily: font, fontWeight: 700, fontSize: "16px", cursor: "pointer",
   background: main ? T.high : T.surface2, color: main ? T.bg : T.high,
+  ...(main ? PRIMARY : {}),
 });
 
 /** "Already have it? Open Tandem": only where the rules table allows it, never at the top of a page, phones only. */
