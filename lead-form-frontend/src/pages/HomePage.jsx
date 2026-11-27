@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import DeckScreen from "../components/DeckScreen";
@@ -57,8 +57,39 @@ export function RailCard({ c, to }) {
 }
 
 /** "This weekend in {city}": feed cards starting by this Sunday (IST). Fewer than 3 → the next ones, titled "Coming up". */
+/**
+ * Rail auto-rotation: one card along every 3 s, back to the start after the last. Pauses while hovered, touched
+ * or focused (and for 5 s after a touch) and while off screen. Reduced motion steps without the smooth slide.
+ */
+function useAutoRotate(ref, count) {
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || count < 2) return;
+    const smooth = !matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let paused = false, visible = false, resume;
+    const step = () => {
+      if (paused || !visible || document.hidden) return;
+      const li = el.querySelector("li");
+      const by = li ? li.getBoundingClientRect().width + parseFloat(getComputedStyle(el).columnGap || "12") : el.clientWidth;
+      const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
+      el.scrollTo({ left: atEnd ? 0 : el.scrollLeft + by, behavior: smooth ? "smooth" : "auto" });
+    };
+    const pause = () => { paused = true; clearTimeout(resume); };
+    const play = (ms = 0) => { clearTimeout(resume); resume = setTimeout(() => { paused = false; }, ms); };
+    const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting; }, { threshold: 0.5 });
+    io.observe(el);
+    const on = [["pointerenter", pause], ["pointerleave", () => play()], ["touchstart", pause], ["touchend", () => play(5000)],
+      ["focusin", pause], ["focusout", () => play()]];
+    on.forEach(([t, f]) => el.addEventListener(t, f, { passive: true }));
+    const every = setInterval(step, 3000);
+    return () => { clearInterval(every); clearTimeout(resume); io.disconnect(); on.forEach(([t, f]) => el.removeEventListener(t, f)); };
+  }, [ref, count]);
+}
+
 export function WeekendRail({ feed, city }) {
   const { cards, weekend } = railCards(feed);
+  const rail = useRef(null);
+  useAutoRotate(rail, cards.length);
   if (!cards.length) return null;
   const to = `/swipe?city=${encodeURIComponent(city)}`;
   return (
@@ -67,7 +98,7 @@ export function WeekendRail({ feed, city }) {
         <h2>{weekend ? "This weekend" : "Coming up"} in {city}</h2>
         <Link to={to}>Swipe them all</Link>
       </div>
-      <ul className="rail">
+      <ul className="rail" ref={rail}>
         {cards.map((c) => <li key={c.id}><RailCard c={c} to={to} /></li>)}
       </ul>
     </section>
