@@ -11,7 +11,11 @@ export function EventCard({ event, desk, onShare, strip, style }) {
       {strip && <div className="card-strip"><span className="avatar">{strip[0]}</span>{strip} is in</div>}
       <div className="card-poster">
         {posterUrl && !broken
-          ? <img src={posterUrl} alt="" draggable="false" loading="eager" decoding="async" onError={() => setBroken(true)} />
+          ? <>
+              {/* Blurred copy fills the sides when the poster is narrower than the box (fit by height) */}
+              <img src={posterUrl} alt="" aria-hidden="true" draggable="false" className="poster-blur" />
+              <img src={posterUrl} alt="" draggable="false" loading="eager" decoding="async" onError={() => setBroken(true)} />
+            </>
           : <PosterFallback title={title} category={category} />}
       </div>
       <div className="card-info">

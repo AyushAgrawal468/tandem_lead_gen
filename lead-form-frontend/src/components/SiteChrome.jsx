@@ -5,7 +5,6 @@ import StoreButtons from "../assets/store-buttons.svg";
 import Wordmark from "../assets/tandem-wordmark.svg";
 import CityPicker from "./CityPicker";
 import { DesktopAppPrompt } from "./AppPrompts";
-import { T, font } from "../lib/card";
 
 const APP_STORE = "https://apps.apple.com/in/app/tandem-events-experiences/id6756263621";
 const PLAY = "https://play.google.com/store/apps/details?id=com.tandemit.tandemit";
@@ -59,26 +58,25 @@ export function SiteHeader({ city, onCity }) {
   );
 }
 
-/** Design screen 42: store badges, FAQ, Privacy Policy, Terms, contact. */
+/** Footer (canvas J3-36 / J3-D36, all content pages): app line + badges, one row of links, the wordmark cut off at the bottom. */
 export function SiteFooter() {
-  const link = { color: T.mid, fontSize: "14px", textDecoration: "none" };
   return (
-    <footer id="get-app" style={{ borderTop: `1px solid ${T.line}`, marginTop: "96px", padding: "48px 0 calc(48px + env(safe-area-inset-bottom))", fontFamily: font }}>
-      <div className="px-4 md:px-6" style={{ maxWidth: "1120px", margin: "0 auto", display: "flex", flexWrap: "wrap", gap: "28px 48px", alignItems: "flex-end", justifyContent: "space-between" }}>
-        <div>
-          <p className="wide text-[24px] md:text-[30px]" style={{ color: T.high, fontWeight: 700, lineHeight: 1.15, margin: "0 0 18px", maxWidth: "460px" }}>Get Tandem on iPhone and Android.</p>
-          <StoreBadges />
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-          <nav aria-label="Footer" style={{ display: "flex", flexWrap: "wrap", gap: "12px 28px" }}>
-            <Link to="/faq" style={link}>FAQ</Link>
-            <Link to="/legal/privacy-policy" style={link}>Privacy Policy</Link>
-            <Link to="/legal/terms-and-conditions" style={link}>Terms</Link>
-            <a href={`mailto:${CONTACT}`} style={link}>Contact</a>
+    <div className="foot-wrap">
+      <footer id="get-app" className="foot">
+        <div className="foot-in">
+          <div className="foot-app">
+            <p>Get Tandem on iPhone and Android.</p>
+            <StoreBadges width={300} />
+          </div>
+          <nav aria-label="Footer">
+            <Link to="/faq">Questions? Read the FAQ.</Link>
+            <Link to="/legal/privacy-policy">Privacy Policy</Link>
+            <Link to="/legal/terms-and-conditions">Terms</Link>
+            <a href={`mailto:${CONTACT}`}>Contact</a>
           </nav>
-          <p style={{ color: T.low, fontSize: "12px", margin: 0 }}>Questions? <Link to="/faq" style={{ color: T.green, textDecoration: "none" }}>Read the FAQ</Link>.</p>
         </div>
-      </div>
-    </footer>
+      </footer>
+      <div className="foot-mark" aria-hidden="true" style={{ WebkitMaskImage: `url(${Wordmark})`, maskImage: `url(${Wordmark})` }} />
+    </div>
   );
 }
