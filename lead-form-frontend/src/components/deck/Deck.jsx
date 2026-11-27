@@ -26,20 +26,22 @@ export function Deck({ cards, index, onSwipe, onOpenDetails, onShare, locked, de
 
   // Coach (canvas J1-01): if nobody touches the deck in 1.5 s, "Drag right if you would go" shows on the first card
   // (once per browser). Whatever card is on top jiggles right and left after 4 s without a touch, key or swipe,
-  // and again each time the deck scrolls back into view. Reduced motion keeps the pill and drops the movement.
+  // and again each time the deck scrolls back into view. Reduced motion gets a gentle 8px jiggle.
   const touched = useRef(false);
   const lastActive = useRef(Date.now());
   const [coach, setCoach] = useState(false);
   useEffect(() => { lastActive.current = Date.now(); setCoach(false); }, [top?.id]); // a new card on top: idle clock restarts, pill goes
   useEffect(() => {
     const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    // Right, then left, then home: it reads as "this goes both ways"
+    // Right, then left, then home: it reads as "this goes both ways". Reduced motion gets a gentle version
+    // (8px, no rotation, slower) so the swipe hint still shows (chosen 27 Nov 2026).
+    const [dx, rot, ms] = still ? [8, 0, 1400] : [24, 1.2, 1000];
     const jiggle = () => {
-      if (!card.current || still || document.hidden) return;
+      if (!card.current || document.hidden) return;
       lastActive.current = Date.now();
-      card.current.animate([{ transform: "translateX(0)" }, { transform: "translateX(24px) rotate(1.2deg)" },
-        { transform: "translateX(-24px) rotate(-1.2deg)" }, { transform: "translateX(0)" }],
-        { duration: 1000, easing: "cubic-bezier(0.37, 0, 0.63, 1)" });
+      card.current.animate([{ transform: "translateX(0)" }, { transform: `translateX(${dx}px) rotate(${rot}deg)` },
+        { transform: `translateX(${-dx}px) rotate(${-rot}deg)` }, { transform: "translateX(0)" }],
+        { duration: ms, easing: "cubic-bezier(0.37, 0, 0.63, 1)" });
     };
     // Coming back to the deck (scrolled away and back) jiggles it straight away
     let away = false;
