@@ -58,13 +58,15 @@ export function SiteHeader({ city, onCity }) {
   );
 }
 
-/** Footer (canvas J3-36 / J3-D36, all content pages): app line + badges, one row of links, the wordmark cut off at the bottom. */
+/** Footer (canvas J3-36 / J3-D36, all content pages): a small muted wordmark, then one row of links. */
 export function SiteFooter() {
   const [copied, setCopied] = useState(false);
   return (
     <div className="foot-wrap">
       <footer id="get-app" className="foot">
         <div className="foot-in">
+          {/* Quiet sign-off: the wordmark small and muted, links home (the hero and band carry the brand) */}
+          <Link to="/" aria-label="Tandem home" className="foot-logo" style={{ WebkitMaskImage: `url(${JSON.stringify(Wordmark)})`, maskImage: `url(${JSON.stringify(Wordmark)})` }} />
           <nav aria-label="Footer">
             <Link to="/faq">Questions? Read the FAQ.</Link>
             <Link to="/legal/privacy-policy">Privacy Policy</Link>
@@ -75,7 +77,6 @@ export function SiteFooter() {
           {copied && <p role="status" className="foot-note">Email us at {CONTACT} (copied)</p>}
         </div>
       </footer>
-      <div className="foot-mark" aria-hidden="true" style={{ WebkitMaskImage: `url(${JSON.stringify(Wordmark)})`, maskImage: `url(${JSON.stringify(Wordmark)})` }} />
     </div>
   );
 }

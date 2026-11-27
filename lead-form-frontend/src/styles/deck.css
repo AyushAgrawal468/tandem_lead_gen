@@ -451,23 +451,20 @@ button:not([disabled]):active, a:active { transform: scale(0.97); }
 .invite-x svg { width: 18px; height: 18px; }
 
 /* Footer (canvas J3-36 / J3-D36) */
-.foot-wrap { position: relative; overflow: hidden; margin-top: 64px; }
+.foot-wrap { margin-top: 64px; }
 .foot { border-top: 1px solid var(--line-faint); font-family: var(--font); }
 .foot-in { max-width: 1200px; margin: 0 auto; box-sizing: border-box; padding: 28px 16px 36px; display: flex; flex-direction: column; gap: 18px; }
 .foot-app { display: flex; flex-direction: column; gap: 18px; }
 .foot p { margin: 0; font-size: 14px; line-height: 1.5; font-weight: 700; color: var(--text-1); }
 .foot nav { display: flex; flex-wrap: wrap; gap: 4px 20px; font-size: 14px; line-height: 1.5; }
 .foot nav a { color: var(--text-2); min-height: 44px; display: inline-flex; align-items: center; text-decoration: none; }
-.foot-mark { width: calc(100% - 32px); max-width: 328px; aspect-ratio: 138 / 32; margin: 0 auto -4px; background: var(--card);
-  -webkit-mask: center / contain no-repeat; mask: center / contain no-repeat; }
 @media (min-width: 1024px) {
   .foot-wrap { margin-top: 120px; }
   .foot-in { flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px; padding: 36px 32px 44px; }
   .foot-app { gap: 14px; }
   .foot nav { gap: 8px 28px; }
   .foot nav a { min-height: 0; }
-  .foot-mark { width: calc(100% - 48px); max-width: 1121px; margin-bottom: -15px; }
-}
+  }
 
 /* Hard stop: fanned cards with the plans count on top (canvas J1-16a/b, J1-17) */
 .stop-stack { position: relative; height: 198px; flex: none; margin: -16px 0 8px; }
@@ -549,3 +546,5 @@ button:not([disabled]):active, a:active { transform: scale(0.97); }
 .ed-desc.clamp { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 5; overflow: hidden; }
 .ed-more { margin-top: 6px; padding: 8px 0; border: 0; background: none; color: var(--mint); font: 700 14px var(--font); cursor: pointer; }
 .foot-note { margin: 0; font-size: 14px; line-height: 1.5; color: var(--text-2); }
+.foot-logo { display: block; width: 112px; height: 26px; flex: none; background: var(--text-3); -webkit-mask: left center / contain no-repeat; mask: left center / contain no-repeat; }
+@media (hover: hover) and (pointer: fine) { .foot-logo:hover { background: var(--text-2); } }
