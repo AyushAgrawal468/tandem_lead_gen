@@ -37,7 +37,7 @@ export function Bridge({ compact = false }) {
   const step = (n, title, sub, icon) => (
     <li style={{ display: "flex", gap: "12px", alignItems: "center", textAlign: "left" }}>
       <span aria-hidden="true" style={{ flex: "none", width: "36px", height: "36px", borderRadius: icon ? "10px" : "50%", display: "grid", placeItems: "center",
-        background: icon ? "#F2F2F2" : T.surface2, color: T.high, fontWeight: 800, fontSize: "14px" }}>
+        background: icon ? "var(--text-1)" : T.surface2, color: T.high, fontWeight: 800, fontSize: "14px" }}>
         {icon ? <img src={AppIcon} alt="" style={{ height: "22px" }} /> : n}
       </span>
       <span style={{ fontSize: "14px", lineHeight: 1.4, color: T.mid }}>
@@ -47,7 +47,7 @@ export function Bridge({ compact = false }) {
   );
   return (
     <div style={{ marginTop: "20px", padding: "16px", borderRadius: "16px", background: "rgba(255,255,255,0.03)", border: `1px solid ${T.line}` }}>
-      <p style={{ margin: "0 0 12px", fontSize: "13px", fontWeight: 800, color: "#C1F546", textAlign: "left" }}>After you install</p>
+      <p style={{ margin: "0 0 12px", fontSize: "13px", fontWeight: 800, color: "var(--yellow)", textAlign: "left" }}>After you install</p>
       <ol style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: "10px" }}>
         {step(1, "Install Tandem", "Free. Look for this icon.", true)}
         {/* [confirm] open decision: does the app show web swipes at first sign-in? */}

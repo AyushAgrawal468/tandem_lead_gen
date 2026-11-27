@@ -22,7 +22,7 @@ export default function QrCode({ size = 200 }) {
 
   const pad = 2; // quiet zone, in modules
   return (
-    <div style={{ position: "relative", width: size, height: size, margin: "0 auto", background: "#fff", borderRadius: "16px", padding: "10px", boxSizing: "border-box" }}>
+    <div style={{ position: "relative", width: size, height: size, margin: "0 auto", background: "var(--white)", borderRadius: "16px", padding: "10px", boxSizing: "border-box" }}>
       {cells && (
         <svg viewBox={`0 0 ${cells.n + pad * 2} ${cells.n + pad * 2}`} width="100%" height="100%" role="img" aria-label="QR code to get Tandem on your phone" shapeRendering="crispEdges">
           <path fill="#111" d={Array.from({ length: cells.n }, (_, r) => Array.from({ length: cells.n }, (_, c) =>
@@ -31,7 +31,7 @@ export default function QrCode({ size = 200 }) {
       )}
       {/* App icon in the centre: about 20% of the code, well inside level H's 30% recovery */}
       <span aria-hidden="true" style={{ position: "absolute", left: "50%", top: "50%", transform: "translate(-50%, -50%)", width: size * 0.2, height: size * 0.2,
-        borderRadius: "10px", background: "#fff", display: "grid", placeItems: "center", boxShadow: "0 0 0 3px #fff" }}>
+        borderRadius: "10px", background: "var(--white)", display: "grid", placeItems: "center", boxShadow: "0 0 0 3px var(--white)" }}>
         <img src={AppIcon} alt="" style={{ height: "70%" }} />
       </span>
     </div>

@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useReducer, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { FUNNEL } from "../lib/funnel.config.js";
 import { reducer, initial } from "../lib/funnel.reducer.js";
@@ -44,7 +45,7 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
  * handoff's reducer; overlays show one at a time (match, phone ask, you're in, send to friend, soft
  * prompts). Used by /, /swipe and the city pages. The page owns the city (header chip) and heading.
  */
-export default function SwipeDeck({ city, onCity, panY, onSignedIn }) {
+export default function SwipeDeck({ city, onCity, panY, onSignedIn, stripSlot }) {
   const [s, dispatch] = useReducer(reducer, null, () => initial(stored()));
   const [session, setSession] = useState(loadSession);
   const [queue, setQueue] = useState([]); // cards still to swipe; queue[0] is the top card
@@ -318,8 +319,9 @@ export default function SwipeDeck({ city, onCity, panY, onSignedIn }) {
   return (
     <div style={{ position: "relative", color: T.high, fontFamily: font, display: "flex", flexDirection: "column", gap: "14px", flex: "1 1 auto", minHeight: 0 }}>
       <section aria-label={`Plans in ${city}`} style={{ display: "flex", flexDirection: "column", gap: "14px", flex: "1 1 auto", minHeight: 0 }}>
-        {/* LP-08: tap puts the invite card on top (it carries the friend strip); x drops the invite */}
-        {invite && !capped && (
+        {/* LP-08: tap puts the invite card on top (it carries the friend strip); x drops the invite.
+            Above the big words when the page gives a slot (DeckScreen), else right above the deck */}
+        {invite && !capped && ((strip) => (stripSlot ? createPortal(strip, stripSlot) : strip))(
           <div className="invite-strip">
             <button onClick={() => { setQueue((q) => [invite, ...q.filter((c) => c.id !== invite.id)]); setInvite(null); }}>
               <span className="avatar">{invite.strip[0]}</span>
@@ -365,7 +367,7 @@ export default function SwipeDeck({ city, onCity, panY, onSignedIn }) {
             <div aria-busy="true" style={{ display: "flex", flexDirection: "column", gap: "14px", flex: "1 1 auto", minHeight: 0 }}>
               <div className="card" style={{ flex: "1 1 auto", height: "auto", minHeight: 0 }}>
                 <div className="card-poster" />
-                <p style={{ color: T.low, fontSize: "14px", margin: "14px 16px 16px" }}>Finding what's on in {city}...</p>
+                <p style={{ color: T.low, fontSize: "14px", margin: "14px 16px 16px" }}>Finding what's on in {city}…</p>
               </div>
               <SwipeButtons disabled desk={desk} onLeft={() => {}} onDown={() => {}} onRight={() => {}} />
             </div>
@@ -403,7 +405,7 @@ export default function SwipeDeck({ city, onCity, panY, onSignedIn }) {
 
         <div className="progress">
           <div className="bar" role="progressbar" aria-label="Web swipes used" aria-valuemin={0} aria-valuemax={LIMIT} aria-valuenow={Math.min(s.count, LIMIT)}>
-            <div className="fill" style={{ width: `${Math.min(100, (s.count / LIMIT) * 100)}%` }} />
+            <div className="fill" style={{ transform: `scaleX(${Math.min(1, s.count / LIMIT)})` }} />
           </div>
           {Math.min(s.count, LIMIT)}/{LIMIT}
         </div>

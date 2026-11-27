@@ -23,7 +23,7 @@ export function CategoryBadge({ category }) {
 // Missing or broken poster: the title on the category colour, never a broken image icon
 export function PosterFallback({ title, category }) {
   const c = catOf(category).color;
-  return <div className="poster-fallback" style={{ background: `linear-gradient(160deg, ${c}, ${c}99 55%, #1E1E1E)` }}>{title}</div>;
+  return <div className="poster-fallback" style={{ background: `linear-gradient(160deg, ${c}, ${c}99 55%, var(--card))` }}>{title}</div>;
 }
 
 // React 19 passes ref as a prop

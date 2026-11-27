@@ -119,7 +119,7 @@ function GroupChat() {
       <h2 className="big">{QA.groupChat[0]}</h2>
       <p className="lead">{QA.groupChat[1]}</p>
       <div className="chat-pair" aria-hidden="true">
-        <figure style={{ background: "#1A1A1A", border: "1px solid #2A2A2A" }}>
+        <figure style={{ background: "var(--card-2)", border: "1px solid var(--line-chat)" }}>
           <figcaption>The group chat, Thursday</figcaption>
           <div className="bubble">someone plan something this weekend pls</div>
           <div className="bubble me">yes!! anything</div>
@@ -127,7 +127,7 @@ function GroupChat() {
           <div className="bubble">maybe, who else is in</div>
           <div className="bubble" style={{ opacity: 0.45 }}>Seen by 6</div>
         </figure>
-        <figure style={{ background: "#0E1A17", border: `1px solid ${T.green}`, gap: "12px" }}>
+        <figure style={{ background: "var(--mint-deep)", border: `1px solid ${T.green}`, gap: "12px" }}>
           <figcaption style={{ margin: 0 }}>Tandem, same Thursday</figcaption>
           <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
             <div style={{ width: "56px", height: "72px", borderRadius: "10px", background: T.purple, flex: "none" }} />

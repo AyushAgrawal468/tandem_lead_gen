@@ -134,7 +134,7 @@ export default function PhoneSheet({ variant = "normal", rights = 3, sender = "Y
                 onChange={(e) => { setPhone(e.target.value.replace(/\D/g, "")); setError(""); }} onBlur={() => setTouched(true)}
                 placeholder="10-digit number"
                 style={{ flex: 1, minWidth: 0, padding: "14px", borderRadius: "8px", fontFamily: font, fontSize: "16px", outline: "none", color: T.high,
-                  background: touched && !valid && phone ? "#221615" : T.surface2, border: `1px solid ${touched && !valid && phone ? T.fail : "transparent"}` }} />
+                  background: touched && !valid && phone ? "var(--fail-tint)" : T.surface2, border: `1px solid ${touched && !valid && phone ? T.fail : "transparent"}` }} />
             </div>
             <p id="phone-error" role="alert" style={{ color: T.fail, fontSize: "14px", minHeight: "21px", margin: "6px 0 0" }}>
               {(touched || phone.length === 10) && phone && !valid ? "Enter a 10-digit mobile number." : error}
@@ -157,7 +157,7 @@ export default function PhoneSheet({ variant = "normal", rights = 3, sender = "Y
                   <div style={{ display: "flex", gap: "10px" }}>
                     {slots.map((s, i) => (
                       <div key={i} style={{ width: "56px", height: "56px", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center",
-                        fontSize: "24px", fontWeight: 700, color: codeError ? T.fail : T.high, background: codeError ? "#221615" : T.surface2,
+                        fontSize: "24px", fontWeight: 700, color: codeError ? T.fail : T.high, background: codeError ? "var(--fail-tint)" : T.surface2,
                         border: `1px solid ${codeError ? T.fail : s.isActive ? T.mid : "transparent"}` }}>
                         {s.char ?? (s.hasFakeCaret ? <span style={{ width: "2px", height: "24px", background: T.high }} /> : null)}
                       </div>

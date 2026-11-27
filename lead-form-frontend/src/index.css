@@ -469,17 +469,17 @@ button.waitlist-join-btn:focus {
 .aurora { position: relative; isolation: isolate; }
 .aurora::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 420px; z-index: -1; pointer-events: none;
   background:
-    radial-gradient(420px 260px at 10% -60px, rgba(0,255,200,0.10), transparent 70%),
-    radial-gradient(380px 260px at 100% -40px, rgba(131,73,255,0.11), transparent 70%); }
+    radial-gradient(420px 260px at 10% -60px, var(--mint-10), transparent 70%),
+    radial-gradient(380px 260px at 100% -40px, var(--purple-11), transparent 70%); }
 
 /* Headlines: Anek Latin set wide, like the app's titles */
-.wide { font-stretch: 118%; font-variation-settings: "wdth" 118; letter-spacing: -0.01em; }
+.wide { font-stretch: 118%; letter-spacing: -0.01em; }
 
 /* Primary button: the app's white pill with a colour edge along the bottom */
 .pill {
-  background: linear-gradient(#fff, #fff) padding-box,
-              linear-gradient(90deg, #00FFC8, #4FA3FF 40%, #A77DFF 70%, #C1F546) border-box !important;
-  color: #111 !important;
+  background: linear-gradient(var(--text-1), var(--text-1)) padding-box,
+              linear-gradient(90deg, var(--mint), var(--purple)) border-box !important; /* canvas KIT primary edge */
+  color: var(--bg) !important;
   border: 0 solid transparent !important;
   border-bottom-width: 3px !important;
 }
