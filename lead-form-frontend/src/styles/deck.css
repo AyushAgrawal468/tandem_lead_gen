@@ -548,3 +548,23 @@ button:not([disabled]):active, a:active { transform: scale(0.97); }
 .foot-note { margin: 0; font-size: 14px; line-height: 1.5; color: var(--text-2); }
 .foot-logo { display: block; width: 112px; height: 26px; flex: none; background: var(--text-3); -webkit-mask: left center / contain no-repeat; mask: left center / contain no-repeat; }
 @media (hover: hover) and (pointer: fine) { .foot-logo:hover { background: var(--text-2); } }
+
+/* /swipe: every upcoming plan, 2 / 3 / 4 a row, loads more on scroll */
+.all-events { margin: 40px 0 0; }
+.all-events h2 { margin: 0; font-size: 28px; line-height: 1.04; font-stretch: 112%; font-weight: 700; text-wrap: balance; }
+.all-events-sub { margin: 8px 0 0; font-size: 14px; line-height: 1.5; color: var(--text-2); }
+.all-grid { list-style: none; margin: 20px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.all-grid .rail-card { width: 100%; height: 300px; padding: 0; text-align: left; font: inherit; color: inherit; cursor: pointer; }
+.all-grid .rail-info b { font-size: 16px; }
+.all-events-note { margin: 20px 0 0; text-align: center; font-size: 14px; color: var(--text-2); }
+.all-events-note button { border: 0; background: none; padding: 8px 4px; color: var(--mint); font: 700 14px var(--font); cursor: pointer; }
+.all-events-cta { display: flex; align-items: center; justify-content: center; width: 100%; height: 52px; box-sizing: border-box; padding: 0 22px;
+  border-radius: var(--r-pill); font: 700 16px var(--font); text-decoration: none; }
+@media (min-width: 640px) { .all-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 1024px) {
+  .all-events { margin-top: 64px; }
+  .all-events h2 { font-size: 40px; }
+  .all-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+  .all-grid .rail-card { height: 380px; }
+  .all-grid .rail-info b { font-size: 18px; }
+}

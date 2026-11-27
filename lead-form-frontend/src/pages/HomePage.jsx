@@ -9,7 +9,7 @@ import QrCode from "../components/QrCode";
 import { initialCity, SUPPORTED_CITIES } from "../lib/city";
 import { STEPS, QA, CITY_PAGES } from "../lib/faq";
 import { T, font } from "../lib/card";
-import { useCityFeed, railCards } from "../lib/feed";
+import { useCityFeed, railCards, plansCount } from "../lib/feed";
 
 const GA_ID = "G-XTYRTQY6R7";
 
@@ -31,8 +31,6 @@ const JSON_LD = {
 };
 
 
-// "550+" from total_upcoming: rounded down so the number never overstates the feed
-const plansCount = (n) => (n >= 100 ? `${Math.floor(n / 50) * 50}+` : n >= 20 ? `${Math.floor(n / 10) * 10}+` : String(n));
 
 function LiveCount({ feed, city }) {
   if (!feed?.total) return null;

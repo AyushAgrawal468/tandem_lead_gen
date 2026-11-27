@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import DeckScreen from "../components/DeckScreen";
+import AllEvents from "../components/AllEvents";
 import Seo from "../components/Seo";
 import { SiteHeader } from "../components/SiteChrome";
 import { initialCity } from "../lib/city";
@@ -20,6 +21,8 @@ export default function SwipePage() {
         <p style={{ color: T.mid, fontSize: "14px", lineHeight: 1.5, margin: "24px 0 32px", maxWidth: "640px" }}>
           Tandem shows you what's on in your city, from gigs and comedy to treks and food walks. Swipe right on what you'd actually do. When a friend wants the same plan, you both get matched.
         </p>
+        {/* Every upcoming plan in the city, loading as you scroll */}
+        <AllEvents city={city} />
       </main>
     </div>
   );

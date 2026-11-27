@@ -33,3 +33,6 @@ export function railCards(feed) {
   const weekend = feed.cards.filter((c) => c.startsAt && istDay(new Date(c.startsAt)) <= sunday);
   return { cards: (weekend.length >= 3 ? weekend : feed.cards).slice(0, 8), weekend: weekend.length >= 3 };
 }
+
+// "550+" from total_upcoming: rounded down so the number never overstates the feed
+export const plansCount = (n) => (n >= 100 ? `${Math.floor(n / 50) * 50}+` : n >= 20 ? `${Math.floor(n / 10) * 10}+` : String(n));
