@@ -524,3 +524,4 @@ button:not([disabled]):active, a:active { transform: scale(0.97); }
 .j2-screen > h1, .j2-screen > p { flex: none; }
 .j2-card { flex: 1 1 auto; min-height: 0; margin-bottom: 14px; }
 @media (min-width: 640px) { .j2-screen { height: calc(100dvh - 64px - 24px); } }
+.has-chip .cat-badge { display: none; } /* the You're in / Saved chip takes the badge's spot (J2-25) */

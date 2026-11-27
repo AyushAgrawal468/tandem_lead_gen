@@ -4,7 +4,7 @@ import { Helmet } from "react-helmet";
 import { apiUrl } from "../lib/api";
 import { call, AuthError } from "../lib/tandemApi";
 import { SESSION_KEY, writeJson, loadSession, sessionFrom, rememberReferral, creditReferral, rememberInvite, clearInvite } from "../lib/session";
-import { fromPublic, metaLine, T, font } from "../lib/card";
+import { fromPublic, T, font, PRIMARY } from "../lib/card";
 import { initialCity, matchCity } from "../lib/city";
 import { isPhone } from "../lib/app";
 import { loadPixel, track, identify } from "../lib/analytics";
@@ -27,6 +27,7 @@ const pill = (main) => ({
   display: "block", width: "100%", boxSizing: "border-box", textAlign: "center", textDecoration: "none", minHeight: "48px", padding: "14px",
   borderRadius: "999px", border: "none", fontFamily: font, fontWeight: 700, fontSize: "16px", cursor: "pointer",
   background: main ? T.high : T.surface2, color: main ? T.bg : T.high,
+  ...(main ? PRIMARY : {}),
 });
 const textLink = { background: "none", border: "none", padding: "8px 0", color: T.green, fontFamily: font, fontSize: "14px", fontWeight: 700, cursor: "pointer" };
 
@@ -60,8 +61,12 @@ const Strip = ({ sender, text }) => (
   </div>
 );
 
-const Chip = ({ text }) => (
-  <span style={{ position: "absolute", top: "24px", left: "24px", zIndex: 2, background: T.green, color: T.bg, borderRadius: "999px", padding: "6px 14px", fontSize: "14px", fontWeight: 800 }}>{text}</span>
+// J2-25/26/31: mint chip with a check, at the category badge's spot (below the friend strip when there is one)
+const Chip = ({ text, low }) => (
+  <span style={{ position: "absolute", top: low ? "62px" : "22px", left: "22px", zIndex: 3, height: "36px", display: "flex", alignItems: "center", gap: "6px",
+    background: T.green, color: T.bg, borderRadius: "999px", padding: "0 14px", fontSize: "14px", fontWeight: 800 }}>
+    <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12l5 5L19 7" /></svg>{text}
+  </span>
 );
 
 /**
@@ -230,26 +235,29 @@ export default function LinkPage() {
                 : stage === "saved" ? "Get the app and allow contacts to see which friends want to go."
                 : `${sender ? sender.firstName : "Your friend"} can see it in Tandem. Plan the rest in the app.`}
             </p>
-            <div style={{ position: "relative" }}>
-              <Chip text={stage === "saved" ? "Saved" : "You're in"} />
-              <Card card={card} />
+            {/* J2-25 / J2-26 / J2-31: the card (friend strip on an invite), the chip, the app ask, then text links */}
+            <div className="has-chip" style={{ position: "relative" }}>
+              <Chip text={stage === "saved" ? "Saved" : "You're in"} low={stage !== "saved" && !!sender} />
+              <Card card={card} strip={stage !== "saved" && sender ? sender.firstName : undefined} />
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "16px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "16px" }}>
               <button onClick={() => getApp(stage)} style={pill(true)}>
                 {stage === "saved" || !sender ? "Get Tandem free" : `Plan it with ${sender.firstName} in Tandem`}
               </button>
               {stage !== "already" && (
-                <p style={{ color: T.mid, fontSize: "14px", textAlign: "center", margin: 0 }}>
+                <p style={{ color: T.low, fontSize: "12px", lineHeight: 1.5, textAlign: "center", margin: "2px 0 0" }}>
                   {stage === "saved" ? "Sign in with the same number. Your plan is saved there." : `Free. Sign in with the same number to plan it with ${sender.firstName}.`}
                 </p>
               )}
-              {stage !== "already" && (
-                <button onClick={() => navigate(`/swipe?city=${encodeURIComponent(city)}`)} style={pill(false)}>
-                  {stage === "saved" ? `See more in ${city}` : `Keep swiping in ${city}`}
-                </button>
-              )}
             </div>
             <OpenTandemLink onStuck={() => setStuck(true)} />
+            {stage !== "already" && (
+              <p style={{ textAlign: "center", margin: 0 }}>
+                <button onClick={() => navigate(`/swipe?city=${encodeURIComponent(city)}`)} style={{ ...textLink, minHeight: "44px" }}>
+                  {stage === "saved" ? `See more in ${city}` : `Keep swiping in ${city}`}
+                </button>
+              </p>
+            )}
             {stage === "accepted" && (
               <p style={{ textAlign: "center", margin: "4px 0 0" }}><button onClick={() => setSendOpen(true)} style={textLink}>Send it to someone else</button></p>
             )}
@@ -262,9 +270,10 @@ export default function LinkPage() {
             <p style={body}>Send it to someone you'd go with.</p>
             <Card card={card} />
             <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "16px" }}>
-              <a href={whatsappUrl(shareText(card, shareLink(eventId, code)))} target="_blank" rel="noopener noreferrer" style={pill(true)}
-                onClick={() => track("share_tapped", { event_id: eventId, channel: "whatsapp", own: true })}>Send on WhatsApp</a>
+              {/* J2-28: Copy link first, WhatsApp as the mint button */}
               <button onClick={copyOwn} style={pill(false)}>Copy link</button>
+              <a href={whatsappUrl(shareText(card, shareLink(eventId, code)))} target="_blank" rel="noopener noreferrer" style={{ ...pill(false), background: T.green, color: T.bg }}
+                onClick={() => track("share_tapped", { event_id: eventId, channel: "whatsapp", own: true })}>Send on WhatsApp</a>
             </div>
             {note && <p role="status" style={{ color: T.mid, fontSize: "14px", textAlign: "center" }}>{note}</p>}
           </>
@@ -290,16 +299,10 @@ export default function LinkPage() {
                 </p>
               </div>
             )}
-            {stage === "over" && card && (
-              <div aria-hidden="true" style={{ marginTop: "16px", opacity: 0.4, display: "flex", gap: "12px", alignItems: "center", background: T.surface1, borderRadius: "16px", padding: "10px" }}>
-                <div style={{ width: "48px", height: "64px", borderRadius: "6px", background: T.surface2, flexShrink: 0 }} />
-                <div><p style={{ margin: 0, fontWeight: 700 }}>{card.title}</p><p style={{ margin: "2px 0 0", color: T.low, fontSize: "14px" }}>{metaLine(card)}</p></div>
-              </div>
-            )}
             {stage !== "referral" && (
               <>
                 <h1 style={H(stage === "over" ? 22 : 24, 700)}>{stage === "notnow" ? "No worries" : stage === "over" ? "This one's over" : "This link doesn't work anymore"}</h1>
-                <p style={body}>
+                <p style={{ ...body, fontSize: "14px" }}>
                   {stage === "notnow" ? `Here's what else is on in ${city}.` : stage === "over" ? `Here's what's on in ${city} this weekend.` : `Here's what's on in ${city} instead.`}
                 </p>
               </>
