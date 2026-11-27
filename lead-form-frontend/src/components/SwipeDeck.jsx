@@ -228,7 +228,7 @@ export default function SwipeDeck({ city, onCity, panY, onSignedIn, stripSlot })
     setSaid(`Saved as ${LABEL[direction]}. ${Math.min(s.count + 1, LIMIT)} of ${LIMIT}.${next ? ` Next: ${next.title}.` : ""}`);
     // Any answer to the invite card clears it; an unverified I'm in keeps it for the replay's inviteRef
     if (card.invite && (session || direction !== "RIGHT")) clearInvite();
-    if (!session) { dispatch({ type: "SWIPED", direction, eventId: card.id }); return; }
+    if (!session) { dispatch({ type: "SWIPED", direction, eventId: card.id, card: { id: card.id, title: card.title, day: card.day, poster: card.poster } }); return; }
 
     const sw = { event_id: card.id, direction, client_ts: Date.now(), card: { id: card.id, title: card.title, day: card.day, poster: card.poster } };
     if (navigator.onLine === false) {

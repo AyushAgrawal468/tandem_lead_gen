@@ -19,7 +19,8 @@ export function reducer(s, a) {
     case 'SWIPED': {
       const count = s.count + 1, rights = s.rights + (a.direction === 'RIGHT' ? 1 : 0);
       let q = s.queue, asked = s.asked, softShown = s.softShown;
-      const swipes = s.verified ? s.swipes : [...s.swipes, { event_id: a.eventId, direction: a.direction, client_ts: Date.now() }];
+      // card: a small copy, so a match replayed after sign-in can still show the event (J1-15)
+      const swipes = s.verified ? s.swipes : [...s.swipes, { event_id: a.eventId, direction: a.direction, client_ts: Date.now(), card: a.card }];
       if (count >= FUNNEL.SWIPE_LIMIT) {
         // A match on the last swipe still shows first; the hard stop sits under it.
         return { ...s, count, rights, swipes, screen: 'hardStop', queue: a.match ? [{ type: 'match', ...a.match }] : [] };

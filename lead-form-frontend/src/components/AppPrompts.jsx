@@ -6,6 +6,7 @@ import { useSheetKeys } from "../lib/useSheetKeys";
 import { track } from "../lib/analytics";
 import { StoreBadges } from "./SiteChrome";
 import AppIcon from "../assets/t-logo.svg";
+import Wordmark from "../assets/tandem-wordmark.svg";
 import { loadSession } from "../lib/session";
 
 // App prompts. Copy from the design canvas (KIT-Copy, boards J1-14, J1-15, J1-16, J1-21).
@@ -119,34 +120,40 @@ export function SoftPrompt({ at, onGetApp, onLater }) {
   );
 }
 
-/** Design screen 15 (the one showpiece): two cards slide together with a mint burst. */
+/** Match (canvas J1-15, the one showpiece): the event twice, sliding together, a mint check between, then the asks. */
 export function MatchScreen({ match, card, onGetApp, onKeepSwiping, onStuck }) {
   const box = useRef(null);
   useSheetKeys(box, onKeepSwiping);
   const friend = match.firstName || "A friend";
-  const tile = { width: "132px", height: "176px", borderRadius: "14px", overflow: "hidden", background: T.surface2, boxShadow: "0 12px 32px rgba(0,0,0,0.6)" };
+  const art = card?.poster
+    ? <img src={card.poster} alt="" />
+    : <span className="match-fallback">{card?.title}</span>;
   return (
-    <div ref={box} role="dialog" aria-modal="true" aria-labelledby="match-title"
-      style={{ position: "fixed", inset: 0, zIndex: 1900, background: "rgba(17,17,17,0.96)", color: T.high, fontFamily: font, display: "flex",
-        flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "24px 16px calc(24px + env(safe-area-inset-bottom))", animation: "deckIn 0.2s" }}>
-      <div style={{ position: "relative", height: "200px", width: "260px", marginBottom: "28px" }}>
-        <div className="match-burst" aria-hidden="true" />
-        <div className="match-left" style={{ ...tile, position: "absolute", left: "8px", top: "8px" }}>
-          {match.photo ? <img src={match.photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-            : <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "48px", fontWeight: 800 }}>{friend[0]}</div>}
+    <div ref={box} role="dialog" aria-modal="true" aria-labelledby="match-title" className="match">
+      <div className="match-glow" aria-hidden="true" />
+      <div className="match-in">
+        <header className="match-hdr">
+          <img src={Wordmark} alt="tandem" width="112" height="26" />
+          <button type="button" onClick={onKeepSwiping} aria-label="Close">
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+          </button>
+        </header>
+        <div className="match-art" aria-hidden="true">
+          <div className="match-card match-left">{art}</div>
+          <div className="match-card match-right">{art}</div>
+          <div className="match-burst" />
+          <div className="match-check"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12l5 5 9-10" /></svg></div>
         </div>
-        <div className="match-right" style={{ ...tile, position: "absolute", right: "8px", top: "8px" }}>
-          {card?.poster ? <img src={card.poster} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-            : <div style={{ height: "100%", display: "flex", alignItems: "flex-end", padding: "12px", fontSize: "16px", fontWeight: 800, lineHeight: 1.15 }}>{card?.title}</div>}
+        <div className="match-text">
+          <h2 id="match-title">{friend} is in too!</h2>
+          <p>{card?.title}{card?.day ? `, ${card.day}` : ""}. Plan it together in the app.</p>
         </div>
-      </div>
-      <div className="match-text" style={{ maxWidth: "388px", width: "100%", textAlign: "center" }}>
-        <h2 id="match-title" className="text-[28px] md:text-[36px]" style={{ fontWeight: 700, lineHeight: 1.15, margin: "0 0 8px" }}>{friend} is in too!</h2>
-        <p style={{ color: T.mid, fontSize: "16px", margin: "0 0 24px" }}>{card?.title}{card?.day ? `, ${card.day}` : ""}. Plan it together in the app.</p>
-        <button onClick={onGetApp} style={pill(true)} autoFocus>Plan it in Tandem</button>
-        <p style={{ color: T.low, fontSize: "14px", margin: "10px 0 0" }}>Free on iPhone and Android. Sign in with the same number.</p>
-        <button onClick={onKeepSwiping} style={{ ...pill(false), marginTop: "14px" }}>Keep swiping</button>
-        <OpenTandemLink onStuck={onStuck} />
+        <div className="match-actions">
+          <button onClick={onGetApp} style={{ ...pill(true), height: "52px", padding: "0 22px" }} autoFocus>Plan it in Tandem</button>
+          <p>Free on iPhone and Android. Sign in with the same number.</p>
+          <button onClick={onKeepSwiping} style={{ ...pill(false), height: "52px", padding: "0 22px" }}>Keep swiping</button>
+          <OpenTandemLink onStuck={onStuck} />
+        </div>
       </div>
     </div>
   );

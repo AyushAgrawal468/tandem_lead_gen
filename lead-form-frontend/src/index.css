@@ -448,16 +448,16 @@ button.waitlist-join-btn:focus {
 .match-left { animation: matchLeft 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
 .match-right { animation: matchRight 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
 .match-text { animation: deckIn 0.2s 0.4s both; }
-.match-burst { position: absolute; left: 50%; top: 50%; width: 220px; height: 220px; margin: -110px 0 0 -110px; border-radius: 50%;
+.match-burst { position: absolute; left: 50%; top: 190px; width: 220px; height: 220px; margin: -110px 0 0 -110px; border-radius: 50%;
   background: radial-gradient(circle, rgba(0,255,200,0.55) 0%, rgba(0,255,200,0) 70%); animation: matchBurst 0.6s 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
-@keyframes matchLeft { from { transform: translateX(-160px) rotate(-14deg); opacity: 0; } to { transform: translateX(10px) rotate(-6deg); opacity: 1; } }
-@keyframes matchRight { from { transform: translateX(160px) rotate(14deg); opacity: 0; } to { transform: translateX(-10px) rotate(6deg); opacity: 1; } }
+@keyframes matchLeft { from { transform: translateX(-160px) rotate(-18deg); opacity: 0; } to { transform: rotate(-9deg); opacity: 1; } }
+@keyframes matchRight { from { transform: translateX(160px) rotate(16deg); opacity: 0; } to { transform: rotate(8deg); opacity: 1; } }
 @keyframes matchBurst { from { transform: scale(0); opacity: 1; } 70% { transform: scale(1.2); opacity: 0.9; } to { transform: scale(1.2); opacity: 0; } }
 .oib-nudge { animation: oibNudge 0.25s ease-in-out 4 alternate; }
 @keyframes oibNudge { from { transform: translate(0, 0); } to { transform: translate(4px, -4px); } }
 @media (prefers-reduced-motion: reduce) {
-  .match-left { animation: deckIn 0.2s both; transform: translateX(10px) rotate(-6deg); }
-  .match-right { animation: deckIn 0.2s both; transform: translateX(-10px) rotate(6deg); }
+  .match-left { animation: deckIn 0.2s both; transform: rotate(-9deg); }
+  .match-right { animation: deckIn 0.2s both; transform: rotate(8deg); }
   .match-text { animation: deckIn 0.2s both; }
   .match-burst { display: none; }
   .oib-nudge { animation: none; }
