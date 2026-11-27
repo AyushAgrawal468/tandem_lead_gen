@@ -13,9 +13,9 @@ import { EventCard } from "../components/deck/EventCard";
 import { SwipeButtons } from "../components/deck/SwipeButtons";
 
 // The handoff card fills its frame (poster flexes), so it needs a height here
-function Card({ card }) {
+function Card({ card, strip, fill }) {
   useEffect(() => { loadPixel(); }, []); // the Meta Pixel loads after the first card renders
-  return <div style={{ height: "min(520px, 62dvh)" }}><EventCard event={card} /></div>;
+  return <div style={{ height: fill ? "100%" : "min(520px, 62dvh)" }}><EventCard event={card} strip={strip} /></div>;
 }
 import SwipeDeck from "../components/SwipeDeck";
 import PhoneSheet from "../components/PhoneSheet";
@@ -50,7 +50,7 @@ function Avatar({ sender }) {
   const box = { width: "28px", height: "28px", borderRadius: "50%", flexShrink: 0, objectFit: "cover", background: T.surface2 };
   return sender.photo
     ? <img src={sender.photo} alt="" style={box} />
-    : <span aria-hidden="true" style={{ ...box, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "13px", fontWeight: 800, color: T.high }}>{sender.firstName[0]}</span>;
+    : <span aria-hidden="true" style={{ ...box, background: "var(--white)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "13px", fontWeight: 800, color: T.purple }}>{sender.firstName[0]}</span>;
 }
 
 // Violet strip with the sender's avatar (design screens 23 and 33)
@@ -189,7 +189,9 @@ export default function LinkPage() {
     try { await navigator.clipboard.writeText(shareLink(eventId, code)); setNote("Link copied."); } catch { setNote("Couldn't copy the link."); }
   };
 
-  const h1 = { fontSize: "22px", lineHeight: 1.2, fontWeight: 700, margin: "20px 0 6px" };
+  // Heading size per state, from the J2 boards: display 800 (wide 118) for the main states, 700 (wide 112) for the soft ones
+  const H = (size, w = 800) => ({ fontSize: `${size}px`, fontWeight: w, margin: "12px 0 6px", overflowWrap: "break-word",
+    ...(w === 800 ? { lineHeight: 1, fontStretch: "118%", letterSpacing: "-0.02em" } : { lineHeight: 1.18, fontStretch: "112%" }) });
   const body = { color: T.mid, fontSize: "16px", lineHeight: 1.5, margin: "0 0 16px" };
   const title = mode === "invite" && sender && card ? `${sender.firstName} wants to go to ${card.title} | Tandem`
     : mode === "referral" && sender ? `${sender.firstName} invited you to Tandem` : card ? `${card.title} | Tandem` : "Tandem";
@@ -206,15 +208,13 @@ export default function LinkPage() {
 
         {stage === "card" && card && (
           <>
-            {mode === "invite"
-              ? <><h1 style={h1}>{sender.firstName} is in for this</h1><p style={body}>{[card.title, card.day, card.price].filter(Boolean).join(" · ")}</p></>
-              : <><h1 style={h1}>{card.title}</h1><p style={body}>{[card.day, card.price].filter(Boolean).join(" · ")}</p></>}
-            <div style={{ borderRadius: "16px", overflow: "hidden", background: T.surface1 }}>
-              {mode === "invite" && <Strip sender={sender} text={`${sender.firstName} is in`} />}
-              <Card card={card} />
-            </div>
-            {/* Handoff audit #6: the invite uses the round buttons without Never (two answers). The white pill is only for leaving to the app. */}
-            <div style={{ marginTop: "16px" }}>
+            {/* J2-23 / J2-29: one screen, heading, the card (friend strip inside it), the two round buttons */}
+            <div className="j2-screen">
+              {mode === "invite"
+                ? <><h1 style={H(34)}>{sender.firstName} is in for this</h1><p style={body}>{[card.title, card.day, card.price].filter(Boolean).join(" · ")}</p></>
+                : <><h1 style={H(30)}>{card.title}</h1><p style={body}>{[card.day, card.price].filter(Boolean).join(" · ")}</p></>}
+              <div className="j2-card"><Card card={card} strip={mode === "invite" ? sender.firstName : undefined} fill /></div>
+              {/* Handoff audit #6: the invite uses the round buttons without Never (two answers). The white pill is only for leaving to the app. */}
               <SwipeButtons hideNever disabled={busy} desk={desk} onLeft={notNow} onRight={imIn} />
             </div>
           </>
@@ -222,7 +222,7 @@ export default function LinkPage() {
 
         {(stage === "accepted" || stage === "saved" || stage === "already") && card && (
           <>
-            <h1 style={h1}>
+            <h1 style={H(stage === "saved" ? 28 : stage === "accepted" ? 30 : 34)}>
               {stage === "accepted" ? `You're in for ${card.title}` : stage === "saved" ? `Saved: ${card.title}` : "You're already in"}
             </h1>
             <p style={body}>
@@ -258,7 +258,7 @@ export default function LinkPage() {
 
         {stage === "own" && card && (
           <>
-            <h1 style={h1}>This is your invite</h1>
+            <h1 style={H(34)}>This is your invite</h1>
             <p style={body}>Send it to someone you'd go with.</p>
             <Card card={card} />
             <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "16px" }}>
@@ -272,7 +272,7 @@ export default function LinkPage() {
 
         {stage === "usedup" && card && (
           <>
-            <h1 style={h1}>You've used your 35 web swipes</h1>
+            <h1 style={H(30)}>You've used your 35 web swipes</h1>
             <p style={body}>Save {card.title} in the app, and see which friends want to go.</p>
             <Card card={card} />
             <button onClick={() => getApp("event_swipes_used_up")} style={{ ...pill(true), marginTop: "16px" }}>Get Tandem free</button>
@@ -298,7 +298,7 @@ export default function LinkPage() {
             )}
             {stage !== "referral" && (
               <>
-                <h1 style={h1}>{stage === "notnow" ? "No worries" : stage === "over" ? "This one's over" : "This link doesn't work anymore"}</h1>
+                <h1 style={H(stage === "over" ? 22 : 24, 700)}>{stage === "notnow" ? "No worries" : stage === "over" ? "This one's over" : "This link doesn't work anymore"}</h1>
                 <p style={body}>
                   {stage === "notnow" ? `Here's what else is on in ${city}.` : stage === "over" ? `Here's what's on in ${city} this weekend.` : `Here's what's on in ${city} instead.`}
                 </p>

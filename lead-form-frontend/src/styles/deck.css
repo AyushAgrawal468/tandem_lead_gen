@@ -309,7 +309,7 @@ button:not([disabled]):active, a:active { transform: scale(0.97); }
 /* Sender strip on an invite card ("{sender} is in", purple = a person) */
 .card-strip { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: var(--purple); color: var(--white);
   font: 700 14px var(--font); flex: none; }
-.card-strip .avatar { width: 24px; height: 24px; border-radius: 50%; background: var(--bg-35); display: grid; place-items: center; font-size: 12px; }
+.card-strip .avatar { width: 28px; height: 28px; flex: none; border-radius: 50%; background: var(--white); color: var(--purple); display: grid; place-items: center; font-size: 13px; font-weight: 800; } /* canvas J2-23 / KIT */
 .card-strip ~ .cat-badge, .card-strip ~ .card-tag { top: 66px; } /* below the friend strip (44px) */
 
 /* ---------- homepage sections (canvas J3-36 phone / J3-D36 desktop) ---------- */
@@ -518,3 +518,9 @@ button:not([disabled]):active, a:active { transform: scale(0.97); }
 .end-head > div { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .end-head h2 { margin: 0; font-size: 20px; line-height: 1.15; font-stretch: 112%; font-weight: 700; }
 .end-head p { margin: 0; font-size: 14px; line-height: 1.45; color: var(--text-2); }
+
+/* Journey 2 card states (canvas J2-23, J2-29): exactly one screen under the header */
+.j2-screen { height: calc(100dvh - 60px - 24px - env(safe-area-inset-bottom)); min-height: 520px; display: flex; flex-direction: column; }
+.j2-screen > h1, .j2-screen > p { flex: none; }
+.j2-card { flex: 1 1 auto; min-height: 0; margin-bottom: 14px; }
+@media (min-width: 640px) { .j2-screen { height: calc(100dvh - 64px - 24px); } }
