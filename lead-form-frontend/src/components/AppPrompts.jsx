@@ -102,14 +102,19 @@ export function OpenInBrowser({ onClose }) {
 }
 
 /** Design screen 14: dismissible banner above the buttons at 10 and 25 swipes; the deck stays usable. */
+const softBtn = { height: "44px", padding: "0 22px", borderRadius: "999px", fontFamily: font, fontSize: "16px", fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" };
+
 export function SoftPrompt({ at, onGetApp, onLater }) {
   const text = at >= 25 ? "25 swipes in, and 10 left on the web. Only the app can match you with friends."
     : "10 swipes in. Some of your friends may want the same plans. The app shows you who.";
   return (
-    <div role="status" className="toast-in" style={{ background: T.surface1, borderRadius: "12px", padding: "12px 14px", margin: "12px 0 0", display: "flex", alignItems: "center", gap: "12px" }}>
-      <p style={{ flex: 1, fontSize: "14px", lineHeight: 1.5, color: T.high, margin: 0 }}>{text}</p>
-      <button onClick={onLater} style={{ background: "none", border: "none", color: T.mid, fontFamily: font, fontSize: "14px", cursor: "pointer", padding: "8px 4px" }}>Later</button>
-      <button onClick={onGetApp} className="pill" style={{ background: T.high, color: T.bg, border: "none", borderRadius: "999px", fontFamily: font, fontWeight: 700, fontSize: "14px", padding: "10px 14px", cursor: "pointer", whiteSpace: "nowrap" }}>Get Tandem free</button>
+    // J1-14a/b: a card between the deck and the buttons, text then Later + Get Tandem free on the right
+    <div role="status" className="soft-prompt toast-in">
+      <p>{text}</p>
+      <div>
+        <button onClick={onLater} style={{ ...softBtn, background: T.surface2, color: T.high, border: 0 }}>Later</button>
+        <button onClick={onGetApp} style={{ ...softBtn, color: T.bg, ...PRIMARY }}>Get Tandem free</button>
+      </div>
     </div>
   );
 }

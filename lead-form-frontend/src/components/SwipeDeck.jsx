@@ -369,6 +369,10 @@ export default function SwipeDeck({ city, onCity, panY, onSignedIn, stripSlot })
             )
           ) : top ? (
             <Deck cards={queue} index={0} commitRef={commitRef} desk={desk} panY={panY}
+              beforeButtons={(overlay?.type === "soft10" || overlay?.type === "soft25") && (
+                <SoftPrompt at={overlay.type === "soft25" ? 25 : 10} onLater={() => dispatch({ type: "DISMISS" })}
+                  onGetApp={() => { dispatch({ type: "DISMISS" }); getApp(overlay.type); }} />
+              )}
               locked={!!sheetOpen || (overlay && overlay.type.startsWith("soft")) || showPopup || !!details}
               onSwipe={(dir, method) => onAction(dir.toUpperCase(), method)} onOpenDetails={openDetails} onShare={share} />
           ) : feed === "loading" ? (
@@ -409,10 +413,7 @@ export default function SwipeDeck({ city, onCity, panY, onSignedIn, stripSlot })
           )}
         </div>
 
-        {(overlay?.type === "soft10" || overlay?.type === "soft25") && top && !capped && (
-          <SoftPrompt at={overlay.type === "soft25" ? 25 : 10} onLater={() => dispatch({ type: "DISMISS" })}
-            onGetApp={() => { dispatch({ type: "DISMISS" }); getApp(overlay.type); }} />
-        )}
+
 
         <div className="progress">
           <div className="bar" role="progressbar" aria-label="Web swipes used" aria-valuemin={0} aria-valuemax={LIMIT} aria-valuenow={Math.min(s.count, LIMIT)}>
@@ -432,11 +433,15 @@ export default function SwipeDeck({ city, onCity, panY, onSignedIn, stripSlot })
 
       {/* Toast pill (handoff "Toast"): never over a sheet or modal; placed by .deck-toast */}
       {(toast || overlay?.type === "youreIn") && !sheetOpen && (
-        <div role="status" className="deck-toast toast-in">
-          {overlay?.type === "youreIn"
-            ? (overlay.saved ? `You're in. ${overlay.saved} swipes saved to your number. Sign in to the app with this number to see which friends want the same.` : "You're in. Swipe right on anything you'd do.")
-            : toast}
-        </div>
+        overlay?.type === "youreIn" ? (
+          // J1-12: a status card, not a pill
+          <div role="status" className="deck-toast youre-in toast-in">
+            <span className="ok" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12l5 5L19 7" /></svg></span>
+            <div><b>You're in</b>{overlay.saved
+              ? `${overlay.saved} swipes saved to ${(session || loadSession())?.masked || "your number"}. Sign in to the app with this number to see which friends want the same.`
+              : "Swipe right on anything you'd do."}</div>
+          </div>
+        ) : <div role="status" className="deck-toast toast-in">{toast}</div>
       )}
 
       {overlay?.type === "phoneAsk" && (

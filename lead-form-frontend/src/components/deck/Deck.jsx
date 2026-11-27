@@ -12,7 +12,7 @@ const storageSet = (k, v) => { try { localStorage.setItem(k, v); } catch { /* bl
 // Handoff "Swipe engine" Deck.jsx: only two cards are ever in the DOM. Buttons sit OUTSIDE the drag surface.
 // Additions: commitRef (event details' buttons swipe the same card), the category glow behind the
 // stack, the coach hint, and preloading the next two posters.
-export function Deck({ cards, index, onSwipe, onOpenDetails, onShare, locked, desk, hideNever, commitRef, panY }) {
+export function Deck({ cards, index, onSwipe, onOpenDetails, onShare, locked, desk, hideNever, commitRef, panY, beforeButtons }) {
   // How the swipe was made (analytics "swiped": drag, button, key); set just before each commit path
   const method = useRef("drag");
   const { card, back, stamps, commit, cardHandlers, deckHandlers } =
@@ -67,6 +67,7 @@ export function Deck({ cards, index, onSwipe, onOpenDetails, onShare, locked, de
           </div>
         )}
       </div>
+      {beforeButtons /* soft prompt sits between the card and the buttons (canvas J1-14a) */}
       <SwipeButtons desk={desk} disabled={locked} hideNever={hideNever}
         onLeft={() => commitBy("button")("left")} onDown={() => commitBy("button")("down")} onRight={() => commitBy("button")("right")} />
     </section>
