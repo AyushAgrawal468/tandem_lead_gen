@@ -9,7 +9,7 @@ import QrCode from "../components/QrCode";
 import { initialCity, SUPPORTED_CITIES } from "../lib/city";
 import { STEPS, QA, CITY_PAGES } from "../lib/faq";
 import { T, font } from "../lib/card";
-import { useCityFeed } from "../lib/feed";
+import { useCityFeed, railCards } from "../lib/feed";
 
 const GA_ID = "G-XTYRTQY6R7";
 
@@ -30,7 +30,6 @@ const JSON_LD = {
   ],
 };
 
-const istDay = (d) => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(d);
 
 // "550+" from total_upcoming: rounded down so the number never overstates the feed
 const plansCount = (n) => (n >= 100 ? `${Math.floor(n / 50) * 50}+` : n >= 20 ? `${Math.floor(n / 10) * 10}+` : String(n));
@@ -61,16 +60,13 @@ export function RailCard({ c, to }) {
 
 /** "This weekend in {city}": feed cards starting by this Sunday (IST). Fewer than 3 → the next ones, titled "Coming up". */
 export function WeekendRail({ feed, city }) {
-  if (!feed?.cards.length) return null;
-  const now = new Date();
-  const sunday = istDay(new Date(now.getTime() + ((7 - new Date(istDay(now)).getUTCDay()) % 7) * 864e5));
-  const weekend = feed.cards.filter((c) => c.startsAt && istDay(new Date(c.startsAt)) <= sunday);
-  const cards = (weekend.length >= 3 ? weekend : feed.cards).slice(0, 8);
+  const { cards, weekend } = railCards(feed);
+  if (!cards.length) return null;
   const to = `/swipe?city=${encodeURIComponent(city)}`;
   return (
     <section className="home-sec" style={{ gap: "18px" }}>
       <div className="rail-head">
-        <h2>{weekend.length >= 3 ? "This weekend" : "Coming up"} in {city}</h2>
+        <h2>{weekend ? "This weekend" : "Coming up"} in {city}</h2>
         <Link to={to}>Swipe them all</Link>
       </div>
       <ul className="rail">
@@ -184,7 +180,7 @@ export default function HomePage() {
             <StoreBadges width={300} />
           </div>
           <WeekendRail feed={feed} city={city} />
-          <HowItWorks cards={feed?.cards} />
+          <HowItWorks cards={railCards(feed).cards} />
           <GroupChat />
           <div className="home-split">
             <section className="home-sec">

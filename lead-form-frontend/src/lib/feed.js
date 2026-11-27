@@ -22,3 +22,14 @@ export function useCityFeed(city) {
   return feed;
 }
 
+
+const istDay = (d) => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(d);
+
+/** The rail's cards: feed cards starting by this Sunday (IST), else the next ones. Also feeds How it works. */
+export function railCards(feed) {
+  if (!feed?.cards.length) return { cards: [], weekend: false };
+  const now = new Date();
+  const sunday = istDay(new Date(now.getTime() + ((7 - new Date(istDay(now)).getUTCDay()) % 7) * 864e5));
+  const weekend = feed.cards.filter((c) => c.startsAt && istDay(new Date(c.startsAt)) <= sunday);
+  return { cards: (weekend.length >= 3 ? weekend : feed.cards).slice(0, 8), weekend: weekend.length >= 3 };
+}

@@ -3,7 +3,7 @@ import DeckScreen from "../components/DeckScreen";
 import Seo, { SITE } from "../components/Seo";
 import { SiteHeader, SiteFooter, StoreBadges } from "../components/SiteChrome";
 import { HowItWorks, WeekendRail } from "./HomePage";
-import { useCityFeed } from "../lib/feed";
+import { useCityFeed, railCards } from "../lib/feed";
 import { CITY_PAGES } from "../lib/faq";
 import { T, font } from "../lib/card";
 
@@ -48,7 +48,7 @@ export default function CityPage({ slug }) {
             <p className="lead">{page.intro}</p>
           </div>
           <WeekendRail feed={feed} city={city} />
-          <HowItWorks cards={feed?.cards} />
+          <HowItWorks cards={railCards(feed).cards} />
         </div>
       </main>
       <SiteFooter />
