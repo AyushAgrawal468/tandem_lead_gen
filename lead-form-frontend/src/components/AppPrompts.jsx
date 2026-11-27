@@ -5,7 +5,7 @@ import { openTandemUrl, whenStuck } from "../lib/app";
 import { useSheetKeys } from "../lib/useSheetKeys";
 import { track } from "../lib/analytics";
 import { StoreBadges } from "./SiteChrome";
-import AppIcon from "../assets/t-logo.svg";
+import AppIcon from "../assets/tandem-mark.svg"; // the app icon: purple scribble on #111 (canvas KIT)
 import Wordmark from "../assets/tandem-wordmark.svg";
 import { loadSession } from "../lib/session";
 
@@ -39,8 +39,8 @@ export function Bridge({ compact = false }) {
   const step = (n, title, sub, icon) => (
     <li style={{ display: "flex", gap: "12px", alignItems: "center", textAlign: "left" }}>
       <span aria-hidden="true" style={{ flex: "none", width: "36px", height: "36px", borderRadius: icon ? "10px" : "50%", display: "grid", placeItems: "center",
-        background: icon ? "var(--text-1)" : T.surface2, color: T.high, fontWeight: 800, fontSize: "14px" }}>
-        {icon ? <img src={AppIcon} alt="" style={{ height: "22px" }} /> : n}
+        background: icon ? "var(--bg)" : T.surface2, border: icon ? "1px solid var(--line)" : 0, color: T.high, fontWeight: 800, fontSize: "14px" }}>
+        {icon ? <img src={AppIcon} alt="" style={{ width: "24px" }} /> : n}
       </span>
       <span style={{ fontSize: "14px", lineHeight: 1.4, color: T.mid }}>
         <strong style={{ color: T.high }}>{title}</strong>{!compact && <><br />{sub}</>}

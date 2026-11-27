@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import AppIcon from "../assets/t-logo.svg";
+import AppIcon from "../assets/tandem-mark.svg";
 import { utm } from "../lib/app";
 
 /**
@@ -31,8 +31,8 @@ export default function QrCode({ size = 200 }) {
       )}
       {/* App icon in the centre: about 20% of the code, well inside level H's 30% recovery */}
       <span aria-hidden="true" style={{ position: "absolute", left: "50%", top: "50%", transform: "translate(-50%, -50%)", width: size * 0.2, height: size * 0.2,
-        borderRadius: "10px", background: "var(--white)", display: "grid", placeItems: "center", boxShadow: "0 0 0 3px var(--white)" }}>
-        <img src={AppIcon} alt="" style={{ height: "70%" }} />
+        borderRadius: "10px", background: "var(--bg)", display: "grid", placeItems: "center", boxShadow: "0 0 0 3px var(--white)" }}>
+        <img src={AppIcon} alt="" style={{ width: "70%" }} />
       </span>
     </div>
   );

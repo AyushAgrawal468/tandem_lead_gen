@@ -1,4 +1,4 @@
-import TMark from "../../assets/t-logo.svg";
+import TMark from "../../assets/tandem-mark.svg";
 import { catOf } from "./categories";
 
 // Small pieces the handoff names but does not define: icons, the stamp, the category badge and the
@@ -9,7 +9,7 @@ const I = (d) => function Icon() {
 export const ClockIcon = I(<><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>);
 export const XIcon = I(<path d="M6 6l12 12M18 6L6 18" />);
 export const CheckIcon = I(<path d="M5 12.5l4.5 4.5L19 7" />);
-// Send to a friend: the Tandem "t" (the app's mark), drawn in currentColor through a mask
+// Send to a friend: the Tandem scribble (the app's mark), drawn in currentColor through a mask
 export const SendIcon = () => <span className="t-mark" aria-hidden="true" style={{ WebkitMaskImage: `url(${JSON.stringify(TMark)})`, maskImage: `url(${JSON.stringify(TMark)})` }} />;
 
 
