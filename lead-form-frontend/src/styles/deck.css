@@ -289,8 +289,12 @@ button:not([disabled]):active, a:active { transform: scale(0.97); }
 @keyframes sheetFade { from { opacity: 0; } to { opacity: 1; } }
 @media (min-width: 1024px) {
   .sheet-backdrop { align-items: center; padding: 16px; }
-  .sheet { max-width: 440px; border-radius: var(--r-sheet); border-bottom: 1px solid var(--line); padding: 28px 24px;
+  /* Desktop modals (canvas J1-D07 / J1-D20): radius 20, 28 padding; the phone ask is 480 wide */
+  .sheet { max-width: 440px; border-radius: 20px; border-bottom: 1px solid var(--line); padding: 28px;
     animation: sheetPop 200ms var(--ease-out); }
+  .sheet.wide { max-width: 480px; }
+  .sheet .sheet-x { display: grid; }
+  .sheet.wide h2 { padding-right: 48px; }
   .sheet-handle { display: none; }
 }
 
@@ -525,3 +529,15 @@ button:not([disabled]):active, a:active { transform: scale(0.97); }
 .j2-card { flex: 1 1 auto; min-height: 0; margin-bottom: 14px; }
 @media (min-width: 640px) { .j2-screen { height: calc(100dvh - 64px - 24px); } }
 .has-chip .cat-badge { display: none; } /* the You're in / Saved chip takes the badge's spot (J2-25) */
+.sheet-x { position: absolute; top: 16px; right: 16px; width: 44px; height: 44px; padding: 0; border-radius: 50%; border: 0; display: none; place-items: center;
+  background: var(--surface-2); color: var(--text-1); cursor: pointer; }
+.sheet-x.always { display: grid; }
+/* Journey 2 card states on desktop (canvas J2-D23): 420x600 card left, the copy and buttons right */
+@media (min-width: 1024px) {
+  .j2-screen { height: 600px; min-height: 0; margin: 56px 0; display: grid; grid-template-columns: 420px minmax(0, 1fr); column-gap: 72px;
+    grid-template-rows: 1fr auto auto auto 1fr; }
+  .j2-screen > .j2-card { grid-column: 1; grid-row: 1 / -1; margin: 0; }
+  .j2-screen > h1 { grid-column: 2; grid-row: 2; margin: 0 0 12px !important; max-width: 14ch; }
+  .j2-screen > p { grid-column: 2; grid-row: 3; max-width: 46ch; margin: 0 0 28px !important; }
+  .j2-screen > .sb-row { grid-column: 2; grid-row: 4; justify-content: flex-start; gap: 34px; }
+}

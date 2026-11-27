@@ -117,8 +117,12 @@ export default function PhoneSheet({ variant = "normal", rights = 3, sender = "Y
   return (
     <div onClick={onClose} className="sheet-backdrop">
       <div ref={box} role="dialog" aria-modal="true" aria-labelledby="phone-title" onClick={(e) => e.stopPropagation()}
-        className="sheet">
+        className="sheet wide">
         <span className="sheet-handle" aria-hidden="true" />
+        {/* Desktop modal close (J1-D07); phones close with Not now, Escape or a backdrop tap */}
+        <button type="button" onClick={onClose} aria-label="Close" className="sheet-x">
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+        </button>
         {(screen === "phone" || screen === "code") && (
           <div style={{ display: "flex", flexDirection: "column", gap: "6px", margin: "0 0 18px" }}>
             <div aria-hidden="true" style={{ display: "flex", gap: "4px", width: "64px" }}>

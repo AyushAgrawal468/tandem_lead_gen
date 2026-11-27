@@ -70,14 +70,12 @@ export function DesktopAppPrompt({ onClose }) {
       <div ref={box} role="dialog" aria-modal="true" aria-labelledby="dl-title" onClick={(e) => e.stopPropagation()} className="sheet"
         style={{ textAlign: "center" }}>
         <span className="sheet-handle" aria-hidden="true" />
-        <button onClick={onClose} aria-label="Close" autoFocus
-          style={{ position: "absolute", top: "12px", right: "12px", width: "36px", height: "36px", padding: 0, borderRadius: "50%", border: "none",
-            background: "transparent", color: T.low, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+        <button onClick={onClose} aria-label="Close" autoFocus className="sheet-x always">
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
         </button>
         <h2 id="dl-title" style={{ fontSize: "24px", fontWeight: 700, margin: "0 0 8px" }}>Get Tandem on your phone</h2>
         <p style={{ color: T.mid, fontSize: "16px", margin: "0 0 20px" }}>Scan with your phone camera.</p>
-        <div style={{ marginBottom: "20px" }}><QrCode size={200} /></div>
+        <div style={{ marginBottom: "20px" }}><QrCode size={220} /></div>
         <div style={{ display: "flex", justifyContent: "center" }}><StoreBadges /></div>
         <Bridge compact />
       </div>

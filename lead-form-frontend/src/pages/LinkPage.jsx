@@ -204,7 +204,7 @@ export default function LinkPage() {
   return (
     <div className="aurora" style={{ minHeight: "100dvh", background: T.bg, color: T.high, fontFamily: font }}>
       <Helmet><title>{title}</title></Helmet>
-      <main style={{ maxWidth: "420px", margin: "0 auto", padding: "0 16px calc(24px + env(safe-area-inset-bottom))" }}>
+      <main style={{ maxWidth: desk && stage === "card" ? "1064px" : "420px", margin: "0 auto", padding: "0 16px calc(24px + env(safe-area-inset-bottom))" }}>
         <SiteHeader {...(deckStage ? { city, onCity: setCity } : {})} />
 
         {stage === "loading" && (
@@ -216,8 +216,8 @@ export default function LinkPage() {
             {/* J2-23 / J2-29: one screen, heading, the card (friend strip inside it), the two round buttons */}
             <div className="j2-screen">
               {mode === "invite"
-                ? <><h1 style={H(34)}>{sender.firstName} is in for this</h1><p style={body}>{[card.title, card.day, card.price].filter(Boolean).join(" · ")}</p></>
-                : <><h1 style={H(30)}>{card.title}</h1><p style={body}>{[card.day, card.price].filter(Boolean).join(" · ")}</p></>}
+                ? <><h1 style={H(desk ? 52 : 34)}>{sender.firstName} is in for this</h1><p style={{ ...body, ...(desk && { fontSize: "18px" }) }}>{[card.title, card.day, card.price].filter(Boolean).join(" · ")}</p></>
+                : <><h1 style={H(desk ? 46 : 30)}>{card.title}</h1><p style={{ ...body, ...(desk && { fontSize: "18px" }) }}>{[card.day, card.price].filter(Boolean).join(" · ")}</p></>}
               <div className="j2-card"><Card card={card} strip={mode === "invite" ? sender.firstName : undefined} fill /></div>
               {/* Handoff audit #6: the invite uses the round buttons without Never (two answers). The white pill is only for leaving to the app. */}
               <SwipeButtons hideNever disabled={busy} desk={desk} onLeft={notNow} onRight={imIn} />
