@@ -25,38 +25,37 @@ export function Deck({ cards, index, onSwipe, onOpenDetails, onShare, locked, de
   useEffect(() => { if (top) loadPixel(); }, [!!top]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Coach (canvas J1-01): if nobody touches the deck in 1.5 s, "Drag right if you would go" shows on the first card
-  // (once per browser). The card then jiggles right and left every 4 s until the first touch, key or swipe, and
-  // again each time the deck scrolls back into view. Reduced motion keeps the pill and drops the movement.
+  // (once per browser). Whatever card is on top jiggles right and left after 4 s without a touch, key or swipe,
+  // and again each time the deck scrolls back into view. Reduced motion keeps the pill and drops the movement.
   const touched = useRef(false);
+  const lastActive = useRef(Date.now());
   const [coach, setCoach] = useState(false);
-  const firstId = useRef(top?.id);
+  useEffect(() => { lastActive.current = Date.now(); setCoach(false); }, [top?.id]); // a new card on top: idle clock restarts, pill goes
   useEffect(() => {
     const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
     // Right, then left, then home: it reads as "this goes both ways"
     const jiggle = () => {
-      if (!card.current || still) return;
+      if (!card.current || still || document.hidden) return;
+      lastActive.current = Date.now();
       card.current.animate([{ transform: "translateX(0)" }, { transform: "translateX(24px) rotate(1.2deg)" },
         { transform: "translateX(-24px) rotate(-1.2deg)" }, { transform: "translateX(0)" }],
         { duration: 1000, easing: "cubic-bezier(0.37, 0, 0.63, 1)" });
     };
-    const nudge = () => { if (!touched.current) jiggle(); };
-    // Coming back to the deck (scrolled away and back) jiggles it again, even after a swipe
+    // Coming back to the deck (scrolled away and back) jiggles it straight away
     let away = false;
     const io = new IntersectionObserver(([e]) => {
       if (!e.isIntersecting) away = true;
       else if (away) { away = false; jiggle(); }
     }, { threshold: 0.6 });
     if (card.current) io.observe(card.current.parentElement);
-    let every;
-    const t = setTimeout(() => {
+    const first = setTimeout(() => {
       if (touched.current || !card.current) return;
       if (!storageGet("tdm.coached")) { setCoach(true); storageSet("tdm.coached", "1"); }
-      nudge();
-      every = setInterval(() => (touched.current ? clearInterval(every) : nudge()), 4000);
+      jiggle();
     }, 1500);
-    return () => { clearTimeout(t); clearInterval(every); io.disconnect(); };
+    const idle = setInterval(() => { if (Date.now() - lastActive.current >= 4000 && !away) jiggle(); }, 500);
+    return () => { clearTimeout(first); clearInterval(idle); io.disconnect(); };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-  if (top?.id !== firstId.current) { touched.current = true; if (coach) setCoach(false); } // first card is gone: no more nudges
 
   // "Preload the next two posters ... as soon as a card becomes top"
   useEffect(() => {
@@ -65,8 +64,8 @@ export function Deck({ cards, index, onSwipe, onOpenDetails, onShare, locked, de
 
   return (
     <section className="deck" tabIndex={0} aria-label="Event cards. Use the arrow keys or the buttons below." {...deckHandlers}
-      onPointerDownCapture={() => { touched.current = true; method.current = "drag"; setCoach(false); }}
-      onKeyDownCapture={() => { touched.current = true; method.current = "key"; setCoach(false); }}>
+      onPointerDownCapture={() => { touched.current = true; lastActive.current = Date.now(); method.current = "drag"; setCoach(false); }}
+      onKeyDownCapture={() => { touched.current = true; lastActive.current = Date.now(); method.current = "key"; setCoach(false); }}>
       <div className="deck-stack" style={{ "--glow": top ? catOf(top.category).color : "transparent" }}>
         {next && <div className="deck-back" ref={back} aria-hidden="true" style={{ transform: "translateY(8px) scale(0.95)" }}>
           <EventCard event={next} desk={desk} /></div>}
