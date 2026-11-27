@@ -568,3 +568,4 @@ button:not([disabled]):active, a:active { transform: scale(0.97); }
   .all-grid .rail-card { height: 380px; }
   .all-grid .rail-info b { font-size: 18px; }
 }
+.rail.ticker { scroll-snap-type: none; } /* the ticker glides; snapping would fight it */

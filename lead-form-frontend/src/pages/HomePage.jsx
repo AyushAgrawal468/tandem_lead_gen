@@ -58,38 +58,42 @@ export function RailCard({ c, to }) {
 
 /** "This weekend in {city}": feed cards starting by this Sunday (IST). Fewer than 3 → the next ones, titled "Coming up". */
 /**
- * Rail auto-rotation: one card along every 3 s, back to the start after the last. Pauses while hovered, touched
- * or focused (and for 5 s after a touch) and while off screen. Reduced motion steps without the smooth slide.
+ * Rail ticker (like a news crawl): glides left at a steady 40px/s and loops without a seam (the cards are drawn twice).
+ * Pauses while hovered, touched or focused (and 5 s after a touch) and while off screen. Reduced motion: 15px/s.
  */
-function useAutoRotate(ref, count) {
+function useTicker(ref, count) {
   useEffect(() => {
     const el = ref.current;
     if (!el || count < 2) return;
-    const smooth = !matchMedia("(prefers-reduced-motion: reduce)").matches;
-    let paused = false, visible = false, resume;
-    const step = () => {
-      if (paused || !visible || document.hidden) return;
-      const li = el.querySelector("li");
-      const by = li ? li.getBoundingClientRect().width + parseFloat(getComputedStyle(el).columnGap || "12") : el.clientWidth;
-      const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
-      el.scrollTo({ left: atEnd ? 0 : el.scrollLeft + by, behavior: smooth ? "smooth" : "auto" });
+    const speed = matchMedia("(prefers-reduced-motion: reduce)").matches ? 15 : 40; // px per second
+    let paused = false, visible = false, resume, raf, last = 0, x = el.scrollLeft;
+    const period = () => { const lis = el.children; return lis[count] ? lis[count].offsetLeft - lis[0].offsetLeft : 0; };
+    const tick = (t) => {
+      const dt = last ? Math.min(64, t - last) : 0; last = t;
+      if (!paused && visible && !document.hidden) {
+        const p = period();
+        x += (speed * dt) / 1000;
+        if (p && x >= p) x -= p; // the second copy has reached where the first began: jump back unseen
+        el.scrollLeft = x;
+      } else x = el.scrollLeft; // a hand scroll while paused: carry on from there
+      raf = requestAnimationFrame(tick);
     };
     const pause = () => { paused = true; clearTimeout(resume); };
-    const play = (ms = 0) => { clearTimeout(resume); resume = setTimeout(() => { paused = false; }, ms); };
-    const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting; }, { threshold: 0.5 });
+    const play = (ms = 0) => { clearTimeout(resume); resume = setTimeout(() => { x = el.scrollLeft; paused = false; }, ms); };
+    const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting; }, { threshold: 0.3 });
     io.observe(el);
     const on = [["pointerenter", pause], ["pointerleave", () => play()], ["touchstart", pause], ["touchend", () => play(5000)],
       ["focusin", pause], ["focusout", () => play()]];
     on.forEach(([t, f]) => el.addEventListener(t, f, { passive: true }));
-    const every = setInterval(step, 3000);
-    return () => { clearInterval(every); clearTimeout(resume); io.disconnect(); on.forEach(([t, f]) => el.removeEventListener(t, f)); };
+    raf = requestAnimationFrame(tick);
+    return () => { cancelAnimationFrame(raf); clearTimeout(resume); io.disconnect(); on.forEach(([t, f]) => el.removeEventListener(t, f)); };
   }, [ref, count]);
 }
 
 export function WeekendRail({ feed, city }) {
   const { cards, weekend } = railCards(feed);
   const rail = useRef(null);
-  useAutoRotate(rail, cards.length);
+  useTicker(rail, cards.length);
   if (!cards.length) return null;
   const to = `/swipe?city=${encodeURIComponent(city)}`;
   return (
@@ -98,8 +102,10 @@ export function WeekendRail({ feed, city }) {
         <h2>{weekend ? "This weekend" : "Coming up"} in {city}</h2>
         <Link to={to}>Swipe them all</Link>
       </div>
-      <ul className="rail" ref={rail}>
+      <ul className="rail ticker" ref={rail}>
         {cards.map((c) => <li key={c.id}><RailCard c={c} to={to} /></li>)}
+        {/* the loop's second copy: hidden from screen readers and the tab order */}
+        {cards.length > 1 && cards.map((c) => <li key={`${c.id}-loop`} aria-hidden="true" inert><RailCard c={c} to={to} /></li>)}
       </ul>
     </section>
   );
