@@ -311,7 +311,10 @@ export default function SwipeDeck({ city, onCity, panY, onSignedIn, stripSlot })
 
   const left = totalUpcoming == null ? 0 : Math.max(0, totalUpcoming - s.count);
   const quickLook = Date.now() - startedAt.current < 2 * 60 * 1000; // J1-16b: 35 swipes in under about 2 minutes
-  const panel = { textAlign: "center", padding: "40px 16px", background: T.surface1, border: `1px solid ${T.line}`, borderRadius: "22px" };
+  // End states fill the hero down to the progress bar, buttons at the bottom (canvas LP-05); taller content scrolls
+  const panel = { textAlign: "center", padding: "40px 16px", background: T.surface1, border: `1px solid ${T.line}`, borderRadius: "22px",
+    flex: "1 0 auto", display: "flex", flexDirection: "column" };
+  const push = <div aria-hidden="true" style={{ flex: "1 1 auto", minHeight: "8px" }} />;
   const stopTitle = { fontSize: "28px", lineHeight: 1.1, fontWeight: 800, fontStretch: "112%", margin: "0 0 8px" };
   const lastRight = readJson(K.lastRight, null);
   const sheetOpen = (overlay && overlay.type !== "youreIn") || sendCard || saveAsk;
@@ -337,6 +340,7 @@ export default function SwipeDeck({ city, onCity, panY, onSignedIn, stripSlot })
               <div style={panel}>
                 <p style={stopTitle}>Welcome back</p>
                 <p style={{ color: T.mid, fontSize: "16px", lineHeight: 1.5, margin: "0 0 24px" }}>Your swipes are saved. Get the app to keep going and see who's in.</p>
+                {push}
                 <button onClick={() => getApp("return")} className="pill" style={btn()}>Get Tandem free</button>
                 <OpenTandemLink onStuck={() => setStuck(true)} />
                 <Bridge />
@@ -344,6 +348,10 @@ export default function SwipeDeck({ city, onCity, panY, onSignedIn, stripSlot })
             ) : (
               // J1-16a / J1-16b / J1-17: hard stop, verified or not, normal or quick look
               <div style={panel}>
+                <div className="stop-stack" aria-hidden="true">
+                  <i /><i /><i /><i />
+                  <b><span>{left >= FUNNEL.HARD_STOP_LOW && !quickLook ? `${left}+` : "New"}</span>plans</b>
+                </div>
                 <p style={stopTitle}>
                   {left >= FUNNEL.HARD_STOP_LOW && !quickLook ? `${left}+ more plans in ${city} are waiting in the app` : "Keep going in the app"}
                 </p>
@@ -352,6 +360,7 @@ export default function SwipeDeck({ city, onCity, panY, onSignedIn, stripSlot })
                     : left >= FUNNEL.HARD_STOP_LOW && !quickLook ? `You've used your ${LIMIT} web swipes, and all ${LIMIT} are saved.`
                     : `You've used your ${LIMIT} web swipes, and they're saved. New plans land every day, and the app shows you first.`}
                 </p>
+                {push}
                 <button onClick={() => getApp("hard_stop")} className="pill" style={btn()}>Get Tandem free</button>
                 {!session && <button onClick={() => { setSaveAsk(true); track("phone_ask_shown", { trigger: "hard_stop" }); }}
                   style={{ ...btn(), background: T.surface2, color: T.high, marginTop: "10px" }}>Save my swipes first</button>}
@@ -376,6 +385,7 @@ export default function SwipeDeck({ city, onCity, panY, onSignedIn, stripSlot })
             <div style={panel}>
               <p style={{ fontSize: "22px", fontWeight: 800, margin: "0 0 6px" }}>Couldn't load plans</p>
               <p style={{ color: T.mid, fontSize: "16px", margin: "0 0 20px" }}>Check your connection and try again.</p>
+              {push}
               <button onClick={() => loadMore(true)} className="pill" style={btn()}>Retry</button>
             </div>
           ) : (
@@ -383,6 +393,7 @@ export default function SwipeDeck({ city, onCity, panY, onSignedIn, stripSlot })
             <div style={panel}>
               <p style={{ fontSize: "22px", fontWeight: 800, margin: "0 0 6px" }}>That's everything on in {city} right now</p>
               <p style={{ color: T.mid, fontSize: "16px", margin: "0 0 20px" }}>New plans land every day. In the app, you see them first, and which friends are in.</p>
+              {push}
               <button onClick={() => getApp("end_of_deck")} className="pill" style={btn()}>Get Tandem free</button>
               {onCity && (
                 <>

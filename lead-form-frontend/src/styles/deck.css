@@ -30,7 +30,7 @@
   --mint-45: rgba(0,255,200,0.45);  --purple-11: rgba(131,73,255,0.11);  --purple-20: rgba(131,73,255,0.20);  --purple-deep: #1C1530;
   --scrim: rgba(0,0,0,0.6);  --shadow-45: rgba(0,0,0,0.45);  --shadow-50: rgba(0,0,0,0.5);  --shadow-55: rgba(0,0,0,0.55);
   --surface-1-70: rgba(37,37,37,0.7);  --surface-3: #333333;  --white: #FFFFFF;
-  --fail-tint: #221615;  --mint-deep: #0E1A17;  --line-chat: #2A2A2A;
+  --fail-tint: #221615;  --mint-deep: #0E1A17;  --line-chat: #2A2A2A;  --cream: #ECE8DF;
 }
 
 html, body { margin: 0; background: var(--bg); color: var(--text-1); font-family: var(--font); }
@@ -464,3 +464,15 @@ button:not([disabled]):active, a:active { transform: scale(0.97); }
   .foot nav a { min-height: 0; }
   .foot-mark { width: calc(100% - 48px); max-width: 1121px; margin-bottom: -15px; }
 }
+
+/* Hard stop: fanned cards with the plans count on top (canvas J1-16a/b, J1-17) */
+.stop-stack { position: relative; height: 198px; flex: none; margin: -16px 0 8px; }
+.stop-stack > * { position: absolute; left: 50%; width: 118px; height: 158px; margin-left: -59px; border-radius: 16px; }
+.stop-stack i:nth-child(1) { top: 30px; background: var(--purple); transform: translateX(-64px) rotate(-15deg); opacity: 0.55; }
+.stop-stack i:nth-child(2) { top: 30px; background: var(--cream); transform: translateX(64px) rotate(15deg); opacity: 0.35; }
+.stop-stack i:nth-child(3) { top: 16px; background: var(--fail); transform: translateX(-31px) rotate(-7deg); opacity: 0.7; }
+.stop-stack i:nth-child(4) { top: 16px; background: var(--mint-deep); border: 1px solid var(--mint); transform: translateX(31px) rotate(7deg); }
+.stop-stack b { top: 0; background: var(--surface-1); box-shadow: 0 20px 40px var(--shadow-50); display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 4px; font-size: 13px; line-height: 1.5; font-weight: 400; color: var(--text-3); }
+.stop-stack b span { font-size: 44px; line-height: 0.9; font-stretch: 118%; font-weight: 800; letter-spacing: -0.02em; color: var(--text-1); }
+@media (max-height: 759px) { .stop-stack { display: none; } } /* short screens (Instagram at 700): text and buttons first */
