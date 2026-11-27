@@ -24,24 +24,29 @@ export function Deck({ cards, index, onSwipe, onOpenDetails, onShare, locked, de
   // Handoff "Performance": the Meta Pixel loads after the first card renders
   useEffect(() => { if (top) loadPixel(); }, [!!top]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Coach (canvas J1-01): if nobody touches the deck in 1.5 s, "Drag right if you would go" shows on the
-  // first card and the card nudges 24px right and back; once per browser. Reduced motion keeps the pill, drops the nudge.
+  // Coach (canvas J1-01): if nobody touches the deck in 1.5 s, "Drag right if you would go" shows on the first card
+  // (once per browser). The first card then keeps nudging 24px right and back every 4 s, so it reads as swipeable,
+  // until the first touch, key or swipe. Reduced motion keeps the pill and drops the nudge.
   const touched = useRef(false);
   const [coach, setCoach] = useState(false);
   const firstId = useRef(top?.id);
   useEffect(() => {
-    if (storageGet("tdm.coached")) return;
+    const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const nudge = () => {
+      if (touched.current || !card.current || still) return;
+      card.current.animate([{ transform: "translateX(0)" }, { transform: "translateX(24px) rotate(1.2deg)" }, { transform: "translateX(0)" }],
+        { duration: 700, easing: "cubic-bezier(0.23, 1, 0.32, 1)" });
+    };
+    let every;
     const t = setTimeout(() => {
       if (touched.current || !card.current) return;
-      setCoach(true);
-      storageSet("tdm.coached", "1");
-      if (!matchMedia("(prefers-reduced-motion: reduce)").matches)
-        card.current.animate([{ transform: "translateX(0)" }, { transform: "translateX(24px) rotate(1.2deg)" }, { transform: "translateX(0)" }],
-          { duration: 700, easing: "cubic-bezier(0.23, 1, 0.32, 1)" });
+      if (!storageGet("tdm.coached")) { setCoach(true); storageSet("tdm.coached", "1"); }
+      nudge();
+      every = setInterval(() => (touched.current ? clearInterval(every) : nudge()), 4000);
     }, 1500);
-    return () => clearTimeout(t);
+    return () => { clearTimeout(t); clearInterval(every); };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-  if (coach && top?.id !== firstId.current) setCoach(false); // first card is gone
+  if (top?.id !== firstId.current) { touched.current = true; if (coach) setCoach(false); } // first card is gone: no more nudges
 
   // "Preload the next two posters ... as soon as a card becomes top"
   useEffect(() => {

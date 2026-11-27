@@ -8,7 +8,7 @@ import { DesktopAppPrompt } from "./AppPrompts";
 
 const APP_STORE = "https://apps.apple.com/in/app/tandem-events-experiences/id6756263621";
 const PLAY = "https://play.google.com/store/apps/details?id=com.tandemit.tandemit";
-const CONTACT = "support@tandem.app"; // same address as the account-deletion page
+const CONTACT = "support@tandem.it.com";
 
 /** Official App Store + Google Play badges (store-buttons.svg is 560x50: App Store 0-272, Play 288-560). */
 export function StoreBadges({ width = 336 }) {
@@ -64,10 +64,6 @@ export function SiteFooter() {
     <div className="foot-wrap">
       <footer id="get-app" className="foot">
         <div className="foot-in">
-          <div className="foot-app">
-            <p>Get Tandem on iPhone and Android.</p>
-            <StoreBadges width={300} />
-          </div>
           <nav aria-label="Footer">
             <Link to="/faq">Questions? Read the FAQ.</Link>
             <Link to="/legal/privacy-policy">Privacy Policy</Link>
@@ -76,7 +72,7 @@ export function SiteFooter() {
           </nav>
         </div>
       </footer>
-      <div className="foot-mark" aria-hidden="true" style={{ WebkitMaskImage: `url(${Wordmark})`, maskImage: `url(${Wordmark})` }} />
+      <div className="foot-mark" aria-hidden="true" style={{ WebkitMaskImage: `url(${JSON.stringify(Wordmark)})`, maskImage: `url(${JSON.stringify(Wordmark)})` }} />
     </div>
   );
 }

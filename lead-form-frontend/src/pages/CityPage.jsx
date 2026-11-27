@@ -48,7 +48,7 @@ export default function CityPage({ slug }) {
             <p className="lead">{page.intro}</p>
           </div>
           <WeekendRail feed={feed} city={city} />
-          <HowItWorks />
+          <HowItWorks cards={feed?.cards} />
         </div>
       </main>
       <SiteFooter />

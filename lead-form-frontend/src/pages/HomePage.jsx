@@ -80,27 +80,34 @@ export function WeekendRail({ feed, city }) {
   );
 }
 
-const Mini = ({ className = "", style }) => <div className={`mini ${className}`} style={style}>Coffee Conversations</div>;
-const ILLUSTRATIONS = [
-  <><Mini style={{ transform: "rotate(-6deg)" }} /><span className="ill-stamp">I'M IN</span></>,
-  <><Mini style={{ transform: "rotate(5deg)" }} /><span className="ill-chip"><span className="avatar">A</span>Arjun swiped too</span></>,
+const Mini = ({ className = "", style, card }) => (
+  <div className={`mini ${className}`} style={style}>
+    {card?.poster && <img src={card.poster} alt="" loading="lazy" onError={(e) => { e.currentTarget.style.display = "none"; }} />}
+    <span>{card?.title || "Coffee Conversations"}</span>
+  </div>
+);
+// Steps 1 and 2 show two live plans; step 3 (the match) shows one plan twice
+const illustrations = (c = []) => [
+  <><Mini card={c[0]} style={{ transform: "rotate(-6deg)" }} /><span className="ill-stamp">I'M IN</span></>,
+  <><Mini card={c[1]} style={{ transform: "rotate(5deg)" }} /><span className="ill-chip"><span className="avatar">A</span>Arjun swiped too</span></>,
   <>
-    <Mini className="small" style={{ transform: "rotate(-10deg)", marginLeft: "-70px" }} />
-    <Mini className="small" style={{ transform: "rotate(9deg)", marginLeft: "70px" }} />
-    <div style={{ position: "absolute", left: "50%", top: "50%", width: "220px", height: "220px", transform: "translate(-50%, -50%)", borderRadius: "50%", background: "radial-gradient(circle, rgba(0,255,200,0.35), rgba(0,255,200,0) 65%)" }} />
+    <Mini card={c[2]} className="small" style={{ transform: "rotate(-10deg)", marginLeft: "-70px" }} />
+    <Mini card={c[2]} className="small" style={{ transform: "rotate(9deg)", marginLeft: "70px" }} />
+    <div style={{ position: "absolute", left: "50%", top: "50%", width: "220px", height: "220px", transform: "translate(-50%, -50%)", borderRadius: "50%", background: "radial-gradient(circle, var(--mint-35), transparent 65%)" }} />
     <span className="ill-chip mint">Arjun is in too!</span>
   </>,
 ];
 
 /** "How does Tandem work?": three illustrated steps (canvas J3-36); also on the city pages. */
-export function HowItWorks() {
+export function HowItWorks({ cards }) {
+  const ills = illustrations((cards || []).filter((x) => x.poster));
   return (
     <section className="home-sec" style={{ gap: "24px" }}>
       <h2>{QA.how[0]}</h2>
       <ol className="steps-ill">
         {STEPS.map(([title, text], i) => (
           <li key={title}>
-            <div className="ill" aria-hidden="true">{ILLUSTRATIONS[i]}</div>
+            <div className="ill" aria-hidden="true">{ills[i]}</div>
             <div className="step-row">
               <span className="step-num" aria-hidden="true" style={i === 2 ? { WebkitTextStrokeColor: "var(--mint)" } : undefined}>{i + 1}</span>
               <span><b>{title}</b><span>{text}</span></span>
@@ -177,7 +184,7 @@ export default function HomePage() {
             <StoreBadges width={300} />
           </div>
           <WeekendRail feed={feed} city={city} />
-          <HowItWorks />
+          <HowItWorks cards={feed?.cards} />
           <GroupChat />
           <div className="home-split">
             <section className="home-sec">

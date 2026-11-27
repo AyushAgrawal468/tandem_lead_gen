@@ -60,8 +60,8 @@ const AccountDeletion = () => {
             <li style={liStyle}>If logged out, log in first to access Profile.</li>
             <li style={liStyle}>
               For questions, contact{" "}
-              <a href="mailto:support@tandem.app" style={{ color: "#00FFC8", textDecoration: "none" }}>
-                support@tandem.app
+              <a href="mailto:support@tandem.it.com" style={{ color: "#00FFC8", textDecoration: "none" }}>
+                support@tandem.it.com
               </a>.
             </li>
           </ul>
