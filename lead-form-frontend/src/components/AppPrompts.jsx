@@ -73,7 +73,7 @@ export function DesktopAppPrompt({ onClose }) {
         <button onClick={onClose} aria-label="Close" autoFocus className="sheet-x always">
           <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
         </button>
-        <h2 id="dl-title" style={{ fontSize: "24px", fontWeight: 700, margin: "0 0 8px" }}>Get Tandem on your phone</h2>
+        <h2 id="dl-title" style={{ fontSize: "24px", fontWeight: 700, lineHeight: 1.18, fontStretch: "112%", margin: "0 0 8px", padding: "0 48px" }}>Get Tandem on your phone</h2>{/* 48px each side: clear of the close button, still centred */}
         <p style={{ color: T.mid, fontSize: "16px", margin: "0 0 20px" }}>Scan with your phone camera.</p>
         <div style={{ marginBottom: "20px" }}><QrCode size={220} /></div>
         <div style={{ display: "flex", justifyContent: "center" }}><StoreBadges /></div>
