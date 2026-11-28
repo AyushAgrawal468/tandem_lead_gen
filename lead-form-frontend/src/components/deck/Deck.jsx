@@ -42,9 +42,12 @@ export function Deck({ cards, index, onSwipe, onOpenDetails, onShare, locked, de
         { transform: `translateX(${-dx}px) rotate(${-rot}deg)` }, { transform: "translateX(0)" }],
         { duration: ms, easing: "cubic-bezier(0.37, 0, 0.63, 1)" });
       // the app's indicator for each side peeks out from behind the card as it leans: right = I'm in, left = Not now
+      // A 24px lean would hide them behind the card, so during the jiggle they sit in front of its edges
       const stack = card.current.parentElement;
-      stack.querySelector(".hint-r")?.animate([{ opacity: 0 }, { opacity: 1, offset: 0.33 }, { opacity: 0, offset: 0.55 }, { opacity: 0 }], { duration: ms });
-      stack.querySelector(".hint-l")?.animate([{ opacity: 0 }, { opacity: 0, offset: 0.45 }, { opacity: 1, offset: 0.66 }, { opacity: 0 }], { duration: ms });
+      stack.classList.add("jiggling");
+      setTimeout(() => stack.classList.remove("jiggling"), ms);
+      stack.querySelector(".hint-r")?.animate([{ opacity: 0 }, { opacity: 1, offset: 0.25 }, { opacity: 1, offset: 0.38 }, { opacity: 0, offset: 0.52 }, { opacity: 0 }], { duration: ms });
+      stack.querySelector(".hint-l")?.animate([{ opacity: 0 }, { opacity: 0, offset: 0.5 }, { opacity: 1, offset: 0.62 }, { opacity: 1, offset: 0.75 }, { opacity: 0, offset: 0.9 }, { opacity: 0 }], { duration: ms });
     };
     // Coming back to the deck (scrolled away and back) jiggles it straight away
     let away = false;

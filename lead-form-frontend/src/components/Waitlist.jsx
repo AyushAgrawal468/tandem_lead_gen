@@ -56,7 +56,7 @@ export default function Waitlist({ city, near = [], onPick, onClose }) {
         {near.length > 0 && (
           <div className="wl-chips">{near.map((c) => <button key={c} type="button" onClick={() => onPick(c)}>{c}</button>)}</div>
         )}
-        <div style={{ flex: "1 1 auto" }} />
+        <div className="wl-push" />
         <form className="wl-form" onSubmit={join}>
           {!city && (
             <div className="wl-field">
