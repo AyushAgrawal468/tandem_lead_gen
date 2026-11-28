@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSwipe } from "./useSwipe";
 import { EventCard } from "./EventCard";
 import { SwipeButtons } from "./SwipeButtons";
-import { Stamp, CheckIcon, ClockIcon, XIcon } from "./parts";
+import { Stamp } from "./parts";
 import { catOf } from "./categories";
 import { loadPixel } from "../../lib/analytics";
 
@@ -25,27 +25,26 @@ export function Deck({ cards, index, onSwipe, onOpenDetails, onShare, locked, de
   useEffect(() => { if (top) loadPixel(); }, [!!top]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Coach (canvas J1-01): if nobody touches the deck in 1.5 s, "Drag right if you would go" shows on the first card
-  // (once per browser). Whatever card is on top jiggles right and left after 4 s without a touch, key or swipe,
-  // and again each time the deck scrolls back into view. Reduced motion gets a gentle 8px jiggle.
+  // (once per browser). Whatever card is on top jiggles right and left (24px, 1.6 s) after 4 s without a touch, key or
+  // swipe, and again each time the deck scrolls back into view.
   const touched = useRef(false);
   const lastActive = useRef(Date.now());
   const [coach, setCoach] = useState(false);
   useEffect(() => { lastActive.current = Date.now(); setCoach(false); }, [top?.id]); // a new card on top: idle clock restarts, pill goes
   useEffect(() => {
-    const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    // Right, then left, then home: it reads as "this goes both ways". Reduced motion gets a gentle version
-    // (8px, no rotation, slower) so the swipe hint still shows (chosen 27 Nov 2026).
-    const [dx, rot, ms] = still ? [8, 0, 1400] : [24, 1.2, 1000];
+    // Right, then left, then home: it reads as "this goes both ways". The same 24px for everyone, reduced motion
+    // included (asked for 28 Nov 2026: the swipe hint must always show), slow enough to read.
+    const [dx, rot, ms] = [24, 1.2, 1600];
     const jiggle = () => {
       if (!card.current || document.hidden) return;
       lastActive.current = Date.now();
       card.current.animate([{ transform: "translateX(0)" }, { transform: `translateX(${dx}px) rotate(${rot}deg)` },
         { transform: `translateX(${-dx}px) rotate(${-rot}deg)` }, { transform: "translateX(0)" }],
         { duration: ms, easing: "cubic-bezier(0.37, 0, 0.63, 1)" });
-      // ...and the glow for each side as the card leans that way: right = I'm in, left = Not now
+      // the app's indicator for each side peeks out from behind the card as it leans: right = I'm in, left = Not now
       const stack = card.current.parentElement;
-      stack.querySelector(".hint-r")?.animate([{ opacity: 0 }, { opacity: 0.9, offset: 0.33 }, { opacity: 0, offset: 0.55 }, { opacity: 0 }], { duration: ms });
-      stack.querySelector(".hint-l")?.animate([{ opacity: 0 }, { opacity: 0, offset: 0.45 }, { opacity: 0.9, offset: 0.66 }, { opacity: 0 }], { duration: ms });
+      stack.querySelector(".hint-r")?.animate([{ opacity: 0 }, { opacity: 1, offset: 0.33 }, { opacity: 0, offset: 0.55 }, { opacity: 0 }], { duration: ms });
+      stack.querySelector(".hint-l")?.animate([{ opacity: 0 }, { opacity: 0, offset: 0.45 }, { opacity: 1, offset: 0.66 }, { opacity: 0 }], { duration: ms });
     };
     // Coming back to the deck (scrolled away and back) jiggles it straight away
     let away = false;
@@ -70,16 +69,20 @@ export function Deck({ cards, index, onSwipe, onOpenDetails, onShare, locked, de
 
   return (
     <section className="deck" tabIndex={0} aria-label="Event cards. Use the arrow keys or the buttons below." {...deckHandlers}
-      onPointerDownCapture={() => { touched.current = true; lastActive.current = Date.now(); method.current = "drag"; setCoach(false); }}
+      onPointerDownCapture={(e) => {
+        touched.current = true; lastActive.current = Date.now(); method.current = "drag"; setCoach(false);
+        // a running jiggle would override the drag: stop it (and its indicators) the moment the card is grabbed
+        e.currentTarget.querySelectorAll(".deck-top, .deck-hint").forEach((el) => el.getAnimations().forEach((a) => a.cancel()));
+      }}
       onKeyDownCapture={() => { touched.current = true; lastActive.current = Date.now(); method.current = "key"; setCoach(false); }}>
       <div className="deck-stack" style={{ "--glow": top ? catOf(top.category).color : "transparent" }}>
         {next && <div className="deck-back" ref={back} aria-hidden="true" style={{ transform: "translateY(8px) scale(0.95)" }}>
           <EventCard event={next} desk={desk} /></div>}
-        {/* Drag glows (as in the app): the side the card leaves shows what that swipe means */}
+        {/* The app's swipe indicators, behind the card: the side it moves away from shows what that swipe means */}
         {top && <>
-          <div className="deck-hint hint-r" aria-hidden="true"><CheckIcon /><b>I'm in</b></div>
-          <div className="deck-hint hint-l" aria-hidden="true"><ClockIcon /><b>Not now</b></div>
-          {!panY && !hideNever && <div className="deck-hint hint-d" aria-hidden="true"><XIcon /><b>Never</b></div>}
+          <div className="deck-hint hint-r" aria-hidden="true"><span>👍</span><b>I'm in</b></div>
+          <div className="deck-hint hint-l" aria-hidden="true"><span>🚫</span><b>Not now</b></div>
+          {!panY && !hideNever && <div className="deck-hint hint-d" aria-hidden="true"><b>Never</b></div>}
         </>}
         {top && (
           <div className={panY ? "deck-top pan-y" : "deck-top"} ref={card} key={top.id} {...cardHandlers}>

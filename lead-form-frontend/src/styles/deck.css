@@ -31,7 +31,7 @@
   --scrim: rgba(0,0,0,0.6);  --shadow-45: rgba(0,0,0,0.45);  --shadow-50: rgba(0,0,0,0.5);  --shadow-55: rgba(0,0,0,0.55);
   --surface-1-70: rgba(37,37,37,0.7);  --surface-3: #333333;  --white: #FFFFFF;
   --fail-tint: #221615;  --mint-deep: #0E1A17;  --line-chat: #2A2A2A;  --cream: #ECE8DF;  --mint-55: rgba(0,255,200,0.55);  --mint-12: rgba(0,255,200,0.12);
-  --grey-35: rgba(188,188,188,0.35);  --fail-45: rgba(243,84,63,0.45);
+  --glow-yes: rgba(84,196,72,0.85);  --glow-no: rgba(214,72,56,0.8);  --glow-never: rgba(214,150,30,0.8); /* app indicators */
 }
 
 html, body { margin: 0; background: var(--bg); color: var(--text-1); font-family: var(--font); }
@@ -576,14 +576,14 @@ button:not([disabled]):active, a:active { transform: scale(0.97); }
 .rail-poster > .poster-fit { position: relative; inset: auto; width: auto; max-width: none; height: 100%; flex: none; object-fit: fill; }
 .rail > li, .rail-card, .rail-poster { min-width: 0; } /* a fitted poster must not widen its card in the flex rail */
 .rail > li > .rail-card { width: 100%; box-sizing: border-box; }
-/* Drag glows beside the card (as in the app): opacity follows the drag via --hint-* set by useSwipe */
-.deck-hint { position: absolute; z-index: 3; width: 150px; height: 150px; margin-top: -75px; top: 45%; pointer-events: none; opacity: 0;
+/* The app's swipe indicators (Discover screen): a big soft glow with an emoji and a bold label, behind the card,
+   revealed as the card moves away. Opacity follows the drag (--hint-* from useSwipe). */
+.deck-hint { position: absolute; z-index: 1; top: 45%; width: 240px; height: 240px; margin-top: -120px; pointer-events: none; opacity: 0;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; border-radius: 50%;
-  font: 800 16px/1.1 var(--font); color: var(--text-1); text-shadow: 0 1px 8px var(--bg); }
-.deck-hint svg { width: 26px; height: 26px; }
-.hint-r { left: -40px; opacity: var(--hint-r, 0); background: radial-gradient(circle, var(--mint-45), transparent 70%); }
-.hint-r svg { color: var(--mint); }
-.hint-l { right: -40px; opacity: var(--hint-l, 0); background: radial-gradient(circle, var(--grey-35), transparent 70%); }
-.hint-l svg { color: var(--text-1); }
-.hint-d { left: 50%; top: 0; margin: -20px 0 0 -75px; opacity: var(--hint-d, 0); background: radial-gradient(circle, var(--fail-45), transparent 70%); }
-.hint-d svg { color: var(--fail); }
+  font: 800 20px/1.1 var(--font); color: var(--white); text-align: center; }
+.deck-hint span { font-size: 34px; line-height: 1; }
+.hint-r { left: -70px; opacity: var(--hint-r, 0); background: radial-gradient(circle, var(--glow-yes), transparent 68%); }
+.hint-l { right: -70px; opacity: var(--hint-l, 0); background: radial-gradient(circle, var(--glow-no), transparent 68%); }
+.hint-d { left: 50%; top: 0; margin: -110px 0 0 -120px; opacity: var(--hint-d, 0); background: radial-gradient(circle, var(--glow-never), transparent 68%); }
+/* As in the app, nothing shows behind the indicator: the next card fades out as the drag grows */
+.deck-back { opacity: calc(1 - 0.9 * max(var(--hint-r, 0), var(--hint-l, 0), var(--hint-d, 0))); }

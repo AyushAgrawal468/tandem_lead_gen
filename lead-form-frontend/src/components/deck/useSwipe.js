@@ -7,7 +7,7 @@ const C = { DIST: 100, VEL: 0.5, MIN: 30, UP: 0.25, ROT_DIV: 20, ROT_MAX: 12, FL
 const EASE = 'cubic-bezier(0.23, 1, 0.32, 1)';
 const BACK_REST = 'translateY(8px) scale(0.95)';
 
-// The app's drag glows ("I'm in" / "Not now" / "Never" beside the card), driven by how far the card has moved
+// The app's swipe indicators (glow + emoji + label behind the card), shown as the card moves away from them
 const hints = (stack, r, l, d) => { if (!stack) return; stack.style.setProperty("--hint-r", r); stack.style.setProperty("--hint-l", l); stack.style.setProperty("--hint-d", d); };
 
 export function useSwipe({ onCommit, onTap, disabled, panY }) {
