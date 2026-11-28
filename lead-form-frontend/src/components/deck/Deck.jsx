@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSwipe } from "./useSwipe";
 import { EventCard } from "./EventCard";
 import { SwipeButtons } from "./SwipeButtons";
-import { Stamp } from "./parts";
+import { Stamp, CheckIcon, ClockIcon, XIcon } from "./parts";
 import { catOf } from "./categories";
 import { loadPixel } from "../../lib/analytics";
 
@@ -42,6 +42,10 @@ export function Deck({ cards, index, onSwipe, onOpenDetails, onShare, locked, de
       card.current.animate([{ transform: "translateX(0)" }, { transform: `translateX(${dx}px) rotate(${rot}deg)` },
         { transform: `translateX(${-dx}px) rotate(${-rot}deg)` }, { transform: "translateX(0)" }],
         { duration: ms, easing: "cubic-bezier(0.37, 0, 0.63, 1)" });
+      // ...and the glow for each side as the card leans that way: right = I'm in, left = Not now
+      const stack = card.current.parentElement;
+      stack.querySelector(".hint-r")?.animate([{ opacity: 0 }, { opacity: 0.9, offset: 0.33 }, { opacity: 0, offset: 0.55 }, { opacity: 0 }], { duration: ms });
+      stack.querySelector(".hint-l")?.animate([{ opacity: 0 }, { opacity: 0, offset: 0.45 }, { opacity: 0.9, offset: 0.66 }, { opacity: 0 }], { duration: ms });
     };
     // Coming back to the deck (scrolled away and back) jiggles it straight away
     let away = false;
@@ -71,6 +75,12 @@ export function Deck({ cards, index, onSwipe, onOpenDetails, onShare, locked, de
       <div className="deck-stack" style={{ "--glow": top ? catOf(top.category).color : "transparent" }}>
         {next && <div className="deck-back" ref={back} aria-hidden="true" style={{ transform: "translateY(8px) scale(0.95)" }}>
           <EventCard event={next} desk={desk} /></div>}
+        {/* Drag glows (as in the app): the side the card leaves shows what that swipe means */}
+        {top && <>
+          <div className="deck-hint hint-r" aria-hidden="true"><CheckIcon /><b>I'm in</b></div>
+          <div className="deck-hint hint-l" aria-hidden="true"><ClockIcon /><b>Not now</b></div>
+          {!panY && !hideNever && <div className="deck-hint hint-d" aria-hidden="true"><XIcon /><b>Never</b></div>}
+        </>}
         {top && (
           <div className={panY ? "deck-top pan-y" : "deck-top"} ref={card} key={top.id} {...cardHandlers}>
             <EventCard event={top} desk={desk} strip={top.strip} onShare={() => onShare(top)} />

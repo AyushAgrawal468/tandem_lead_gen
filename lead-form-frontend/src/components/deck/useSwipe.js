@@ -7,6 +7,9 @@ const C = { DIST: 100, VEL: 0.5, MIN: 30, UP: 0.25, ROT_DIV: 20, ROT_MAX: 12, FL
 const EASE = 'cubic-bezier(0.23, 1, 0.32, 1)';
 const BACK_REST = 'translateY(8px) scale(0.95)';
 
+// The app's drag glows ("I'm in" / "Not now" / "Never" beside the card), driven by how far the card has moved
+const hints = (stack, r, l, d) => { if (!stack) return; stack.style.setProperty("--hint-r", r); stack.style.setProperty("--hint-l", l); stack.style.setProperty("--hint-d", d); };
+
 export function useSwipe({ onCommit, onTap, disabled, panY }) {
   const card = useRef(null), back = useRef(null);
   const sR = useRef(null), sL = useRef(null), sD = useRef(null);
@@ -21,6 +24,7 @@ export function useSwipe({ onCommit, onTap, disabled, panY }) {
     el.style.transform = `translate(${dx}px, ${dy}px) rotate(${rot}deg)`;
     const horiz = Math.abs(dx) >= dy, p = Math.min(1, Math.max(Math.abs(dx), Math.max(dy, 0)) / C.DIST);
     if (sR.current) sR.current.style.opacity = horiz && dx > 0 ? p : 0;
+    hints(el.parentElement, horiz && dx > 0 ? p : 0, horiz && dx < 0 ? p : 0, !horiz && dy > 0 ? p : 0);
     if (sL.current) sL.current.style.opacity = horiz && dx < 0 ? p : 0;
     if (sD.current) sD.current.style.opacity = !horiz && dy > 0 ? p : 0;
     if (back.current && !reduce.current) back.current.style.transform = `translateY(${8 * (1 - p)}px) scale(${0.95 + 0.05 * p})`;
@@ -47,6 +51,7 @@ export function useSwipe({ onCommit, onTap, disabled, panY }) {
       // Reset the card behind BEFORE the parent advances, or the next 'back' card mounts at full size.
       if (back.current) { back.current.style.transition = 'none'; back.current.style.transform = BACK_REST; }
       Object.assign(s.current, { dx: 0, dy: 0, busy: false });
+      if (card.current) hints(card.current.parentElement, 0, 0, 0);
       onCommit(dir); // parent advances the index; the new top card mounts at rest (keyed by event id)
     }, C.FLY_MS);
   }, [disabled, onCommit, paint]);

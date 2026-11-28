@@ -1,10 +1,11 @@
 import { ClockIcon, XIcon, CheckIcon } from "./parts";
 
 // Handoff "SwipeButtons reference", word for word. One component for the deck and for Journey 2 invites (pass hideNever).
-const Btn = ({ label, keyHint, cls, onClick, disabled, desk, children }) => (
+// The arrow shows on every screen: a key hint on desktop, the swipe direction on phones
+const Btn = ({ label, keyHint, cls, onClick, disabled, children }) => (
   <div className="sb">
     <button type="button" className={`sb-btn ${cls}`} aria-label={label} onClick={onClick} disabled={disabled}>{children}</button>
-    <span className="sb-label" aria-hidden="true">{label}{desk && <span className="sb-key"> {keyHint}</span>}</span>
+    <span className="sb-label" aria-hidden="true">{label}<span className="sb-key"> {keyHint}</span></span>
   </div>
 );
 
