@@ -52,7 +52,9 @@ export function initAnalytics() {
     try {
       // Sentry's loader script: async, no bundle weight; the key is the DSN's public key
       window.sentryOnLoad = () => window.Sentry.init({ dsn: SENTRY_DSN, environment: window.location.hostname });
-      loadScript(`https://js.sentry-cdn.com/${new URL(SENTRY_DSN).username}.min.js`);
+      // EU projects (ingest.de.sentry.io) serve their loader from js-de.sentry-cdn.com; the US one returns a no-op for them
+      const dsn = new URL(SENTRY_DSN), cdn = dsn.hostname.includes(".de.") ? "js-de.sentry-cdn.com" : "js.sentry-cdn.com";
+      loadScript(`https://${cdn}/${dsn.username}.min.js`);
     } catch { /* bad DSN: no Sentry */ }
   }
   if (POSTHOG_KEY && !window.location.hostname.startsWith("demo.")) loadPostHog(); // no demo data in PostHog
