@@ -25,7 +25,7 @@ export function Deck({ cards, index, onSwipe, onOpenDetails, onShare, locked, de
   useEffect(() => { if (top) loadPixel(); }, [!!top]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Coach (canvas J1-01): if nobody touches the deck in 1.5 s, "Drag right if you would go" shows on the first card
-  // (once per browser). Whatever card is on top jiggles right and left (24px, 1.6 s) after 4 s without a touch, key or
+  // (once per browser). Whatever card is on top jiggles right and left (24px, 2.4 s) after 4 s still, counted from the last jiggle's end, without a touch, key or
   // swipe, and again each time the deck scrolls back into view.
   const touched = useRef(false);
   const lastActive = useRef(Date.now());
@@ -34,10 +34,10 @@ export function Deck({ cards, index, onSwipe, onOpenDetails, onShare, locked, de
   useEffect(() => {
     // Right, then left, then home: it reads as "this goes both ways". The same 24px for everyone, reduced motion
     // included (asked for 28 Nov 2026: the swipe hint must always show), slow enough to read.
-    const [dx, rot, ms] = [24, 1.2, 1600];
+    const [dx, rot, ms] = [24, 1.2, 2400]; // slow: one easy swing right and left
     const jiggle = () => {
       if (!card.current || document.hidden) return;
-      lastActive.current = Date.now();
+      lastActive.current = Date.now() + ms; // the 4 s pause counts from the end of this jiggle
       card.current.animate([{ transform: "translateX(0)" }, { transform: `translateX(${dx}px) rotate(${rot}deg)` },
         { transform: `translateX(${-dx}px) rotate(${-rot}deg)` }, { transform: "translateX(0)" }],
         { duration: ms, easing: "cubic-bezier(0.37, 0, 0.63, 1)" });
