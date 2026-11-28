@@ -6,6 +6,8 @@ import Seo, { SITE } from "../components/Seo";
 import { SiteHeader, SiteFooter, StoreBadges } from "../components/SiteChrome";
 import { CategoryBadge, PosterFallback, PosterImages } from "../components/deck/parts";
 import QrCode from "../components/QrCode";
+import { DesktopAppPrompt } from "../components/AppPrompts";
+import { track } from "../lib/analytics";
 import { initialCity, SUPPORTED_CITIES } from "../lib/city";
 import { STEPS, QA, CITY_PAGES } from "../lib/faq";
 import { T, font } from "../lib/card";
@@ -152,12 +154,19 @@ export function HowItWorks({ cards }) {
 }
 
 function GroupChat({ card }) {
+  const [qr, setQr] = useState(false);
+  // Same as the header's Get Tandem: a touch screen goes to /download (the right store), a mouse gets the QR
+  const getApp = (e) => {
+    track("install_cta_clicked", { source: "group_chat" });
+    if (window.matchMedia("(pointer: coarse)").matches) return;
+    e.preventDefault(); setQr(true);
+  };
   return (
     <section className="home-sec">
       <h2 className="big">{QA.groupChat[0]}</h2>
       <p className="lead">{QA.groupChat[1]}</p>
-      <div className="chat-pair" aria-hidden="true">
-        <figure style={{ background: "var(--card-2)", border: "1px solid var(--line-chat)" }}>
+      <div className="chat-pair">
+        <figure aria-hidden="true" style={{ background: "var(--card-2)", border: "1px solid var(--line-chat)" }}>
           <figcaption>The group chat, Thursday</figcaption>
           <div className="bubble">someone plan something this weekend pls</div>
           <div className="bubble me">yes!! anything</div>
@@ -166,16 +175,18 @@ function GroupChat({ card }) {
           <div className="bubble" style={{ opacity: 0.45 }}>Seen by 6</div>
         </figure>
         <figure style={{ background: "var(--mint-deep)", border: `1px solid ${T.green}`, gap: "12px" }}>
-          <figcaption style={{ margin: 0 }}>Tandem, same Thursday</figcaption>
-          <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+          <figcaption aria-hidden="true" style={{ margin: 0 }}>Tandem, same Thursday</figcaption>
+          <div aria-hidden="true" style={{ display: "flex", gap: "12px", alignItems: "center" }}>
             <div style={{ width: "56px", height: "72px", borderRadius: "10px", background: T.purple, flex: "none", overflow: "hidden" }}>
               {card?.poster && <img src={card.poster} alt="" loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />}
             </div>
             <div><b style={{ fontSize: "18px" }}>Arjun is in too!</b><div style={{ fontSize: "14px", color: T.mid }}>{card ? [card.title, card.day].filter(Boolean).join(", ") : "Coffee Conversations, every Saturday"}</div></div>
           </div>
-          <div style={{ height: "40px", borderRadius: "999px", background: T.green, color: T.bg, fontSize: "14px", fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center" }}>Plan it in the app</div>
+          <a href={`/download${typeof window !== "undefined" ? window.location.search : ""}`} onClick={getApp}
+            style={{ height: "40px", borderRadius: "999px", background: T.green, color: T.bg, fontSize: "14px", fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none" }}>Plan it in the app</a>
         </figure>
       </div>
+      {qr && <DesktopAppPrompt onClose={() => setQr(false)} />}
     </section>
   );
 }
