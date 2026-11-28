@@ -23,6 +23,17 @@ export function CategoryBadge({ category }) {
 }
 
 // Missing or broken poster: the title on the category colour, never a broken image icon
+/** A tile's poster, never cropped: fitted by height and centred, a blurred copy filling the sides. Hides itself if it fails. */
+export function PosterImages({ src }) {
+  const hide = (e) => { e.currentTarget.parentElement.querySelectorAll("img").forEach((i) => { i.style.display = "none"; }); };
+  return (
+    <>
+      <img src={src} alt="" aria-hidden="true" className="poster-blur" loading="lazy" />
+      <img src={src} alt="" className="poster-fit" loading="lazy" onError={hide} />
+    </>
+  );
+}
+
 export function PosterFallback({ title, category }) {
   const c = catOf(category).color;
   return <div className="poster-fallback" style={{ background: `linear-gradient(160deg, ${c}, ${c}99 55%, var(--card))` }}>{title}</div>;

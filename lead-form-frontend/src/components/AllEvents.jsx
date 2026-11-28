@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { EventDetails } from "./EventCard";
-import { CategoryBadge, PosterFallback } from "./deck/parts";
+import { CategoryBadge, PosterFallback, PosterImages } from "./deck/parts";
 import { DesktopAppPrompt } from "./AppPrompts";
 import { call } from "../lib/tandemApi";
 import { fromPublic, PRIMARY } from "../lib/card";
@@ -83,7 +83,7 @@ export default function AllEvents({ city }) {
             <button type="button" className="rail-card" onClick={() => open(c)} aria-label={[c.title, c.day].filter(Boolean).join(", ")}>
               <div className="rail-poster">
                 <PosterFallback title={c.title} category={c.category} />
-                {c.poster && <img src={c.poster} alt="" loading="lazy" onError={(e) => { e.currentTarget.style.display = "none"; }} />}
+                {c.poster && <PosterImages src={c.poster} />}
               </div>
               <CategoryBadge category={c.category} />
               {c.tag && <span className="card-tag">{c.tag}</span>}

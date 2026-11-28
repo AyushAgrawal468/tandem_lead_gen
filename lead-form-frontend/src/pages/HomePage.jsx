@@ -4,7 +4,7 @@ import { Helmet } from "react-helmet";
 import DeckScreen from "../components/DeckScreen";
 import Seo, { SITE } from "../components/Seo";
 import { SiteHeader, SiteFooter, StoreBadges } from "../components/SiteChrome";
-import { CategoryBadge, PosterFallback } from "../components/deck/parts";
+import { CategoryBadge, PosterFallback, PosterImages } from "../components/deck/parts";
 import QrCode from "../components/QrCode";
 import { initialCity, SUPPORTED_CITIES } from "../lib/city";
 import { STEPS, QA, CITY_PAGES } from "../lib/faq";
@@ -43,7 +43,7 @@ export function RailCard({ c, to }) {
     <Link to={to} className="rail-card" aria-label={[c.title, c.day].filter(Boolean).join(", ")}>
       <div className="rail-poster">
         <PosterFallback title={c.title} category={c.category} />
-        {c.poster && <img src={c.poster} alt="" loading="lazy" onError={(e) => { e.currentTarget.style.display = "none"; }} />}
+        {c.poster && <PosterImages src={c.poster} />}
       </div>
       <CategoryBadge category={c.category} />
       {c.tag && <span className="card-tag">{c.tag}</span>}
